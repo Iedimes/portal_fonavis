@@ -1,0 +1,16 @@
+import './admin-user';
+import './profile-edit-profile';
+import './profile-edit-password';
+import './modality';
+import './land';
+import './document';
+import './category';
+import './project-type';
+import './stage';
+import './typology';
+import './parentesco';
+import './discapacidad';
+import './modality-has-land';
+import './land-has-project-type';
+import './assignment';
+import './project-type-has-typology';
