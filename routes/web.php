@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
@@ -235,6 +235,50 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'ProjectTypeHasTypologiesController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{projectTypeHasTypology}',                    'ProjectTypeHasTypologiesController@update')->name('update');
             Route::delete('/{projectTypeHasTypology}',                  'ProjectTypeHasTypologiesController@destroy')->name('destroy');
+        });
+    });
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
+
+Route::resource('projects', ProjectController::class);
+Route::get('generate-pdf/{id}',[App\Http\Controllers\ProjectController::class,'generatePDF']);
+
+Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectController::class,'distrito']);
+Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
+Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('users')->name('users/')->group(static function() {
+            Route::get('/',                                             'UsersController@index')->name('index');
+            Route::get('/create',                                       'UsersController@create')->name('create');
+            Route::post('/',                                            'UsersController@store')->name('store');
+            Route::get('/{user}/edit',                                  'UsersController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'UsersController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{user}',                                      'UsersController@update')->name('update');
+            Route::delete('/{user}',                                    'UsersController@destroy')->name('destroy');
+        });
+    });
+});
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('projects')->name('projects/')->group(static function() {
+            Route::get('/',                                             'ProjectsController@index')->name('index');
+            Route::get('/create',                                       'ProjectsController@create')->name('create');
+            Route::post('/',                                            'ProjectsController@store')->name('store');
+            Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{project}',                                   'ProjectsController@update')->name('update');
+            Route::delete('/{project}',                                 'ProjectsController@destroy')->name('destroy');
         });
     });
 });

@@ -41,4 +41,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getsat() {
+        return $this->hasOne('App\Models\Sat','NucCod','sat_ruc');
+    }
 }

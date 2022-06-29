@@ -14,3 +14,5 @@ import './modality-has-land';
 import './land-has-project-type';
 import './assignment';
 import './project-type-has-typology';
+import './user';
+import './project';

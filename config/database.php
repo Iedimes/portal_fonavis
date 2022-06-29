@@ -89,6 +89,18 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
         ],
+        'sqlsrvsecond' => [
+            'driver' => 'sqlsrv',
+            'host' => env('DB_HOST_SECOND2', 'localhost'),
+            'port' => env('DB_PORT_SECOND2', '1433'),
+            'database' => env('DB_DATABASE_SECOND2', 'forge'),
+            'username' => env('DB_USERNAME_SECOND2', 'forge'),
+            'password' => env('DB_PASSWORD_SECOND2', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
 
     ],
 

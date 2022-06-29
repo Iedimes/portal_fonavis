@@ -156,3 +156,40 @@ $factory->define(App\Models\ProjectTypeHasTypology::class, static function (Fake
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\User::class, static function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->firstName,
+        'email' => $faker->email,
+        'username' => $faker->sentence,
+        'password' => bcrypt($faker->password),
+        'remember_token' => null,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        'sat_ruc' => $faker->sentence,
+        
+        
+    ];
+});
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Project::class, static function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->firstName,
+        'phone' => $faker->sentence,
+        'sat_id' => $faker->sentence,
+        'state_id' => $faker->sentence,
+        'city_id' => $faker->sentence,
+        'modalidad_id' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        'leader_name' => $faker->sentence,
+        'localidad' => $faker->sentence,
+        'land_id' => $faker->sentence,
+        'typology_id' => $faker->randomNumber(5),
+        'action' => $faker->sentence,
+        'expsocial' => $faker->sentence,
+        'exptecnico' => $faker->sentence,
+        
+        
+    ];
+});

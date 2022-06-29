@@ -247,5 +247,53 @@ return [
         ],
     ],
 
+    'user' => [
+        'title' => 'Users',
+
+        'actions' => [
+            'index' => 'Users',
+            'create' => 'New User',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'name' => 'Name',
+            'email' => 'Email',
+            'username' => 'Username',
+            'password' => 'Password',
+            'sat_ruc' => 'Sat ruc',
+            
+        ],
+    ],
+
+    'project' => [
+        'title' => 'Projects',
+
+        'actions' => [
+            'index' => 'Projects',
+            'create' => 'New Project',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'name' => 'Name',
+            'phone' => 'Phone',
+            'sat_id' => 'Sat',
+            'state_id' => 'State',
+            'city_id' => 'City',
+            'modalidad_id' => 'Modalidad',
+            'leader_name' => 'Leader name',
+            'localidad' => 'Localidad',
+            'land_id' => 'Land',
+            'typology_id' => 'Typology',
+            'action' => 'Action',
+            'expsocial' => 'Expsocial',
+            'exptecnico' => 'Exptecnico',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];
