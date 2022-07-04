@@ -26,9 +26,9 @@ class StoreLandHasProjectType extends FormRequest
     public function rules(): array
     {
         return [
-            'land_id' => ['required', 'string'],
-            'project_type_id' => ['required', 'string'],
-            
+            'land' => ['nullable'],
+            'project_type' => ['nullable'],
+
         ];
     }
 
@@ -45,4 +45,14 @@ class StoreLandHasProjectType extends FormRequest
 
         return $sanitized;
     }
+
+    public function getPtId()
+     {
+         return $this->get('project_type')['id'];
+     }
+
+    public function getLandId()
+     {
+         return $this->get('land')['id'];
+     }
 }
