@@ -193,3 +193,14 @@ $factory->define(App\Models\Project::class, static function (Faker\Generator $fa
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\DocumentCheck::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->randomNumber(5),
+        'document_id' => $faker->randomNumber(5),
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

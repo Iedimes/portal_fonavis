@@ -252,6 +252,9 @@ Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectContr
 Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
 Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
 
+//
+Route::get('projects/ajax/{id}/checkdocuments/{project_id}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
+
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
@@ -279,6 +282,22 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{project}',                                   'ProjectsController@update')->name('update');
             Route::delete('/{project}',                                 'ProjectsController@destroy')->name('destroy');
+        });
+    });
+});
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('document-checks')->name('document-checks/')->group(static function() {
+            Route::get('/',                                             'DocumentChecksController@index')->name('index');
+            Route::get('/create',                                       'DocumentChecksController@create')->name('create');
+            Route::post('/',                                            'DocumentChecksController@store')->name('store');
+            Route::get('/{documentCheck}/edit',                         'DocumentChecksController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'DocumentChecksController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{documentCheck}',                             'DocumentChecksController@update')->name('update');
+            Route::delete('/{documentCheck}',                           'DocumentChecksController@destroy')->name('destroy');
         });
     });
 });

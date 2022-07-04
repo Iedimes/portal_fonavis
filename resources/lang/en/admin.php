@@ -295,5 +295,22 @@ return [
         ],
     ],
 
+    'document-check' => [
+        'title' => 'Document Checks',
+
+        'actions' => [
+            'index' => 'Document Checks',
+            'create' => 'New Document Check',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'project_id' => 'Project',
+            'document_id' => 'Document',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

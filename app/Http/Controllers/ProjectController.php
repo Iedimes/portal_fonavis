@@ -10,6 +10,7 @@ use App\Models\Departamento;
 use App\Models\Distrito;
 use App\Models\Modality;
 use App\Models\Document;
+use App\Models\DocumentCheck;
 use App\Models\Documents;
 use App\Models\Assignment;
 use App\Models\Typology;
@@ -94,6 +95,37 @@ class ProjectController extends Controller
         //return $request;
     }
 
+
+
+    public function checkdocuments($id,$project_id)
+    {
+
+        $aux = DocumentCheck::where('project_id', $project_id)
+                            ->where('document_id', $id)
+                            ->first();
+
+        if (!$aux) {
+            $status = new DocumentCheck;
+            $status->project_id = $project_id;
+            $status->document_id = $id;
+            $status->save();
+            return "check creado!!";
+        } else {
+            $aux->delete();
+            return "check eliminado";
+        }
+
+
+
+
+        return "controlador laravel con id: ".$id." y proyecto: ".$project_id;
+        //
+        //return $request;
+        //Project::create($request->all());
+        //return redirect('projects/')->with('success', 'Se ha agregado un Nuevo Proyecto!');
+        //return $request;
+    }
+
     /**
      * Display the specified resource.
      *
@@ -108,16 +140,18 @@ class ProjectController extends Controller
 
         $tipoproy = Land_project::where('land_id',$project->land_id)->first();
         //dd($tipoproy);
-        $documentos = Documents::where('project_id',$id)->get();
+        //$documentos = Documents::where('project_id',$id)->get();
 
         $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
         //->whereNotIn('document_id', $documentos->pluck('document_id'))
         ->where('category_id',1)
         //->where('stage_id',1)
         ->get();
+
+        //return $docproyecto;
         //dd($docproyecto);
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('projects.show',compact('title','project','documentos','docproyecto','tipoproy'));
+        return view('projects.show',compact('title','project','docproyecto','tipoproy'));
     }
 
     public function generatePDF($id)

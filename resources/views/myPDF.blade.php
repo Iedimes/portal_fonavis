@@ -102,7 +102,7 @@
         <tr>
             <td style="width:3px;">{{$key+1}}</td>
             <td style="width:3px;">{{$item->document->name}}</td>
-            <td style="width:3px;">X</td>
+            <td style="width:3px;">{{ $item->check()->where('project_id','=', $project->id)->first() ? 'SI' : ''}}</td>
         </tr>
 
         @endforeach

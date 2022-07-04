@@ -11,18 +11,18 @@ class Project extends Model
     //public $timestamps = false;
 
     //protected $dateFormat = 'd-m-Y H:i:s';
-    protected $dateFormat = 'Y-m-d H:i:s.v';
+    //protected $dateFormat = 'Y-m-d H:i:s.v';
 
     //protected $dates = ['created_at','updated_at'];
 
     //public $timestamps = false;
 
-    protected $connection = 'sqlsrv';
+    //protected $connection = 'sqlsrv';
 
-    public function fromDateTime($value)
+    /*public function fromDateTime($value)
     {
         return Carbon::parse(parent::fromDateTime($value))->format('Y-d-m H:i:s');
-    }
+    }*/
 
     /*public function getDateFormat()
     {

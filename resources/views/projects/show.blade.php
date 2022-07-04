@@ -4,7 +4,7 @@
 
 
 @section('content')
-
+<p id="verdict"></p>
 <br>
 <div class="invoice p-3 mb-3">
 
@@ -68,8 +68,8 @@
 
         <td>
             <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="{{$item->id}}">
-            <label class="custom-control-label" for="{{$item->id}}"></label>
+            <input type="checkbox" {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
+            <label class="custom-control-label" for="{{$item->document_id}}"></label>
             </div>
         </td>
     </tr>
@@ -92,5 +92,31 @@
 @stop
 
 @section('js')
+
+<script>
+
+    function Check(value) {
+      //document.getElementById('verdict').innerHTML = value.checked;
+      console.log('oiko');
+      var sites = {!! json_encode($project['id']) !!};
+      var abc = sites;
+      console.log(sites);
+      $.ajax({
+            url: '{{URL::to('/projects')}}/ajax/'+value.id+"/checkdocuments/"+abc,
+            type: "GET",
+            dataType: "json",
+            success:function(data) {
+                console.log(data);
+                /*$('select[name="land_id"]').empty();
+                $('select[name="land_id"]').append('<option value="">Selecciona el Tipo de Terreno</option>');
+
+                $.each(data, function(key, value) {
+                    $('select[name="land_id"]').append('<option value="'+ key +'">'+ value +'</option>');
+                });*/
+
+            }
+        });
+    };
+</script>
 
 @endsection

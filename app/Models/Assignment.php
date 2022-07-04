@@ -42,4 +42,8 @@ class Assignment extends Model
     public function document() {
         return $this->belongsTo('App\Models\Document');
     }
+
+    public function check() {
+        return $this->belongsTo(DocumentCheck::class, 'document_id', 'document_id');
+    }
 }

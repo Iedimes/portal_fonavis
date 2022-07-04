@@ -16,3 +16,4 @@ import './assignment';
 import './project-type-has-typology';
 import './user';
 import './project';
+import './document-check';
