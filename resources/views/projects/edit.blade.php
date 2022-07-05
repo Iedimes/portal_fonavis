@@ -9,11 +9,9 @@
 @section('content')
 <div class="invoice p-3 mb-3">
 <div class="box box-primary">
-    <form role="form" action="{{url('projects') }}" method="post">
+    <form role="form" action="{{url('projects/'.$project['id']) }}" method="post">
             @csrf
-            @if(isset($project['id']))
-                {!! method_field('patch') !!}
-            @endif
+            {{ method_field('PUT') }}
       <div class="box-body">
           <div class="row">
                 <div class="col-md-6">

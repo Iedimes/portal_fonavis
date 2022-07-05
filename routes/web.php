@@ -241,7 +241,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->name('home');
 
 Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
 

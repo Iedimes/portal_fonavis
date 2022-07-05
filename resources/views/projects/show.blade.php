@@ -4,7 +4,6 @@
 
 
 @section('content')
-<p id="verdict"></p>
 <br>
 <div class="invoice p-3 mb-3">
 

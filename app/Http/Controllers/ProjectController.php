@@ -89,6 +89,7 @@ class ProjectController extends Controller
     public function store(StoreProject $request)
     {
         //
+        //return 'store';
         //return $request;
         Project::create($request->all());
         return redirect('projects/')->with('success', 'Se ha agregado un Nuevo Proyecto!');
@@ -195,7 +196,10 @@ class ProjectController extends Controller
 
         $typology = $this->typologyedit($project->typology_id);
         $typology = json_decode($typology, true);
-        return view('projects.create',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias'));
+
+        $id = Auth::user()->id;
+        $user = User::find($id);
+        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user'));
     }
 
     /**
@@ -208,6 +212,7 @@ class ProjectController extends Controller
     public function update(StoreProject $request, $id)
     {
         //
+        //return $id;
         $project = Project::find($id);
         $project->name = $request->input("name");
         $project->phone = $request->input("phone");
