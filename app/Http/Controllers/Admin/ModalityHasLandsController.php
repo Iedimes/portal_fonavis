@@ -9,6 +9,8 @@ use App\Http\Requests\Admin\ModalityHasLand\IndexModalityHasLand;
 use App\Http\Requests\Admin\ModalityHasLand\StoreModalityHasLand;
 use App\Http\Requests\Admin\ModalityHasLand\UpdateModalityHasLand;
 use App\Models\ModalityHasLand;
+use App\Models\Modality;
+use App\Models\Land;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -64,8 +66,10 @@ class ModalityHasLandsController extends Controller
     public function create()
     {
         $this->authorize('admin.modality-has-land.create');
+        $modality=Modality::all();
+        $land=Land::all();
 
-        return view('admin.modality-has-land.create');
+        return view('admin.modality-has-land.create', compact('modality', 'land'));
     }
 
     /**
@@ -78,6 +82,8 @@ class ModalityHasLandsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['modality_id']=  $request->getModalityId();
+        $sanitized ['land_id']=  $request->getLandId();
 
         // Store the ModalityHasLand
         $modalityHasLand = ModalityHasLand::create($sanitized);
@@ -113,10 +119,14 @@ class ModalityHasLandsController extends Controller
     public function edit(ModalityHasLand $modalityHasLand)
     {
         $this->authorize('admin.modality-has-land.edit', $modalityHasLand);
+        $modality=Modality::all();
+        $land=Land::all();
 
 
         return view('admin.modality-has-land.edit', [
             'modalityHasLand' => $modalityHasLand,
+            'modality' => $modality,
+            'land' => $land,
         ]);
     }
 
@@ -131,6 +141,8 @@ class ModalityHasLandsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['modality_id']=  $request->getModalityId();
+        $sanitized ['land_id']=  $request->getLandId();
 
         // Update changed values ModalityHasLand
         $modalityHasLand->update($sanitized);

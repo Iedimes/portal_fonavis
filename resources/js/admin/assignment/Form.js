@@ -1,15 +1,16 @@
 import AppForm from '../app-components/Form/AppForm';
-
 Vue.component('assignment-form', {
     mixins: [AppForm],
+    props:['document','category','pt','stage'],
+
     data: function() {
         return {
             form: {
-                document_id:  '' ,
-                category_id:  '' ,
-                project_type_id:  '' ,
-                stage_id:  '' ,
-                
+                document:  '' ,
+                category:  '' ,
+                project_type:  '' ,
+                stage:  '' ,
+
             }
         }
     }

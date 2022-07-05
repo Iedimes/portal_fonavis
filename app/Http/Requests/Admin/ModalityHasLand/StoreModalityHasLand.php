@@ -26,9 +26,9 @@ class StoreModalityHasLand extends FormRequest
     public function rules(): array
     {
         return [
-            'modality_id' => ['required', 'string'],
-            'land_id' => ['required', 'string'],
-            
+            'modality' => ['nullable'],
+            'land' => ['nullable'],
+
         ];
     }
 
@@ -44,5 +44,15 @@ class StoreModalityHasLand extends FormRequest
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getModalityId()
+    {
+        return $this->get('modality')['id'];
+    }
+
+    public function getLandId()
+    {
+        return $this->get('land')['id'];
     }
 }

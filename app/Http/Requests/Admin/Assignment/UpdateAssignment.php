@@ -26,11 +26,11 @@ class UpdateAssignment extends FormRequest
     public function rules(): array
     {
         return [
-            'document_id' => ['sometimes', 'string'],
-            'category_id' => ['sometimes', 'string'],
-            'project_type_id' => ['sometimes', 'string'],
-            'stage_id' => ['sometimes', 'integer'],
-            
+            'document_id' => ['nullable'],
+            'category_id' => ['nullable'],
+            'project_type_id' => ['nullable'],
+            'stage_id' => ['nullable'],
+
         ];
     }
 
@@ -48,4 +48,23 @@ class UpdateAssignment extends FormRequest
 
         return $sanitized;
     }
+
+
+    public function getDocumentId()
+    {
+        return $this->get('document')['id'];
+    }
+    public function getCategoryId()
+    {
+        return $this->get('category')['id'];
+    }
+    public function getPtId()
+    {
+        return $this->get('project_type')['id'];
+    }
+    public function getStageId()
+    {
+        return $this->get('stage')['id'];
+    }
+
 }

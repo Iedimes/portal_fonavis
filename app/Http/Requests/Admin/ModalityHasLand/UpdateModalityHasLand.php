@@ -26,9 +26,9 @@ class UpdateModalityHasLand extends FormRequest
     public function rules(): array
     {
         return [
-            'modality_id' => ['sometimes', 'string'],
-            'land_id' => ['sometimes', 'string'],
-            
+            'modality' => ['nullable'],
+            'land' => ['nullable'],
+
         ];
     }
 
@@ -45,5 +45,15 @@ class UpdateModalityHasLand extends FormRequest
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getModalityId()
+    {
+        return $this->get('modality')['id'];
+    }
+
+    public function getLandId()
+    {
+        return $this->get('land')['id'];
     }
 }

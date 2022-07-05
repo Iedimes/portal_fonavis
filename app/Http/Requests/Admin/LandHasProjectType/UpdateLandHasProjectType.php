@@ -26,9 +26,9 @@ class UpdateLandHasProjectType extends FormRequest
     public function rules(): array
     {
         return [
-            'land_id' => ['sometimes', 'string'],
-            'project_type_id' => ['sometimes', 'string'],
-            
+            'land_id' => ['nullable'],
+            'project_type' => ['nullable'],
+
         ];
     }
 
@@ -46,4 +46,14 @@ class UpdateLandHasProjectType extends FormRequest
 
         return $sanitized;
     }
+
+    public function getPtId()
+     {
+         return $this->get('project_type')['id'];
+     }
+
+     public function getLandId()
+     {
+         return $this->get('land')['id'];
+     }
 }

@@ -9,6 +9,11 @@ use App\Http\Requests\Admin\Assignment\IndexAssignment;
 use App\Http\Requests\Admin\Assignment\StoreAssignment;
 use App\Http\Requests\Admin\Assignment\UpdateAssignment;
 use App\Models\Assignment;
+use App\Models\Document;
+use App\Models\Category;
+use App\Models\ProjectType;
+use App\Models\Stage;
+
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -65,7 +70,15 @@ class AssignmentsController extends Controller
     {
         $this->authorize('admin.assignment.create');
 
-        return view('admin.assignment.create');
+        $document = Document::all();
+        $category = Category::all();
+        $pt=ProjectType::all();
+        $stage=Stage::all();
+
+
+
+
+        return view('admin.assignment.create', compact('document','category','pt','stage'));
     }
 
     /**
@@ -78,9 +91,19 @@ class AssignmentsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['document_id']=  $request->getDocumentId();
+        $sanitized ['category_id']=  $request->getCategoryId();
+        $sanitized ['project_type_id']=  $request->getPtId();
+        $sanitized ['stage_id']=  $request->getStageId();
+
+
+       // return $request->getPtId();
 
         // Store the Assignment
         $assignment = Assignment::create($sanitized);
+
+
+
 
         if ($request->ajax()) {
             return ['redirect' => url('admin/assignments'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
@@ -113,10 +136,21 @@ class AssignmentsController extends Controller
     public function edit(Assignment $assignment)
     {
         $this->authorize('admin.assignment.edit', $assignment);
+        $document = Document::all();
+        $category = Category::all();
+        $pt=ProjectType::all();
+        $stage=Stage::all();
+
 
 
         return view('admin.assignment.edit', [
             'assignment' => $assignment,
+            'document' => $document,
+            'category'=> $category,
+            'pt' => $pt,
+            'stage'=>$stage,
+
+
         ]);
     }
 
@@ -131,9 +165,18 @@ class AssignmentsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['document_id']=  $request->getDocumentId();
+        $sanitized ['category_id']=  $request->getCategoryId();
+        $sanitized ['project_type_id']=  $request->getPtId();
+        $sanitized ['stage_id']=  $request->getStageId();
+
+
 
         // Update changed values Assignment
         $assignment->update($sanitized);
+
+        //$sanitized ['document_id']=  $request->getDocumentId();
+
 
         if ($request->ajax()) {
             return [

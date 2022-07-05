@@ -9,6 +9,8 @@ use App\Http\Requests\Admin\LandHasProjectType\IndexLandHasProjectType;
 use App\Http\Requests\Admin\LandHasProjectType\StoreLandHasProjectType;
 use App\Http\Requests\Admin\LandHasProjectType\UpdateLandHasProjectType;
 use App\Models\LandHasProjectType;
+use App\Models\Land;
+use App\Models\ProjectType;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -65,7 +67,10 @@ class LandHasProjectTypeController extends Controller
     {
         $this->authorize('admin.land-has-project-type.create');
 
-        return view('admin.land-has-project-type.create');
+        $land=Land::all();
+        $pt=ProjectType::all();
+
+        return view('admin.land-has-project-type.create', compact('land', 'pt'));
     }
 
     /**
@@ -77,7 +82,12 @@ class LandHasProjectTypeController extends Controller
     public function store(StoreLandHasProjectType $request)
     {
         // Sanitize input
+        // return $request;
         $sanitized = $request->getSanitized();
+        $sanitized ['land_id']=  $request->getLandId();
+        $sanitized ['project_type_id']=  $request->getPtId();
+
+
 
         // Store the LandHasProjectType
         $landHasProjectType = LandHasProjectType::create($sanitized);
@@ -113,10 +123,14 @@ class LandHasProjectTypeController extends Controller
     public function edit(LandHasProjectType $landHasProjectType)
     {
         $this->authorize('admin.land-has-project-type.edit', $landHasProjectType);
+        $land=Land::all();
+        $pt=ProjectType::all();
 
 
         return view('admin.land-has-project-type.edit', [
             'landHasProjectType' => $landHasProjectType,
+            'land' => $land,
+            'pt' => $pt,
         ]);
     }
 
@@ -126,11 +140,13 @@ class LandHasProjectTypeController extends Controller
      * @param UpdateLandHasProjectType $request
      * @param LandHasProjectType $landHasProjectType
      * @return array|RedirectResponse|Redirector
-     */
+    */
     public function update(UpdateLandHasProjectType $request, LandHasProjectType $landHasProjectType)
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['land_id']=  $request->getLandId();
+        $sanitized ['project_type_id']=  $request->getPtId();
 
         // Update changed values LandHasProjectType
         $landHasProjectType->update($sanitized);

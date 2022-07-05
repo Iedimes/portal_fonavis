@@ -10,9 +10,11 @@
             <modality-has-land-form
                 :action="'{{ $modalityHasLand->resource_url }}'"
                 :data="{{ $modalityHasLand->toJson() }}"
+                :modality="{{$modality->toJson()}}"
+                :land="{{$land->toJson()}}"
                 v-cloak
                 inline-template>
-            
+
                 <form class="form-horizontal form-edit" method="post" @submit.prevent="onSubmit" :action="action" novalidate>
 
 
@@ -23,21 +25,21 @@
                     <div class="card-body">
                         @include('admin.modality-has-land.components.form-elements')
                     </div>
-                    
-                    
+
+
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary" :disabled="submiting">
                             <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
                             {{ trans('brackets/admin-ui::admin.btn.save') }}
                         </button>
                     </div>
-                    
+
                 </form>
 
         </modality-has-land-form>
 
         </div>
-    
+
 </div>
 
 @endsection
