@@ -81,7 +81,7 @@
                                         <td>@{{ item.document.name }}</td>
                                         <td>@{{ item.category.name }}</td>
                                         <td>@{{ item.project_type.name }}</td>
-                                        <td>@{{ item.stage_id }}</td>
+                                        <td>@{{ item.stage.name }}</td>
 
                                         <td>
                                             <div class="row no-gutters">

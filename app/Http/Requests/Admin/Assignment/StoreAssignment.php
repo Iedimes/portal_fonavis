@@ -26,11 +26,10 @@ class StoreAssignment extends FormRequest
     public function rules(): array
     {
         return [
-            'document_id' => ['required', 'string'],
-            'category_id' => ['required', 'string'],
-            'project_type_id' => ['required', 'string'],
-            'stage_id' => ['required', 'integer'],
-            
+            'document' => ['nullable'],
+            'category' => ['nullable'],
+            'project_type' => ['nullable'],
+            'stage' => ['nullable'],
         ];
     }
 
@@ -47,4 +46,22 @@ class StoreAssignment extends FormRequest
 
         return $sanitized;
     }
+
+    public function getDocumentId()
+    {
+        return $this->get('document')['id'];
+    }
+    public function getCategoryId()
+    {
+        return $this->get('category')['id'];
+    }
+    public function getPtId()
+     {
+         return $this->get('project_type')['id'];
+     }
+
+     public function getStageId()
+     {
+         return $this->get('stage')['id'];
+     }
 }
