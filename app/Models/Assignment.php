@@ -22,7 +22,7 @@ class Assignment extends Model
     ];
 
     protected $appends = ['resource_url'];
-    protected $with = ['projectType','category','document'];
+    protected $with = ['projectType','category','document','stage'];
 
     /* ************************ ACCESSOR ************************* */
 
@@ -41,6 +41,9 @@ class Assignment extends Model
 
     public function document() {
         return $this->belongsTo('App\Models\Document');
+    }
+    public function stage() {
+        return $this->belongsTo('App\Models\Stage');
     }
 
     public function check() {
