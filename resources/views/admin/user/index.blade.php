@@ -30,7 +30,7 @@
                                     </div>
                                     <div class="col-sm-auto form-group ">
                                         <select class="form-control" v-model="pagination.state.per_page">
-                                            
+
                                             <option value="10">10</option>
                                             <option value="25">25</option>
                                             <option value="100">100</option>
@@ -42,19 +42,19 @@
                             <table class="table table-hover table-listing">
                                 <thead>
                                     <tr>
-                                        <th class="bulk-checkbox">
+                                        {{--<th class="bulk-checkbox">
                                             <input class="form-check-input" id="enabled" type="checkbox" v-model="isClickedAll" v-validate="''" data-vv-name="enabled"  name="enabled_fake_element" @click="onBulkItemsClickedAllWithPagination()">
                                             <label class="form-check-label" for="enabled">
                                                 #
                                             </label>
                                         </th>
 
-                                        <th is='sortable' :column="'id'">{{ trans('admin.user.columns.id') }}</th>
+                                        <th is='sortable' :column="'id'">{{ trans('admin.user.columns.id') }}</th>--}}
                                         <th is='sortable' :column="'name'">{{ trans('admin.user.columns.name') }}</th>
                                         <th is='sortable' :column="'email'">{{ trans('admin.user.columns.email') }}</th>
                                         <th is='sortable' :column="'username'">{{ trans('admin.user.columns.username') }}</th>
+                                        <th is='sortable' :column="'sat_ruc'">{{ trans('admin.user.columns.sat_name') }}</th>
                                         <th is='sortable' :column="'sat_ruc'">{{ trans('admin.user.columns.sat_ruc') }}</th>
-
                                         <th></th>
                                     </tr>
                                     <tr v-show="(clickedBulkItemsCount > 0) || isClickedAll">
@@ -71,18 +71,20 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(item, index) in collection" :key="item.id" :class="bulkItems[item.id] ? 'bg-bulk' : ''">
-                                        <td class="bulk-checkbox">
+                                        {{--<td class="bulk-checkbox">
                                             <input class="form-check-input" :id="'enabled' + item.id" type="checkbox" v-model="bulkItems[item.id]" v-validate="''" :data-vv-name="'enabled' + item.id"  :name="'enabled' + item.id + '_fake_element'" @click="onBulkItemClicked(item.id)" :disabled="bulkCheckingAllLoader">
                                             <label class="form-check-label" :for="'enabled' + item.id">
                                             </label>
                                         </td>
 
-                                    <td>@{{ item.id }}</td>
+                                    <td>@{{ item.id }}</td>--}}
                                         <td>@{{ item.name }}</td>
                                         <td>@{{ item.email }}</td>
                                         <td>@{{ item.username }}</td>
+
+                                        <td>@{{ item.getsat ? item.getsat.NucNomSat : 'N/A' }}</td>
                                         <td>@{{ item.sat_ruc }}</td>
-                                        
+
                                         <td>
                                             <div class="row no-gutters">
                                                 <div class="col-auto">

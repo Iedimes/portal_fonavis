@@ -52,9 +52,9 @@
                     </button>
                     <div class="dropdown-menu" role="menu" style="">
                     <a class="dropdown-item" href="{{ url('projects/'.$project->id) }}">Ver</a>
-                    <a class="dropdown-item" href="{{ url('projects/'.$project->id.'/edit') }}">Editar</a>
+                    <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="{{ url('projects/'.$project->id.'/edit') }}">Editar</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item disabled" href="">Postulantes</a>
+                    <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="">Postulantes</a>
                     </div>
                     </div>
             </td>

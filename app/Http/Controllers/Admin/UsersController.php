@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\User\IndexUser;
 use App\Http\Requests\Admin\User\StoreUser;
 use App\Http\Requests\Admin\User\UpdateUser;
 use App\Models\User;
+use App\Models\Sat;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -64,8 +65,13 @@ class UsersController extends Controller
     public function create()
     {
         $this->authorize('admin.user.create');
+        $sat = Sat::where('NucRuc','!=', null)
+        ->where('NucEst','=', 'H')
+        ->select('NucNomSat','NucCod','NucCont')
+        ->get();
 
-        return view('admin.user.create');
+        //return $sat;
+        return view('admin.user.create',compact('sat'));
     }
 
     /**
@@ -76,9 +82,13 @@ class UsersController extends Controller
      */
     public function store(StoreUser $request)
     {
+        //return $request;
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $sanitized ['sat_ruc'] =  $request->getSatId();
+        $sanitized ['password'] = bcrypt($request['password']);
 
+        //return $sanitized;
         // Store the User
         $user = User::create($sanitized);
 

@@ -11,9 +11,19 @@
     <div class="col-12">
     <h4>
     <i class="fas fa-university"></i> Proyecto: {{ $project->name }}
+    @if ($project->getEstado)
     <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
         <i class="fas fa-download"></i> IMPRIMIR PDF
-        </a>
+    </a>
+    @else
+    <button type="button" class="btn btn-success float-right" onclick="allchecked()">
+        <i class="fa fa-plus-circle"></i> Enviar al MUVH
+        </button>
+    @endif
+    {{--<a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
+        <i class="fas fa-download"></i> IMPRIMIR PDF
+        </a>--}}
+
     </h4>
     </div>
 
@@ -25,7 +35,7 @@
     <strong>Lider:</strong> {{utf8_encode($project->leader_name)}}<br>
     <strong>Departamento: </strong>{{utf8_encode($project->state_id?$project->getState->DptoNom:"")}}<br>
     <strong>Modalidad:</strong> {{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}<br>
-
+    <strong>Estado:</strong> {{ $project->getEstado ? $project->getEstado->getStage->name : "Pendiente"}}<br>
     </address>
     </div>
 
@@ -67,7 +77,7 @@
 
         <td>
             <div class="custom-control custom-switch">
-            <input type="checkbox" {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
+            <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }}  {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
             <label class="custom-control-label" for="{{$item->document_id}}"></label>
             </div>
         </td>
@@ -78,15 +88,33 @@
     </div>
 
     </div>
+    </div>
 
-    <div class="row no-print">
-    <div class="col-12">
-    <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
-    <i class="fas fa-download"></i> IMPRIMIR PDF
-    </a>
-    </div>
-    </div>
-    </div>
+
+    <div class="modal modal-info fade" id="modal-enviar">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span></button>
+              <h4 class="modal-title"><i class="fa  fa-send"></i> Enviar Proyecto al MUVH</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url('projects/send') }}" method="post">
+                        {{ csrf_field() }}
+                <p id="demoproy"></p>
+                <input id="send_id" name="send_id" type="hidden" value="" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-outline">Enviar</button>
+            </div>
+        </form>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
 
 @stop
 
@@ -116,6 +144,61 @@
             }
         });
     };
+
+    function delay(time) {
+        return new Promise(resolve => setTimeout(resolve, time));
+    }
+
+    function allchecked(){
+        var sites = {!! json_encode($project['id']) !!};
+        var abc = sites;
+        var keys = {!! json_encode($claves) !!};
+        var def = keys;
+        var si = 0;
+        var no = 0
+        def.forEach(element => {
+            //console.log('Id document: '+element);
+            if (document.getElementById(element).checked) {
+                //console.log('checkbox: '+element+' esta seleccionado');
+                si += 1;
+            }else
+            {
+                no += 1;
+            }
+        });
+
+        console.log('Total si: '+si+' Total No: '+no);
+        if (no >= 1) {
+            alert('Debe completar todos los checks para enviar al MUVH')
+        }else
+        {
+            console.log('Puede Enviar al MUVH');
+            $.ajax({
+                url: '{{URL::to('/projects/send')}}/'+sites,
+                type: "GET",
+                dataType: "json",
+                success:async function(data) {
+                    //console.log(data.message);
+                    if (data.message == 'success') {
+                        $(document).Toasts('create', {
+                            icon: 'fas fa-exclamation',
+                            class: 'bg-success m-1',
+                            autohide: true,
+                            delay: 5000,
+                            title: 'Importante!',
+                            body: 'El proyecto ha cambiado de estado'
+                        })
+                        await delay(3000);
+                        location.reload()
+                        console.log('refrescar');
+                    } else {
+                        console.log('no hace nada');
+                    }
+                }
+            });
+        }
+        //console.log(def);
+    }
 </script>
 
 @endsection

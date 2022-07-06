@@ -2,6 +2,12 @@ import AppForm from '../app-components/Form/AppForm';
 
 Vue.component('user-form', {
     mixins: [AppForm],
+    props:['sat'],
+    methods: {
+        customLabel({ NucCod, NucNomSat }) {
+          return `${NucCod} – ${NucNomSat}`;
+        }
+      },
     data: function() {
         return {
             form: {
@@ -9,8 +15,8 @@ Vue.component('user-form', {
                 email:  '' ,
                 username:  '' ,
                 password:  '' ,
-                sat_ruc:  '' ,
-                
+                sat:  '' ,
+
             }
         }
     }

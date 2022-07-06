@@ -136,7 +136,7 @@ class ProjectController extends Controller
     public function show($id)
     {
         $project=Project::find($id);
-        //return $project;
+        //return $project->getEstado;
         $title="Resumen Proyecto ".$project->name;
 
         $tipoproy = Land_project::where('land_id',$project->land_id)->first();
@@ -148,11 +148,11 @@ class ProjectController extends Controller
         ->where('category_id',1)
         //->where('stage_id',1)
         ->get();
-
-        //return $docproyecto;
+        $claves = $docproyecto->pluck('document_id');
+        //return $docproyecto->pluck('document_id')->toArray();
         //dd($docproyecto);
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('projects.show',compact('title','project','docproyecto','tipoproy'));
+        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves'));
     }
 
     public function generatePDF($id)
@@ -264,16 +264,29 @@ class ProjectController extends Controller
         //
     }
 
-    public function send(Request $request)
+    public function send(Request $request,$id)
     {
-        //return $request;
-        $state = new ProjectStatus();
-        $state->project_id=$request->send_id;
-        $state->stage_id='1';
-        $state->user_id=Auth::user()->id;
-        $state->record='Proyecto Enviado!';
-        $state->save();
-        return redirect('projects/'.$request->send_id.'/postulantes')->with('success', 'El proyecto se ha enviado a MUVH correctamente!');
+        //return $id;
+
+        try {
+            $state = new ProjectStatus();
+            $state->project_id=$id;
+            $state->stage_id='1';
+            $state->user_id=Auth::user()->id;
+            $state->record='Proyecto Enviado!';
+            $state->save();
+
+            return [
+                'message' => 'success'
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'message' => 'error '.$th
+            ];
+        }
+
+
+        //return redirect('projects/'.$request->send_id.'/postulantes')->with('success', 'El proyecto se ha enviado a MUVH correctamente!');*/
     }
 
     public function destroyfile(Request $request)

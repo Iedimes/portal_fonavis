@@ -29,9 +29,10 @@ class StoreUser extends FormRequest
             'name' => ['required', 'string'],
             'email' => ['required', 'email', 'string'],
             'username' => ['required', 'string'],
-            'password' => ['required', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
-            'sat_ruc' => ['nullable', 'string'],
-            
+            'password' => ['required', 'confirmed', 'min:7','string'],
+            //'password' => ['required', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
+            'sat' => ['required'],
+
         ];
     }
 
@@ -47,5 +48,10 @@ class StoreUser extends FormRequest
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getSatId()
+    {
+        return $this->get('sat')['NucCod'];
     }
 }

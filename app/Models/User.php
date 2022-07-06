@@ -18,9 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'name','email','username','password','sat_ruc'
     ];
 
     /**
@@ -32,6 +30,8 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    protected $appends = ['resource_url'];
+    protected $with = ['getsat'];
 
     /**
      * The attributes that should be cast.
@@ -41,6 +41,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getResourceUrlAttribute()
+    {
+        return url('/admin/users/'.$this->getKey());
+    }
 
     public function getsat() {
         return $this->hasOne('App\Models\Sat','NucCod','sat_ruc');

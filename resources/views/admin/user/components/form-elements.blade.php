@@ -39,9 +39,20 @@
 </div>
 
 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('sat_ruc'), 'has-success': fields.sat_ruc && fields.sat_ruc.valid }">
-    <label for="sat_ruc" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.user.columns.sat_ruc') }}</label>
+    <label for="sat" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.user.columns.sat_ruc') }}</label>
         <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.sat_ruc" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('sat_ruc'), 'form-control-success': fields.sat_ruc && fields.sat_ruc.valid}" id="sat_ruc" name="sat_ruc" placeholder="{{ trans('admin.user.columns.sat_ruc') }}">
+        <multiselect
+            v-model="form.sat"
+            :options="sat"
+            :multiple="false"
+            track-by="NucCod"
+            label="NucNomSat"
+            :taggable="true"
+            tag-placeholder=""
+            :custom-label="customLabel"
+            placeholder="">
+        </multiselect>
+        {{--<input type="text" v-model="form.sat_ruc" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('sat_ruc'), 'form-control-success': fields.sat_ruc && fields.sat_ruc.valid}" id="sat_ruc" name="sat_ruc" placeholder="{{ trans('admin.user.columns.sat_ruc') }}">--}}
         <div v-if="errors.has('sat_ruc')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('sat_ruc') }}</div>
     </div>
 </div>

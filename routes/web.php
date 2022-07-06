@@ -246,6 +246,8 @@ Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->n
 Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
 
 Route::resource('projects', ProjectController::class);
+Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
+
 Route::get('generate-pdf/{id}',[App\Http\Controllers\ProjectController::class,'generatePDF']);
 
 Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectController::class,'distrito']);
