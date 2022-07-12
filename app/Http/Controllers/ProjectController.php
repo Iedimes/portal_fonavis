@@ -98,9 +98,9 @@ class ProjectController extends Controller
 
 
 
-    public function checkdocuments($id,$project_id)
+    public function checkdocuments($id,$project_id,$sheets)
     {
-
+        //return $sheets;
         $aux = DocumentCheck::where('project_id', $project_id)
                             ->where('document_id', $id)
                             ->first();
@@ -109,6 +109,7 @@ class ProjectController extends Controller
             $status = new DocumentCheck;
             $status->project_id = $project_id;
             $status->document_id = $id;
+            $status->sheets = $sheets;
             $status->save();
             return "check creado!!";
         } else {
@@ -216,6 +217,7 @@ class ProjectController extends Controller
         $project = Project::find($id);
         $project->name = $request->input("name");
         $project->phone = $request->input("phone");
+        $project->households = $request->input("households");
         $project->state_id = $request->input("state_id");
         $project->city_id = $request->input("city_id");
         $project->land_id = $request->input("land_id");

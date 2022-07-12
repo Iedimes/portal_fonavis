@@ -79,6 +79,7 @@
                     <div id="cabecera">
                     <strong>Código:</strong> {{$project->id}}<br>
                     <strong>Programa:</strong> FONAVIS<br>
+                    <strong>Cantidad de Viviendas:</strong> {{$project->households}}<br>
                     <strong>SAT:</strong> {{ utf8_encode($project->sat_id?$project->getSat->NucNomSat:"") }}<br>
                     <strong>Departamento: </strong> {{$project->state_id?$project->getState->DptoNom:""}}<br>
                     <strong>Distrito:</strong> {{$project->city_id}}<br>
@@ -95,6 +96,7 @@
         <tr>
           <th class="center" style="width:3px;">#</th>
           <th style="width:400px;">Documento</th>
+          <th style="width:20px;">N° de FOLIO</th>
           <th class="center" style="width:10px;">Check</th>
         </tr>
 
@@ -102,6 +104,7 @@
         <tr>
             <td style="width:3px;">{{$key+1}}</td>
             <td style="width:3px;">{{$item->document->name}}</td>
+            <td> {{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }} </td>
             <td style="width:3px;">{{ $item->check()->where('project_id','=', $project->id)->first() ? 'SI' : ''}}</td>
         </tr>
 

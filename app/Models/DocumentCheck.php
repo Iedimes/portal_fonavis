@@ -10,6 +10,7 @@ class DocumentCheck extends Model
     protected $fillable = [
         'project_id',
         'document_id',
+        'sheets'
 
     ];
 

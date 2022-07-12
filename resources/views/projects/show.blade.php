@@ -44,6 +44,7 @@
     <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
     <strong>Distrito:</strong> {{utf8_encode($project->city_id)}}<br>
     <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
+    <strong>Cantidad de Viviendas:</strong> {{utf8_encode($project->households)}}<br>
     </address>
     </div>
 
@@ -65,7 +66,7 @@
     <tr>
     <th>#</th>
     <th>Documento</th>
-
+    <th>N° FOLIO</th>
     <th>Check</th>
     </tr>
     </thead>
@@ -74,7 +75,14 @@
     <tr>
         <td>{{ $key+1 }}</td>
         <td>{{ $item->document->name}}</td>
-
+        <td>
+            <div class="row">
+                <div class="col-6">
+                    <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{'sheet-'.$item->document_id}}" placeholder=""
+                    value="{{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }}">
+                </div>
+            </div>
+        </td>
         <td>
             <div class="custom-control custom-switch">
             <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }}  {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
@@ -124,25 +132,43 @@
 
     function Check(value) {
       //document.getElementById('verdict').innerHTML = value.checked;
-      console.log('oiko');
+      //console.log('oiko');
       var sites = {!! json_encode($project['id']) !!};
       var abc = sites;
-      console.log(sites);
-      $.ajax({
-            url: '{{URL::to('/projects')}}/ajax/'+value.id+"/checkdocuments/"+abc,
-            type: "GET",
-            dataType: "json",
-            success:function(data) {
-                console.log(data);
-                /*$('select[name="land_id"]').empty();
-                $('select[name="land_id"]').append('<option value="">Selecciona el Tipo de Terreno</option>');
+      var sheets = document.getElementById('sheet-'+value.id).value;
+      //console.log(sheets);
+      //console.log(document.getElementById('sheet-'+value.id).value);
+      //console.log(sites);
 
-                $.each(data, function(key, value) {
-                    $('select[name="land_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                });*/
+      if (document.getElementById(value.id).checked == false) {
+        console.log('cambio a falso');
+        document.getElementById('sheet-'+value.id).value = 0;
+      }
 
-            }
-        });
+      if (sheets >= 1) {
+            $.ajax({
+                url: '{{URL::to('/projects')}}/ajax/'+value.id+"/checkdocuments/"+abc+"/"+sheets,
+                type: "GET",
+                dataType: "json",
+                success:function(data) {
+                    console.log(data);
+                }
+            });
+
+            $(document).Toasts('create', {
+                            icon: 'fas fa-exclamation',
+                            class: 'bg-success m-1',
+                            autohide: true,
+                            delay: 5000,
+                            title: 'Importante!',
+                            body: 'Cambio guardado correctamente'
+                        })
+
+        }else{
+            alert('Debe completar el campo folio para checkear este documento')
+            document.getElementById(value.id).checked = false
+        }
+
     };
 
     function delay(time) {

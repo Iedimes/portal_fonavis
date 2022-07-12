@@ -30,7 +30,7 @@ class Project extends Model
     }*/
 
     protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
-    'typology_id','expsocial','exptecnico','action'];
+    'typology_id','expsocial','exptecnico','action','households'];
 
     //protected $with = ['getTypology'];
 

@@ -255,7 +255,7 @@ Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectContro
 Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
 
 //
-Route::get('projects/ajax/{id}/checkdocuments/{project_id}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
+Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
 
 
 /* Auto-generated admin routes */

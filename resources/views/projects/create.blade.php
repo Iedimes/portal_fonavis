@@ -22,11 +22,6 @@
                         <input type="text" required class="form-control" name="name" value="{{ old('name',isset($project['name'])?utf8_decode($project['name']):'') }}"  placeholder="Ingrese Nombre del Proyecto">
                         {!! $errors->first('name','<span class="help-block">:message</span>') !!}
                     </div>
-                    <div class="form-group {{ $errors->has('leader_name') ? 'has-error' : '' }}">
-                        <label for="exampleInputPassword1">Nombre del Lider del Grupo</label>
-                        <input required type="text" class="form-control" name="leader_name" value="{{ old('leader_name',isset($project['leader_name'])?$project['leader_name']:'') }}" placeholder="Ingrese Nombre del Lider del Grupo">
-                        {!! $errors->first('leader_name','<span class="help-block">:message</span>') !!}
-                    </div>
                 </div>
 
                 <div class="col-md-6">
@@ -36,12 +31,32 @@
                         <input type="text" class="form-control" value="{{ utf8_encode($user->sat_ruc?$user->getSat->NucNomSat:"") }}" readonly>
                         {!! $errors->first('sat_id','<span class="help-block">:message</span>') !!}
                     </div>
-                    <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
-                        <label for="exampleInputPassword1">Telefono</label>
-                        <input required type="number" class="form-control" name="phone" value="{{ old('phone',isset($project['phone'])?$project['phone']:'') }}" placeholder="Ingrese Telefono de Contacto">
-                        {!! $errors->first('phone','<span class="help-block">:message</span>') !!}
-                    </div>
+
                 </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+                <div class="form-group {{ $errors->has('leader_name') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Nombre del Lider del Grupo</label>
+                    <input required type="text" class="form-control" name="leader_name" value="{{ old('leader_name',isset($project['leader_name'])?$project['leader_name']:'') }}" placeholder="Ingrese Nombre del Lider del Grupo">
+                    {!! $errors->first('leader_name','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Telefono</label>
+                    <input required type="number" class="form-control" name="phone" value="{{ old('phone',isset($project['phone'])?$project['phone']:'') }}" placeholder="Ingrese Telefono de Contacto">
+                    {!! $errors->first('phone','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Cantidad de Viviendas</label>
+                    <input required type="number" class="form-control" name="households" value="{{ old('households',isset($project['households'])?$project['households']:'') }}" placeholder="Ingrese Cantidad de Viviendas del Proyecto">
+                    {!! $errors->first('households','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
           </div>
           <div class="row">
               <div class="col-md-4">
