@@ -11,10 +11,10 @@ class ProjectStatus extends Model
 
     protected $fillable = ['project_id','stage_id','user_id','record'];
 
-    public function getDateFormat()
+    /*public function getDateFormat()
     {
         return 'Y-d-m H:i:s.v';
-    }
+    }*/
 
     public function getStage() {
         return $this->hasOne('App\Models\Stage','id','stage_id');
