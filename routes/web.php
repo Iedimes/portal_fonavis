@@ -254,6 +254,10 @@ Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectContr
 Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
 Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
 
+
+//validacion qr
+Route::get('/{key}',[App\Http\Controllers\ProjectController::class,'verification']);
+
 //
 Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
 
@@ -280,6 +284,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/',                                             'ProjectsController@index')->name('index');
             Route::get('/create',                                       'ProjectsController@create')->name('create');
             Route::post('/',                                            'ProjectsController@store')->name('store');
+            Route::get('/{project}/show',                               'ProjectsController@show');
+            Route::get('/{project}/transition',                         'ProjectsController@transition');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{project}',                                   'ProjectsController@update')->name('update');
@@ -300,6 +306,22 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'DocumentChecksController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{documentCheck}',                             'DocumentChecksController@update')->name('update');
             Route::delete('/{documentCheck}',                           'DocumentChecksController@destroy')->name('destroy');
+        });
+    });
+});
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('project-statuses')->name('project-statuses/')->group(static function() {
+            Route::get('/',                                             'ProjectStatusController@index')->name('index');
+            Route::get('/create',                                       'ProjectStatusController@create')->name('create');
+            Route::post('/',                                            'ProjectStatusController@store')->name('store');
+            Route::get('/{projectStatus}/edit',                         'ProjectStatusController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ProjectStatusController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{projectStatus}',                             'ProjectStatusController@update')->name('update');
+            Route::delete('/{projectStatus}',                           'ProjectStatusController@destroy')->name('destroy');
         });
     });
 });

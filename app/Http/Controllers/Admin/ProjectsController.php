@@ -9,6 +9,10 @@ use App\Http\Requests\Admin\Project\IndexProject;
 use App\Http\Requests\Admin\Project\StoreProject;
 use App\Http\Requests\Admin\Project\UpdateProject;
 use App\Models\Project;
+use App\Models\Land_project;
+use App\Models\Assignment;
+use App\Models\Stage;
+use App\Models\ProjectStatus;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -19,6 +23,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectsController extends Controller
 {
@@ -100,7 +105,35 @@ class ProjectsController extends Controller
     {
         $this->authorize('admin.project.show', $project);
 
-        // TODO your code goes here
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+        ->where('category_id',1)
+        ->get();
+        $history = ProjectStatus::where('project_id',$project['id'])
+                    ->orderBy('created_at')
+                    ->get();
+
+        //return $history;
+
+        return view('admin.project.show', compact('project', 'docproyecto','history'));
+    }
+
+
+    public function transition(Project $project)
+    {
+       //return $project->getEstado->getStage->id;
+        $user = Auth::user()->id;
+        $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+
+        /*if ($workflowState->id == 26) {
+            $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
+        }else{
+            $mensaje = 'Este cambio de estado quedara registrado en el historial de la solicitud';
+        }*/
+        $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
+
+        return view('admin.project.transition', compact('project', 'user','mensaje','stages'));
+
     }
 
     /**

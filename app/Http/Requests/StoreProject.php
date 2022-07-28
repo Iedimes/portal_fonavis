@@ -32,6 +32,7 @@ class StoreProject extends FormRequest
             'sat_id' => 'required',
             'land_id' => 'required',
             'city_id' => 'required',
+            'typology_id' => 'required',
             'leader_name' => 'required',
             'localidad' => 'required',
 
@@ -56,4 +57,16 @@ class StoreProject extends FormRequest
 
         ];
     }
+
+
+    public function getSanitized(): array
+    {
+        $sanitized = $this->validated();
+
+        //Add your code for manipulation with request data here
+
+        return $sanitized;
+    }
+
+
 }

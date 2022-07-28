@@ -74,18 +74,29 @@
     <header>
         <img src="{{storage_path('images/logofull.png')}}" class="imagencentro" width="690" >
     </header>
-                  <p>
-                    <strong>Proyecto:</strong> {{$project->name}}<br>
-                    <div id="cabecera">
-                    <strong>Código:</strong> {{$project->id}}<br>
-                    <strong>Programa:</strong> FONAVIS<br>
-                    <strong>Cantidad de Viviendas:</strong> {{$project->households}}<br>
-                    <strong>SAT:</strong> {{ utf8_encode($project->sat_id?$project->getSat->NucNomSat:"") }}<br>
-                    <strong>Departamento: </strong> {{$project->state_id?$project->getState->DptoNom:""}}<br>
-                    <strong>Distrito:</strong> {{$project->city_id}}<br>
-                    <strong>Modalidad:</strong> {{$project->modalidad_id?$project->getModality->name:""}}<br>
-                    <strong>Tipo de Terreno:</strong> {{$project->land_id?$project->getLand->name:""}}<br>
-                  </p>
+    <table style="width: 100%; padding-top:10px">
+        <tr>
+            <td style="width: 40%">
+                <strong>Proyecto:</strong> {{$project->name}}<br>
+                <div id="cabecera">
+                <strong>Código:</strong> {{$project->id}}<br>
+                <strong>Programa:</strong> FONAVIS<br>
+                <strong>Cantidad de Viviendas:</strong> {{$project->households}}<br>
+                <strong>SAT:</strong> {{ utf8_encode($project->sat_id?$project->getSat->NucNomSat:"") }}<br>
+                <strong>Departamento: </strong> {{$project->state_id?$project->getState->DptoNom:""}}<br>
+                <strong>Distrito:</strong> {{$project->city_id}}<br>
+                <strong>Modalidad:</strong> {{$project->modalidad_id?$project->getModality->name:""}}<br>
+                <strong>Tipo de Terreno:</strong> {{$project->land_id?$project->getLand->name:""}}<br>
+            </td>
+            <td style="width: 10%"></td>
+            <td style="text-align: right">
+                <img  src="data:image/png;base64, {{ base64_encode($valor) }}" alt="">
+            </td>
+        </tr>
+    </table>
+
+
+
 
               <h2>Lista de Documentos</h2>
 

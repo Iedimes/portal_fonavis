@@ -204,3 +204,16 @@ $factory->define(App\Models\DocumentCheck::class, static function (Faker\Generat
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\ProjectStatus::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->sentence,
+        'stage_id' => $faker->randomNumber(5),
+        'user_id' => $faker->randomNumber(5),
+        'record' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

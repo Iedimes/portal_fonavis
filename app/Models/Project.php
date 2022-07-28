@@ -30,7 +30,7 @@ class Project extends Model
     }*/
 
     protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
-    'typology_id','expsocial','exptecnico','action','households'];
+    'typology_id','expsocial','exptecnico','action','households','certificate_pin'];
 
     //protected $with = ['getTypology'];
 
@@ -65,5 +65,14 @@ class Project extends Model
 
     public function getEstado() {
         return $this->hasOne('App\Models\ProjectStatus', 'project_id', 'id')->latest();
+    }
+
+    protected $appends = ['resource_url'];
+
+    /* ************************ ACCESSOR ************************* */
+
+    public function getResourceUrlAttribute()
+    {
+        return url('/admin/projects/'.$this->getKey());
     }
 }

@@ -20,6 +20,7 @@ use App\Models\Project_tipologies;
 use App\Models\ProjectStatus;
 use App\Models\User;
 use PDF;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 use App\Http\Requests\StoreProject;
 
@@ -91,7 +92,19 @@ class ProjectController extends Controller
         //
         //return 'store';
         //return $request;
-        Project::create($request->all());
+
+        $sanitized = $request->getSanitized();
+
+        $key = str_random(25);
+        while (Project::where('certificate_pin', $key)->exists()) {
+            $key = str_random(25);
+        }
+        $sanitized['certificate_pin'] = $key;
+
+        //return $sanitized;
+
+        $task = Project::create($sanitized);
+        //Project::create($request->all());
         return redirect('projects/')->with('success', 'Se ha agregado un Nuevo Proyecto!');
         //return $request;
     }
@@ -150,10 +163,14 @@ class ProjectController extends Controller
         //->where('stage_id',1)
         ->get();
         $claves = $docproyecto->pluck('document_id');
+        $history = ProjectStatus::where('project_id',$project['id'])
+                    ->orderBy('created_at')
+                    ->get();
+        //return $history;
         //return $docproyecto->pluck('document_id')->toArray();
         //dd($docproyecto);
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves'));
+        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history'));
     }
 
     public function generatePDF($id)
@@ -164,14 +181,28 @@ class ProjectController extends Controller
         $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
         ->where('category_id',1)
         ->get();
-
+        $codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
         $data = ['title' => 'Welcome to HDTuto.com',
                 'project' => $project,
-                'documents' => $docproyecto
+                'documents' => $docproyecto,
+                'valor' => $codigoQr,
                 ];
+        //$codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
         $pdf = PDF::loadView('myPDF', $data);
 
         return $pdf->download('FORMULARIO-INGRESO-'.$project->name.'.pdf');
+    }
+
+    public function verification($key)
+    {
+
+        //return $key;
+        $project = Project::where('certificate_pin', $key)
+            //->select('name', 'last_name', 'government_id', 'farm', 'account', 'amount', 'state_id', 'city_id', 'created_at')
+            ->first();
+
+        //return $task;
+        return view('verification', compact('project'));
     }
 
     /**

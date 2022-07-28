@@ -312,5 +312,24 @@ return [
         ],
     ],
 
+    'project-status' => [
+        'title' => 'Project Status',
+
+        'actions' => [
+            'index' => 'Project Status',
+            'create' => 'New Project Status',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'project_id' => 'Project',
+            'stage_id' => 'Stage',
+            'user_id' => 'User',
+            'record' => 'Record',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

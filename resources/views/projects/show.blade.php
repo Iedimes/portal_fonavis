@@ -58,44 +58,92 @@
 
     </div>
 
+    <div class="card card-primary card-tabs">
+        <div class="card-header p-0 pt-1">
+        <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+        <li class="nav-item">
+        <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Documentos a Entregar</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Historial</a>
+        </li>
+        <li class="nav-item">
 
-    <div class="row">
-    <div class="col-12 table-responsive">
-    <table class="table table-striped">
-    <thead>
-    <tr>
-    <th>#</th>
-    <th>Documento</th>
-    <th>N° FOLIO</th>
-    <th>Check</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach ($docproyecto as $key => $item)
-    <tr>
-        <td>{{ $key+1 }}</td>
-        <td>{{ $item->document->name}}</td>
-        <td>
-            <div class="row">
-                <div class="col-6">
-                    <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{'sheet-'.$item->document_id}}" placeholder=""
-                    value="{{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }}">
-                </div>
+        </ul>
+        </div>
+        <div class="card-body">
+        <div class="tab-content" id="custom-tabs-one-tabContent">
+    <div class="tab-pane fade active show" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+        <div class="row">
+            <div class="col-12 table-responsive">
+            <table class="table table-striped">
+            <thead>
+            <tr>
+            <th>#</th>
+            <th>Documento</th>
+            <th>N° FOLIO</th>
+            <th>Check</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach ($docproyecto as $key => $item)
+            <tr>
+                <td>{{ $key+1 }}</td>
+                <td>{{ $item->document->name}}</td>
+                <td>
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{'sheet-'.$item->document_id}}" placeholder=""
+                            value="{{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }}">
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="custom-control custom-switch">
+                    <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }}  {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
+                    <label class="custom-control-label" for="{{$item->document_id}}"></label>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+            </table>
             </div>
-        </td>
-        <td>
-            <div class="custom-control custom-switch">
-            <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }}  {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
-            <label class="custom-control-label" for="{{$item->document_id}}"></label>
+
             </div>
-        </td>
-    </tr>
-    @endforeach
-    </tbody>
-    </table>
-    </div>
+
 
     </div>
+        <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+
+            <table class="table table-striped">
+                <thead>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Observacion</th>
+                </thead>
+                <tbody>
+                    @foreach ($history as $item)
+                    <tr>
+                        <td>{{ $item->getStage->name }}</td>
+                        <td>{{ $item->created_at }} </td>
+                        <td>{{ $item->getUser ? $item->getUser['first_name'] : 'N/A'}}</td>
+                        <td> {{ $item->record }} </td>
+                    </tr>
+                    @endforeach
+
+                </tbody>
+            </table>
+
+        </div>
+
+        </div>
+        </div>
+
+        </div>
+
+
     </div>
 
 

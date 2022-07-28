@@ -20,5 +20,9 @@ class ProjectStatus extends Model
         return $this->hasOne('App\Models\Stage','id','stage_id');
     }
 
+    public function getUser() {
+        return $this->hasOne('App\Models\AdminUser','id','user_id');
+    }
+
 
 }
