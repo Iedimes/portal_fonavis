@@ -256,7 +256,7 @@ Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectCon
 
 
 //validacion qr
-Route::get('/{key}',[App\Http\Controllers\ProjectController::class,'verification']);
+Route::get('/{key}',[App\Http\Controllers\HomeController::class,'verification']);
 
 //
 Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
