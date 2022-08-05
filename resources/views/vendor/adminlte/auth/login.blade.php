@@ -18,16 +18,54 @@
     @php( $password_reset_url = $password_reset_url ? url($password_reset_url) : '' )
 @endif
 
-@section('auth_header', "INGRESE SUS DATOS")
+<div class="fonavis">
+</div>
+<img src="/img/muvh transparente.png"width="300px;"class="img-responsive">
 
 @section('auth_body')
+<img src="/img/logofonavis.png"width="300px;"class="img-responsive">
+<h3 class="card-title float-none text-center">INGRESE LOS DATOS SOLICITADOS  </h3> <hr>
+<style>
+.login-page, .register-page {
+    -ms-flex-align: center;
+    align-items: center;
+
+    background-image: url("/img/fondo.PNG") !important;
+    -webkit-background-size: cover;
+
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    height: 100vh;
+    -ms-flex-pack: center;
+    justify-content: center;
+    background-color: #fff;
+    box-shadow: 0 0 50px 5px rgb(0 0 0 / 30%), 0 0 5px -1px white;
+
+
+
+}
+
+.login-box, .register-box {
+    width: 360px;
+    position: relative;
+    top: 120px;
+}
+
+.fonavis {background-color: #fff; margin-top:16px;}
+
+
+</style>
+
     <form action="{{ $login_url }}" method="post">
         @csrf
 
         {{-- Email field --}}
+        <label> CORREO ELECTRONICO</label>
         <div class="input-group mb-3">
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('adminlte::adminlte.email') }}" autofocus>
+                   value="{{ old('email') }}" placeholder="{{ __('Ingrese su correo Electronico') }}" autofocus>
 
             <div class="input-group-append">
                 <div class="input-group-text">
@@ -43,9 +81,11 @@
         </div>
 
         {{-- Password field --}}
+        <label> CONTRASEÑA </label>
+
         <div class="input-group mb-3">
             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                   placeholder="{{ __('adminlte::adminlte.password') }}">
+                   placeholder="{{ __('Ingrese su contraseña') }}">
 
             <div class="input-group-append">
                 <div class="input-group-text">
@@ -61,15 +101,15 @@
         </div>
 
         {{-- Login field --}}
-        <div class="row float-right">
+        <div class="row">
             <div class="col-12">
                 <button type=submit class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
                     <span class="fas fa-sign-in-alt"></span>
-                    {{ __('adminlte::adminlte.sign_in') }}
+                    {{ __('Acceder') }}
                 </button>
             </div>
         </div>
-
+        <a href="https://www.muvh.gov.py" style="/* text-align:center; */float: right;margin-top: 18px;"> ir a la página web </a>
     </form>
 @stop
 
