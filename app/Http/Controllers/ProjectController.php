@@ -14,6 +14,7 @@ use App\Models\DocumentCheck;
 use App\Models\Documents;
 use App\Models\Assignment;
 use App\Models\Typology;
+use App\Models\ProjectHasPostulantes;
 use App\Models\Land_project;
 use App\Models\ModalityHasLand;
 use App\Models\Project_tipologies;
@@ -150,7 +151,8 @@ class ProjectController extends Controller
     public function show($id)
     {
         $project=Project::find($id);
-        //return $project->getEstado;
+        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
+        //return $postulantes;
         $title="Resumen Proyecto ".$project->name;
 
         $tipoproy = Land_project::where('land_id',$project->land_id)->first();
@@ -170,7 +172,7 @@ class ProjectController extends Controller
         //return $docproyecto->pluck('document_id')->toArray();
         //dd($docproyecto);
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history'));
+        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history','postulantes'));
     }
 
     public function generatePDF($id)

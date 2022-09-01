@@ -44,7 +44,7 @@
     <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
     <strong>Distrito:</strong> {{utf8_encode($project->city_id)}}<br>
     <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
-    <strong>Cantidad de Viviendas:</strong> {{utf8_encode($project->households)}}<br>
+    <strong>Cantidad de Viviendas:</strong> {{$postulantes->count()}}<br>
     </address>
     </div>
 
@@ -61,14 +61,15 @@
     <div class="card card-primary card-tabs">
         <div class="card-header p-0 pt-1">
         <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
-        <li class="nav-item">
-        <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Documentos a Entregar</a>
-        </li>
-        <li class="nav-item">
-        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Historial</a>
-        </li>
-        <li class="nav-item">
-
+            <li class="nav-item">
+            <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Documentos a Entregar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="custom-tabs-one-applicant-tab" data-toggle="pill" href="#custom-tabs-one-applicant" role="tab" aria-controls="custom-tabs-one-applicant" aria-selected="false">Postulantes</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Historial</a>
+            </li>
         </ul>
         </div>
         <div class="card-body">
@@ -112,6 +113,43 @@
 
             </div>
 
+
+    </div>
+    <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+        <a href="{{ url('projects/'.$project->id.'/postulantes') }}">
+            <button type="button" class="btn btn-info float-right">
+                <i class="fa fa-user"></i> Ir a la Seccion de Postulantes
+            </button>
+        </a>
+        <br>
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <th>#</th>
+                <th>Nombre</th>
+                <th class="text-center">Cedula</th>
+                <th class="text-center">Edad</th>
+                <th class="text-center">Ingreso</th>
+                <th class="text-center">Nivel</th>
+            </thead>
+            <tbody>
+                @foreach ($postulantes as $key=>$post)
+                <tr>
+                    <td>{{$key+1}}</td>
+                    <td>{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}</td>
+                    @if (is_numeric($post->postulante_id?$post->getPostulante->cedula:""))
+                    <td class="text-center">{{ number_format($post->postulante_id?$post->getPostulante->cedula:"",0,".",".")  }} </td>
+                    @else
+                    <td class="text-center">{{ $post->postulante_id?$post->getPostulante->cedula:""  }} </td>
+                    @endif
+                    <td class="text-center">{{ \Carbon\Carbon::parse( $post->postulante_id?$post->getPostulante->birthdate:"")->age }} </td>
+                    <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id),0,".",".") }} </td>
+                    <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
+                </tr>
+                @endforeach
+
+            </tbody>
+        </table>
 
     </div>
         <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">

@@ -254,6 +254,20 @@ Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectContr
 Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
 Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
 
+//Postulantes
+Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class,'index']);
+Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class,'create']);
+Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class,'destroy']);
+Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
+/*Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
+Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
+Route::post('editpostulante', 'PostulantesController@update');
+Route::post('postulantes/upload', 'PostulantesController@upload');
+Route::post('postulantes/destroyfile', 'PostulantesController@destroyfile');
+
+Route::post('postulantes/destroy', 'PostulantesController@destroy');
+Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro');*/
+
 
 //validacion qr
 Route::get('/{key}',[App\Http\Controllers\HomeController::class,'verification']);
