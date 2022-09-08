@@ -26,7 +26,7 @@
               <p>
                 <strong>Departamento: </strong>{{$project->state_id?$project->getState->DptoNom:""}}<br>
                 <strong>Distrito:</strong> {{$project->city_id}}<br>
-                <strong>Modalidad:</strong> {{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}<br>
+                <strong>Modalidad:</strong> {{$project->modalidad_id?$project->getModality->name:""}}<br>
                 <a href="{{ url('projects/'.$project->id) }}">
                     <button type="button" class="btn btn-info">
                         <i class="fa fa-undo"></i> Volver al Proyecto
@@ -36,8 +36,8 @@
             </div>
               <div class="col-md-4">
                 <p>
-                    <strong>SAT:</strong> {{utf8_encode($project->sat_id?$project->getSat->NucNomSat:"")}}<br>
-                    <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
+                    <strong>SAT:</strong> {{ $project->sat_id?$project->getSat->NucNomSat:""}}<br>
+                    <strong>Tipo de Terreno:</strong> {{$project->land_id?$project->getLand->name:""}}<br>
                     <strong>Total Postulantes:</strong> {{ $postulantes->count() }}<br>
                 </p>
               </div>
@@ -116,7 +116,7 @@
                               {{--<li><a href="{!! url('PostulantesController@show', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Ver</a></li>--}}
                               @if (!isset($project->getEstado->stage_id))
                             <!--  <li><a href="{!! url('PostulantesController@edit', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Editar</a></li> -->
-                            <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ utf8_encode($post->postulante_id?$post->getPostulante->first_name:"") }} {{ utf8_encode($post->postulante_id?$post->getPostulante->last_name:"") }}" href="#">Eliminar</a>
+                            <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
                               @endif
                             </div>
                     </div>
