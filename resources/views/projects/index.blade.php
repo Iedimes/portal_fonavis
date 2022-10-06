@@ -10,7 +10,7 @@
             <h4>
             <i class="fas fa-university"></i> Proyectos
             <a href="{{ url('projects/create') }}" class="announce">
-                <button class="btn btn-primary float-right" hr type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button>
+                {{-- <button class="btn btn-primary float-right" hr type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button> --}}
             </a>
             </h4>
         </div>
