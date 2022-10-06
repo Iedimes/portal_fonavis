@@ -49,13 +49,13 @@
                     {!! $errors->first('phone','<span class="help-block">:message</span>') !!}
                 </div>
             </div>
-            <div class="col-md-4">
+            {{--<div class="col-md-4">
                 <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
                     <label for="exampleInputPassword1">Cantidad de Viviendas</label>
                     <input required type="number" class="form-control" name="households" value="{{ old('households',isset($project['households'])?$project['households']:'') }}" placeholder="Ingrese Cantidad de Viviendas del Proyecto">
                     {!! $errors->first('households','<span class="help-block">:message</span>') !!}
                 </div>
-            </div>
+            </div>--}}
 
           </div>
           <div class="row">

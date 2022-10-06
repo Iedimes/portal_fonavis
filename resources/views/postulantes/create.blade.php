@@ -16,7 +16,7 @@
             @endif
             <input type="text"  name="gender" value="{{ $sexo }}"  hidden>
             <input type="text"  name="project_id" value="{{ $project_id->id }}"  hidden>
-            <input type="text"  name="grupo" value="{{ utf8_encode($project_id->name) }}"  hidden>
+            <input type="text"  name="grupo" value="{{ $project_id->name }}"  hidden>
             <input type="text"  name="disc_id" value="{{ isset($disc['id'])?$disc['id']:'' }}"  hidden>
       <div class="box-body">
           <div class="row">

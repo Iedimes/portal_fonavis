@@ -26,7 +26,7 @@ class StoreProject extends FormRequest
         return [
             'name' => 'required',
             'phone' => 'required',
-            'households' => 'required',
+            //'households' => 'required',
             'state_id' => 'required',
             'modalidad_id' => 'required',
             'sat_id' => 'required',
@@ -46,7 +46,7 @@ class StoreProject extends FormRequest
         return [
             'name.required' => 'El campo Nombre es Requerido',
             'phone.required' => 'El campo Telefono es Requerido',
-            'households.required' => 'El campo Camtidad de Viviendas es Requerido',
+            //'households.required' => 'El campo Camtidad de Viviendas es Requerido',
             'state_id.required' => 'El campo Departamento es Requerido',
             'modalidad_id.required'  => 'El campo Modalidad es Requerido',
             'sat_id.required' => 'El campo Sat es Requerido',
