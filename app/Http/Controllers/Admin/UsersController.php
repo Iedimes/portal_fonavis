@@ -123,10 +123,15 @@ class UsersController extends Controller
     public function edit(User $user)
     {
         $this->authorize('admin.user.edit', $user);
+        $sat = Sat::where('NucRuc','!=', null)
+        ->where('NucEst','=', 'H')
+        ->select('NucNomSat','NucCod','NucCont')
+        ->get();
 
 
         return view('admin.user.edit', [
             'user' => $user,
+            'sat' => $sat,
         ]);
     }
 
@@ -141,6 +146,16 @@ class UsersController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+
+        if ($request['password']) {
+            $sanitized ['password'] = bcrypt($request['password']);
+        }
+
+        if ($request['sat_ruc']) {
+            $sanitized ['sat_ruc'] =  $request->getSatId();
+        }
+
+
 
         // Update changed values User
         $user->update($sanitized);

@@ -29,9 +29,11 @@ class UpdateUser extends FormRequest
             'name' => ['sometimes', 'string'],
             'email' => ['sometimes', 'email', 'string'],
             'username' => ['sometimes', 'string'],
-            'password' => ['sometimes', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
+            //'password' => ['sometimes', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
+            'password' => ['sometimes', 'confirmed', 'min:7','string'],
+
             'sat_ruc' => ['nullable', 'string'],
-            
+
         ];
     }
 
@@ -48,5 +50,10 @@ class UpdateUser extends FormRequest
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getSatId()
+    {
+        return $this->get('sat')['NucCod'];
     }
 }
