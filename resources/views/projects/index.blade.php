@@ -10,7 +10,7 @@
             <h4>
             <i class="fas fa-university"></i> Proyectos
             <a href="{{ url('projects/create') }}" class="announce">
-                {{-- <button class="btn btn-primary float-right" hr type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button> --}}
+                 <button class="btn btn-primary float-right" hr type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button>
             </a>
             </h4>
         </div>
@@ -50,12 +50,12 @@
                     <button type="button" class="btn btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
                     <span class="sr-only">Toggle Dropdown</span>
                     </button>
-                    {{-- <div class="dropdown-menu" role="menu" style="">
+                    <div class="dropdown-menu" role="menu" style="">
                     <a class="dropdown-item" href="{{ url('projects/'.$project->id) }}">Ver</a>
                     <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="{{ url('projects/'.$project->id.'/edit') }}">Editar</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="{{ url('projects/'.$project->id.'/postulantes') }}">Postulantes</a>
-                    </div> --}}
+                    </div>
                 </div>
             </td>
             {{--<td style="text-align:center; width: 150px;">
