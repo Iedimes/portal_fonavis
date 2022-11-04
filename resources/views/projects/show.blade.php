@@ -117,9 +117,16 @@
     </div>
     <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
         <a href="{{ url('projects/'.$project->id.'/postulantes') }}">
-            <button type="button" class="btn btn-info float-right">
+
+
+                @if ($project->getEstado)
+
+                @else
+                <button type="button" class="btn btn-info float-right">
                 <i class="fa fa-user"></i> Ir a la Seccion de Postulantes
             </button>
+                @endif
+
         </a>
         <br>
         <br>
