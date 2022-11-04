@@ -20,19 +20,21 @@
 
 <div class="fonavis">
 </div>
-<img src="/img/muvh transparente.png"width="300px;"class="img-responsive">
+{{-- <img src="/img/muvh transparente.png"width="300px;"class="img-responsive"> --}}
 
 @section('auth_body')
 <img src="/img/logofonavis.png"width="300px;"class="img-responsive">
 <h3 class="card-title float-none text-center">INGRESE LOS DATOS SOLICITADOS  </h3> <hr>
 <style>
+personalizado {color:black;}
+
 .login-page, .register-page {
     -ms-flex-align: center;
     align-items: center;
-
+    background-repeat: no-repeat;
+    background-position: -2em;
     background-image: url("/img/fondo.PNG") !important;
     -webkit-background-size: cover;
-
     display: -ms-flexbox;
     display: flex;
     -ms-flex-direction: column;
@@ -50,11 +52,10 @@
 .login-box, .register-box {
     width: 360px;
     position: relative;
-    top: 120px;
+    top: -31px;
 }
 
 .fonavis {background-color: #fff; margin-top:16px;}
-
 
 </style>
 
