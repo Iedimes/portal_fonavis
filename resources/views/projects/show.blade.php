@@ -119,7 +119,12 @@
         <a href="{{ url('projects/'.$project->id.'/postulantes') }}">
 
 
-                @if ($project->getEstado)
+
+
+
+                @if (($project->getEstado)||($postulantes->count() >= 50))
+
+
 
                 @else
                 <button type="button" class="btn btn-info float-right">
