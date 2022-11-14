@@ -172,10 +172,10 @@ class PostulantesController extends Controller
         if ($request->input('cedula')) {
             $expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
             $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
-                                    ->where('CerEst', '<>', 2)
-                                    ->where('CerEst', '<>', 7)
-                                    ->where('CerEst', '<>', 8)
-                                    ->where('CerEst', '<>', 12)
+                                    ->where('CerEst', '!=', 2)
+                                    ->where('CerEst', '!=', 7)
+                                    ->where('CerEst', '!=', 8)
+                                    ->where('CerEst', '!=', 12)
                                     ->get();
             $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
             $existe = Postulante::where('cedula',$request->input('cedula'))->get();
