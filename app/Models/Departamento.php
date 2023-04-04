@@ -11,4 +11,15 @@ class Departamento extends Model
     protected $primaryKey = 'DptoId';
 
     protected $connection = 'sqlsrvsecond';
+
+    // protected $appends = ['resource_url'];
+    // protected $with = ['localidad'];
+
+
+    // public function localidad()
+    // {
+    //     return $this->hasOne(Distrito::class, 'CiuDptoID', 'DptoId');
+    // }
 }
+
+

@@ -71,15 +71,22 @@ class ProjectController extends Controller
         $title="Crear Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
-        $departamentos = Departamento::where('DptoId','<',18)
+        $dep = [4, 5, 8, 10, 22];
+        $loc = [49, 123, 145, 179, 230];
+        // $departamentos = Departamento::where('DptoId','<',18)
+        //                 ->orderBy('DptoNom', 'asc')->get();
+
+        $departamentos = Departamento::whereIn('DptoId', $dep)
                         ->orderBy('DptoNom', 'asc')->get();
+        $localidad = Distrito::whereIn('CiuId', $loc)
+                        ->orderBy('CiuNom', 'asc')->get();
         $tipologias = Typology::all();
         $id = Auth::user()->id;
         $user = User::find($id);
 
         //return $user->sat_ruc;
         //return $user->getSat->NucNomSat;
-        return view('projects.create',compact('title','tierra','departamentos','modalidad','tipologias','user'));
+        return view('projects.create',compact('title','tierra','departamentos', 'localidad', 'modalidad','tipologias','user'));
     }
 
     /**
