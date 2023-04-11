@@ -107,7 +107,7 @@ class PostulantesController extends Controller
                 'password' => 'S3n4vitat'
             ];
             $client = new client();
-            $res = $client->post("http://" . env("URL_ENV", "192.168.202.43:8080") . "/mbohape-core/sii/security", [
+            $res = $client->post('http://10.1.79.7:8080/mbohape-core/sii/security', [
                 'headers' => $headers,
                 'json' => $GetOrder,
                 'decode_content' => false
@@ -123,7 +123,7 @@ class PostulantesController extends Controller
                     'Accept' => 'application/json',
                     'decode_content' => false
                 ];
-                $cedula = $client->get("http://" . env("URL_ENV", "192.168.202.43:8080") . '/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
                     'headers' => $headerscedula,
                 ]);
                 $datos=$cedula->getBody()->getContents();
