@@ -463,13 +463,10 @@ class PostulantesController extends Controller
     {
         $project=Project::find($id);
         $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
-        $data = ['title' => 'Welcome to HDTuto.com',
-                'project' => $project,
-                'postulantes' => $postulantes
-                ];
-        $pdf = PDF::loadView('myPDF', $data);
+        $contar = count($postulantes);
+        $pdf = PDF::loadView('postulantesPDF', compact('project','postulantes', 'contar'))->setPaper('a4', 'landscape');
 
-        return $pdf->download('postulantes.pdf');
+        return $pdf->download('Listadopostulantes.pdf');
     }
 
 

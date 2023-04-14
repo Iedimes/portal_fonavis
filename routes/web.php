@@ -253,12 +253,16 @@ Route::get('generate-pdf/{id}',[App\Http\Controllers\ProjectController::class,'g
 Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectController::class,'distrito']);
 Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
 Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
+Route::get('projects/ajax/{state_id?}/local',[App\Http\Controllers\ProjectController::class,'distrito']);
 
 //Postulantes
 Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class,'index']);
 Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class,'create']);
 Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class,'destroy']);
 Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
+Route::get('imprimir/{id}','App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
+
+
 /*Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
 Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
 Route::post('editpostulante', 'PostulantesController@update');

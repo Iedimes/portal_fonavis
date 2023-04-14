@@ -51,7 +51,19 @@
     <div class="col-sm-4 invoice-col">
     <address>
     <strong>SAT:</strong> {{$project->sat_id?$project->getSat->NucNomSat:""}}<br>
-    <strong>Localidad:</strong> {{$project->localidad}}<br>
+    <strong>Localidad:</strong> {{ $project->localidad }}
+    {{-- <strong>Localidad:</strong> @if($project->localidad==123)
+    Villa Florida
+    @elseif($project->localidad==230)
+    Santa Rosa del Mbutuy
+    @elseif($project->localidad==145)
+    Itakyry
+    @elseif($project->localidad==49)
+    Colonia Independencia
+    @elseif($project->localidad==179)
+    Asuncion
+    @endif --}}
+    <br>
     <strong>Tipologia:</strong> {{$project->typology_id?$project->getTypology->name:""}}<br>
     </address>
     </div>
@@ -118,6 +130,11 @@
     <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
         <a href="{{ url('projects/'.$project->id.'/postulantes') }}">
 
+            @if ($project->getEstado)
+            <a href="{{ url('imprimir/'.$project->id) }}"> <button type="button" class="btn btn-info btn-block btn-lg btn-lg">
+                <i class="fa fa-file-excel-o"></i> Imprimir Listado
+                </button></a>
+            @endif
 
 
 
