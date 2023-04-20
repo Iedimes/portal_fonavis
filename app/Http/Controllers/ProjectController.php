@@ -71,7 +71,7 @@ class ProjectController extends Controller
         $title="Crear Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
-        $dep = [4, 5, 8, 10, 22];
+        $dep = [2, 4, 5, 8, 10, 16, 22];
         $loc = [49, 123, 145, 179, 230];
         // $departamentos = Departamento::where('DptoId','<',18)
         //                 ->orderBy('DptoNom', 'asc')->get();
@@ -225,8 +225,15 @@ class ProjectController extends Controller
         $title="Editar Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
-        $departamentos = Departamento::where('DptoId','<',18)
+        $dep = [4, 5, 8, 10, 22];
+        $departamentos = Departamento::whereIn('DptoId', $dep)
                         ->orderBy('DptoNom', 'asc')->get();
+        $loc = [49, 123, 145, 179, 230];
+        $localidad = Distrito::whereIn('CiuId', $loc)
+                                        ->orderBy('CiuNom', 'asc')->get();
+
+        // $departamentos = Departamento::where('DptoId','<',18)
+        //                 ->orderBy('DptoNom', 'asc')->get();
         $project=Project::find($id);
         //$cities = $this->distrito($project->state_id);
         //$cities = json_decode($cities, true);
@@ -238,9 +245,12 @@ class ProjectController extends Controller
         $typology = $this->typologyedit($project->typology_id);
         $typology = json_decode($typology, true);
 
+        $local = $this->localedit($project->localidad);
+        $local = json_decode($local, true);
+
         $id = Auth::user()->id;
         $user = User::find($id);
-        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user'));
+        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user', 'local', 'localidad'));
     }
 
     /**
@@ -348,18 +358,21 @@ class ProjectController extends Controller
     }
 
     public function distrito($dptoid){
-        $dpto = Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
+        // $dpto = Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
+        $en=[49,123,145,179,230];
+        $dpto = Distrito::where('CiuDptoID', $dptoid)
+                        ->whereIn('CiuId', $en)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
         //return json_encode($dpto, JSON_FORCE_OBJECT);
         return json_encode($dpto , JSON_UNESCAPED_UNICODE);
     }
 
 
-    public function distritosinjson($dptoid){
-        //$dpto =
-        return Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
-        //return json_encode($dpto, JSON_FORCE_OBJECT);
-        //return json_encode($dpto , JSON_UNESCAPED_UNICODE);
-    }
+    // public function distritosinjson($dptoid){
+    //     //$dpto =
+    //     return Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
+    //     //return json_encode($dpto, JSON_FORCE_OBJECT);
+    //     //return json_encode($dpto , JSON_UNESCAPED_UNICODE);
+    // }
 
     public function lands($dptoid){
         $dpto = ModalityHasLand::join('lands', 'modality_has_lands.land_id', '=', 'lands.id')
@@ -382,4 +395,30 @@ class ProjectController extends Controller
         ->where('typology_id',$dptoid)->get()->sortBy("name")->pluck("name","typology_id");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
+
+
+    // public function local($localidad){
+    //     $local = ModalityHasLand::join('lands', 'modality_has_lands.land_id', '=', 'lands.id')
+    //     ->where('modality_id', $dptoid)->get()->sortBy("name")->pluck("name","land_id");
+    //     return json_encode($dpto, JSON_UNESCAPED_UNICODE);
+    // }
+
+    public function localedit($dptoid){
+        //$tipo = Land_project::where('land_id',$dptoid)->first();
+        //dd($tipo);
+        $dpto = Departamento::join('LOCALIDA', 'BAMDPT.DptoId', '=', 'LOCALIDA.CiuId')
+        ->where('LOCALIDA.CiuId',$dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","LOCALIDA.CiuId");
+        return json_encode($dpto, JSON_UNESCAPED_UNICODE);
+    }
+
+    // public function local($dptoid){
+    //     // $dpto = Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
+    //     $en=[49,123,145,179,230];
+    //     $dpto = Distrito::where('CiuDptoID', $dptoid)
+    //                     ->whereIn('CiuId', $en)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
+    //     //return json_encode($dpto, JSON_FORCE_OBJECT);
+    //     return json_encode($dpto , JSON_UNESCAPED_UNICODE);
+    // }
+
+
 }
