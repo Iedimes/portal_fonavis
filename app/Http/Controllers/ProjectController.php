@@ -225,12 +225,17 @@ class ProjectController extends Controller
         $title="Editar Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
-        $dep = [4, 5, 8, 10, 22];
+        $dep = [2, 4, 5, 8, 10, 16, 22];
+        // $loc = [49, 123, 145, 179, 230];
+        // $departamentos = Departamento::where('DptoId','<',18)
+        //                 ->orderBy('DptoNom', 'asc')->get();
+        //return "Probando";
         $departamentos = Departamento::whereIn('DptoId', $dep)
-                        ->orderBy('DptoNom', 'asc')->get();
-        $loc = [49, 123, 145, 179, 230];
-        $localidad = Distrito::whereIn('CiuId', $loc)
-                                        ->orderBy('CiuNom', 'asc')->get();
+                         ->orderBy('DptoNom', 'asc')
+                         ->get();
+        // $loc = [49, 123, 145, 179, 230];
+        // $localidad = Distrito::whereIn('CiuId', $loc)
+        //                                 ->orderBy('CiuNom', 'asc')->get();
 
         // $departamentos = Departamento::where('DptoId','<',18)
         //                 ->orderBy('DptoNom', 'asc')->get();
@@ -245,12 +250,12 @@ class ProjectController extends Controller
         $typology = $this->typologyedit($project->typology_id);
         $typology = json_decode($typology, true);
 
-        $local = $this->localedit($project->localidad);
-        $local = json_decode($local, true);
+        // $local = $this->localedit($project->localidad);
+        // $local = json_decode($local, true);
 
         $id = Auth::user()->id;
         $user = User::find($id);
-        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user', 'local', 'localidad'));
+        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user'));
     }
 
     /**
