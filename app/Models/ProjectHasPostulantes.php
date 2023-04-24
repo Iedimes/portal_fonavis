@@ -30,10 +30,15 @@ class ProjectHasPostulantes extends Model
         $ingreso = $total->sum('ingreso');//return $miembros->pluck('miembro_id');
         $grupo = $ingreso + $postulante->ingreso;
 
-        if ($grupo < 2192839)   {return '4'; }
-        if ($grupo < 4166394)   {return '3'; }
-        if ($grupo < 7455653)   {return '2'; }
-        if ($grupo < 10964195)  {return '1';}
+        // if ($grupo < 2192839)   {return '4'; }
+        // if ($grupo < 4166394)   {return '3'; }
+        // if ($grupo < 7455653)   {return '2'; }
+        // if ($grupo < 10964195)  {return '1';}
+
+        if ($grupo <= 2550307)   {return '4'; }
+        if ($grupo <= 4845583)   {return '3'; }
+        if ($grupo <= 8671044)   {return '2'; }
+        if ($grupo <= 12751535)  {return '1';}
 
     }
 
