@@ -37,6 +37,7 @@
             :project="{{$project->id}}"
             :stages="{{ $stages->toJson() }}"
             :user="{{$user}}"
+            email={{$email}}
             v-cloak
             inline-template>
 
@@ -58,12 +59,5 @@
 
         </project-status-form>
     </div>
-
-
-
-        </div>
-
-
-
-
+   </div>
 @endsection

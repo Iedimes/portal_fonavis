@@ -123,6 +123,7 @@ class ProjectsController extends Controller
     {
        //return $project->getEstado->getStage->id;
         $user = Auth::user()->id;
+        $email = Auth::user()->email;
         $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
         /*if ($workflowState->id == 26) {
@@ -132,7 +133,7 @@ class ProjectsController extends Controller
         }*/
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
-        return view('admin.project.transition', compact('project', 'user','mensaje','stages'));
+        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email'));
 
     }
 

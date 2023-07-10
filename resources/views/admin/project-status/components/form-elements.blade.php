@@ -5,7 +5,7 @@
         <div v-if="errors.has('project_id')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('project_id') }}</div>
     </div>
 </div>--}}
-
+<input type="hidden" name="email" value="{{ $email }}">
 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('stage_id'), 'has-success': fields.stage_id && fields.stage_id.valid }">
     <label for="stage_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project-status.columns.stage_id') }}</label>
         <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -46,5 +46,9 @@
         <div v-if="errors.has('record')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('record') }}</div>
     </div>
 </div>
-
+@if($errors->any())
+<div class="alert alert-danger">
+    {{ $errors->first('msg') }}
+</div>
+@endif
 

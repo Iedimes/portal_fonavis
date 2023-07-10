@@ -19,6 +19,8 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectStatusController extends Controller
 {
@@ -74,23 +76,50 @@ class ProjectStatusController extends Controller
      * @param StoreProjectStatus $request
      * @return array|RedirectResponse|Redirector
      */
-    public function store(StoreProjectStatus $request)
-    {
-        // Sanitize input
-        //return $request;
-        $sanitized = $request->getSanitized();
-        $sanitized ['stage_id']=  $request->getStageId();
-        // Store the ProjectStatus
 
-        //return $sanitized;
-        $projectStatus = ProjectStatus::create($sanitized);
+     public function store(StoreProjectStatus $request)
+     {
+         $sanitized = $request->getSanitized();
+         $sanitized['stage_id'] = $request->getStageId();
+         $email = $request->email;
 
-        if ($request->ajax()) {
-            return ['redirect' => url('admin/projects/'. $request['project_id'] .'/show'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
-        }
+         if ($sanitized['stage_id'] == 2) {
+             $nombre = Auth::user()->name;
+             $subject = 'El proyecto xxxx fue preseleccionado';
+             $message = 'Prueba de correo';
 
-        return redirect('admin/project-statuses');
-    }
+             // Store the ProjectStatus
+             $projectStatus = ProjectStatus::create($sanitized);
+
+
+             try {
+                 Mail::send('admin.project-status.email', ['nombre' => $nombre], function ($message) use ($email, $subject) {
+                     $message->to($email);
+                     $message->subject($subject);
+                     $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
+                 });
+
+                 return response()->json([
+                    'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+                ]);
+             } catch (Exception $e) {
+                 // Manejo de errores
+             }
+         }else{
+            // Store the ProjectStatus
+            $projectStatus = ProjectStatus::create($sanitized);
+
+            return response()->json([
+                'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+            ]);
+
+         }
+
+         return response()->json([
+            'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+        ]);
+     }
+
 
     /**
      * Display the specified resource.
