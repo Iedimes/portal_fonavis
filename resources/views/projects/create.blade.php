@@ -37,7 +37,7 @@
           <div class="row">
             <div class="col-md-4">
                 <div class="form-group {{ $errors->has('leader_name') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Nombre del Lider del Grupo</label>
+                    <label for="exampleInputPassword1">Nombre del Representante del Grupo</label>
                     <input required type="text" class="form-control" name="leader_name" value="{{ old('leader_name',isset($project['leader_name'])?$project['leader_name']:'') }}" placeholder="Ingrese Nombre del Lider del Grupo">
                     {!! $errors->first('leader_name','<span class="help-block">:message</span>') !!}
                 </div>
@@ -47,6 +47,42 @@
                     <label for="exampleInputPassword1">Telefono</label>
                     <input required type="number" class="form-control" name="phone" value="{{ old('phone',isset($project['phone'])?$project['phone']:'') }}" placeholder="Ingrese Telefono de Contacto">
                     {!! $errors->first('phone','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
+              <div class="col-md-4">
+                <div class="form-group {{ $errors->has('res_nro') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Resolución</label>
+                    <input required type="number" class="form-control" name="res_nro" value="{{ old('res_nro',isset($project['res_nro'])?$project['res_nro']:'') }}" placeholder="Ingrese Nro de Resolucion">
+                    {!! $errors->first('res_nro','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
+
+                  <div class="col-md-4">
+                <!-- Nueva columna para fecha de resolucion -->
+                <div class="form-group {{ $errors->has('fechares') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Fecha de Resolución</label>
+                    <input required type="text" class="form-control" name="fechares" value="{{ old('fechares',isset($project['fechares'])?$project['fechares']:'') }}" placeholder="Ingrese fecha de resolución">
+                    {!! $errors->first('fechares','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
+             <div class="col-md-4">
+                <!-- Nueva columna para coordenadax -->
+                <div class="form-group {{ $errors->has('coordenadax') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Coordenada X</label>
+                    <input required type="text" class="form-control" name="coordenadax" value="{{ old('coordenadax',isset($project['coordenadax'])?$project['coordenadax']:'') }}" placeholder="Ingrese la coordenada X">
+                    {!! $errors->first('coordenadax','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Nueva columna para coordenada Y -->
+                <div class="form-group {{ $errors->has('coordenaday') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Coordenada Y</label>
+                    <input required type="text" class="form-control" name="coordenaday" value="{{ old('coordenaday',isset($project['coordenaday'])?$project['coordenaday']:'') }}" placeholder="Ingrese la Coordenada Y">
+                    {!! $errors->first('coordenaday','<span class="help-block">:message</span>') !!}
                 </div>
             </div>
             {{--<div class="col-md-4">
@@ -107,34 +143,50 @@
               </div>
           </div>
           <div class="row">
-              <div class="col-md-4">
-                <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Departamento</label>
-                    <select class="form-control required" name="state_id" required>
-                        <option value="">Selecciona el Departamento</option>
-                            @foreach($departamentos as $key=>$dpto)
-                                <option value="{{$dpto->DptoId}}"
-                                    {{ old('state_id',isset($project['state_id'])?$project['state_id']:'') == $dpto->DptoId ? 'selected' : '' }}
-                                    >{{ utf8_encode($dpto->DptoNom) }}</option>
-                            @endforeach
-                    </select>
-                    {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
-                </div>
+            <div class="col-md-4">
+              <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
+                <label for="exampleInputPassword1">Departamento</label>
+                <select class="form-control required" name="state_id" id="state_id" required>
+                  <option value="">Selecciona el Departamento</option>
+                  @foreach($departamentos as $key=>$dpto)
+                    <option value="{{$dpto->DptoId}}"
+                      {{ old('state_id',isset($project['state_id'])?$project['state_id']:'') == $dpto->DptoId ? 'selected' : '' }}
+                      >{{ utf8_encode($dpto->DptoNom) }}</option>
+                  @endforeach
+                </select>
+                {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
               </div>
-              <div class="col-md-4">
-                <div class="form-group {{ $errors->has('city_id') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Distrito</label>
-                    <input required type="text" class="form-control" name="city_id" value="{{ old('city_id',isset($project['city_id'])?utf8_encode($project['city_id']):'') }}" placeholder="Ingrese Distrito">
-                    {!! $errors->first('city_id','<span class="help-block">:message</span>') !!}
-                </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group {{ $errors->has('city_id') ? 'has-error' : '' }}">
+                <label for="exampleInputPassword1">Distrito</label>
+                <select class="form-control required" name="city_id" id="city_id" required>
+                  <option value="">Selecciona el Distrito</option>
+                  @foreach($localidad as $key=>$loc)
+                    <option value="{{$loc->CiuId}}"
+                      {{ old('state_id',isset($project['city_id'])?$project['city_id']:'') == $loc->CiuId ? 'selected' : '' }}
+                      >{{ utf8_encode($loc->CiuNom) }}</option>
+                  @endforeach
+                </select>
+                {!! $errors->first('city_id','<span class="help-block">:message</span>') !!}
               </div>
+            </div>
+
               <div class="col-md-4">
                 <div class="form-group {{ $errors->has('localidad') ? 'has-error' : '' }}">
-                    <label>Localidad</label>
+                    <label>Localidad/Barrio</label>
                     <input type="text" required class="form-control" name="localidad" value="{{ old('localidad',isset($project['localidad'])?utf8_encode($project['localidad']):'') }}"  placeholder="Ingrese Localidad">
                     {!! $errors->first('localidad','<span class="help-block">:message</span>') !!}
                 </div>
               </div>
+
+              <div class="col-md-4">
+                <!-- Nueva columna para coordenada Y -->
+                <div class="form-group {{ $errors->has('finca_nro') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Finca Nro</label>
+                    <input required type="text" class="form-control" name="finca_nro" value="{{ old('finca_nro',isset($project['finca_nro'])?$project['finca_nro']:'') }}" placeholder="Ingrese Nro de Finca">
+                    {!! $errors->first('finca_nro','<span class="help-block">:message</span>') !!}
+                </div>  </div>
           </div>
           <button type="submit" class="btn btn-primary pull-right">Guardar</button>
       </div>
@@ -144,62 +196,77 @@
 @stop
 @section('js')
 
-    <script type="text/javascript">
-
-            $('select[name="modalidad_id"]').on('change', function() {
-                var stateID = $(this).val();
-                if(stateID) {
-                    $.ajax({
-                        url: '{{URL::to('/projects')}}/ajax/'+stateID+"/lands",
-                        type: "GET",
-                        dataType: "json",
-                        success:function(data) {
-
-                            $('select[name="land_id"]').empty();
-                            $('select[name="land_id"]').append('<option value="">Selecciona el Tipo de Terreno</option>');
-
-                            $.each(data, function(key, value) {
-                                $('select[name="land_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                            });
-
-                        }
-                    });
-                }else{
-                    $('select[name="land_id"]').empty();
-                }
+<script type="text/javascript">
+    $('select[name="modalidad_id"]').on('change', function() {
+      var stateID = $(this).val();
+      if(stateID) {
+        $.ajax({
+          url: '{{URL::to('/projects')}}/ajax/'+stateID+"/lands",
+          type: "GET",
+          dataType: "json",
+          success:function(data) {
+            $('select[name="land_id"]').empty();
+            $('select[name="land_id"]').append('<option value="">Selecciona el Tipo de Terreno</option>');
+            $.each(data, function(key, value) {
+              $('select[name="land_id"]').append('<option value="'+ key +'">'+ value +'</option>');
             });
+          }
+        });
+      } else {
+        $('select[name="land_id"]').empty();
+      }
+    });
 
-            $('select[name="land_id"]').on('change', function() {
-                var stateID = $(this).val();
-                if(stateID) {
-                    $.ajax({
-                        url: '{{URL::to('/projects')}}/ajax/'+stateID+"/typology",
-                        type: "GET",
-                        dataType: "json",
-                        success:function(data) {
-
-                            $('select[name="typology_id"]').empty();
-                            $('select[name="typology_id"]').append('<option value="">Selecciona la Tipologia</option>');
-
-                            $.each(data, function(key, value) {
-                                $('select[name="typology_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                            });
-
-                        }
-                    });
-                }else{
-                    $('select[name="typology_id"]').empty();
-                }
+    $('select[name="land_id"]').on('change', function() {
+      var stateID = $(this).val();
+      if(stateID) {
+        $.ajax({
+          url: '{{URL::to('/projects')}}/ajax/'+stateID+"/typology",
+          type: "GET",
+          dataType: "json",
+          success:function(data) {
+            $('select[name="typology_id"]').empty();
+            $('select[name="typology_id"]').append('<option value="">Selecciona la Tipologia</option>');
+            $.each(data, function(key, value) {
+              $('select[name="typology_id"]').append('<option value="'+ key +'">'+ value +'</option>');
             });
+          }
+        });
+      } else {
+        $('select[name="typology_id"]').empty();
+      }
+    });
 
-            function encode_utf8( s )
-            {
-            return unescape( encodeURIComponent( s ) );
-            }
+    $('#state_id').on('change', function() {
+      var state_id = $(this).val();
+      if (state_id) {
+        $.ajax({
+          url: '/projects/ajax/' + state_id + '/local',
+          type: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            $('select[name="city_id"]').empty();
+            $('select[name="city_id"]').append('<option value="">Selecciona el Distrito</option>');
 
-            function decode_utf8( s )
-            {
-            return decodeURIComponent( escape( s ) );
-            }
-    </script>
+            $.each(data, function(key, value) {
+            $('select[name="city_id"]').append('<option value="' + value + '">' + value + '</option>');
+            });
+          }
+        });
+      } else {
+        $('select[name="city_id"]').empty();
+      }
+    });
+
+    function encode_utf8( s )
+    {
+      return unescape( encodeURIComponent( s ) );
+    }
+
+    function decode_utf8( s )
+    {
+      return decodeURIComponent( escape( s ) );
+    }
+  </script>
+
 @stop

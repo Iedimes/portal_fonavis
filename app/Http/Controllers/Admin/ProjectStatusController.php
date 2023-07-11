@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\ProjectStatus\IndexProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\UpdateProjectStatus;
 use App\Models\ProjectStatus;
+use App\Models\Project;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -82,18 +83,20 @@ class ProjectStatusController extends Controller
          $sanitized = $request->getSanitized();
          $sanitized['stage_id'] = $request->getStageId();
          $email = $request->email;
+         $projecto = Project::where('id', $request->project_id)->get();
+         //return $projecto[0]->name;
 
          if ($sanitized['stage_id'] == 2) {
-             $nombre = Auth::user()->name;
-             $subject = 'El proyecto xxxx fue preseleccionado';
-             $message = 'Prueba de correo';
+             $nombre = Auth::user()->full_name;
+             $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO';
+             $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
 
              // Store the ProjectStatus
              $projectStatus = ProjectStatus::create($sanitized);
 
 
              try {
-                 Mail::send('admin.project-status.email', ['nombre' => $nombre], function ($message) use ($email, $subject) {
+                 Mail::send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
                      $message->to($email);
                      $message->subject($subject);
                      $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');

@@ -4,7 +4,7 @@
     <title>Correo Pre seleccionado</title>
 </head>
 <body>
-    <h1>Hola, {{ $nombre }}!</h1>
-    <p>Acá va a ir el texto con los datos del proyecto.</p>
+    <h1>{{ $nombre }}</h1>
+    <p>{{$texto}}.</p>
 </body>
 </html>
