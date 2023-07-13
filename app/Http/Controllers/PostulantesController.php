@@ -167,7 +167,13 @@ class PostulantesController extends Controller
     }
 
 
-    public function createmiembro(Request $request, $id){
+    public function createmiembro(Request $request, $id, $x){
+
+        //return $request;
+        //return $id;
+        //return $x;
+
+        //return "Crear Miembro";
 
         if ($request->input('cedula')) {
             $expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
@@ -188,30 +194,30 @@ class PostulantesController extends Controller
 
             if($existe->count() >= 1){
                 //Session::flash('error', 'Ya existe el postulante!');
-                return redirect()->back()->with('error', 'Ya existe el postulante!');
+                return redirect()->back()->with('status', 'Ya existe el postulante!');
             }
 
             if ($expedientes->count() >= 1) {
-                return redirect()->back()->with('error', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
+                return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
             }else{
                 $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
                 ->where('SolEtapa','B')
                 ->first();
                 if ($todos) {
-                    return redirect()->back()->with('error', 'Ya es Beneficiario Final!');
+                    return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
                 }
             }
 
             if ($certificados->count() >= 1) {
-                return redirect()->back()->with('error', 'Ya cuenta con certificado de Subsidio como Titular!');
+                return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
             }
 
             if ($certificadosconyuge->count() >= 1) {
-                return redirect()->back()->with('error', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
             }
 
             if ($cartera->count() >= 1) {
-                return redirect()->back()->with('error', 'Ya cuenta con Beneficios en la Institución!');
+                return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
             }
 
             if ($solicitantes) {
@@ -220,7 +226,7 @@ class PostulantesController extends Controller
                 ->where('PylCod','!=' ,'P.F.')
                 ->get();
                 if ($carterasol->count() >= 1) {
-                    return redirect()->back()->with('error', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
                 }
 
             }
@@ -259,7 +265,8 @@ class PostulantesController extends Controller
                 if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
                     //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
                     //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
-                    return redirect()->back()->with('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    //return redirect()->back()->with('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
                 }else{
                     $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
                     $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
@@ -274,7 +281,7 @@ class PostulantesController extends Controller
                     $project_id = Project::find($id);
                     $parentesco = Parentesco::all();
                     $discapacdad = Discapacidad::all();
-                    $idpostulante = $request->postulante_id;
+                    $idpostulante = $x;
                         //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
                     return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
                     'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
@@ -344,7 +351,8 @@ class PostulantesController extends Controller
 
         //return $request->all();
         //Postulante ::create($request->all());
-        return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha agregado un nuevo Miembro!');
+        //return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha agregado un nuevo Miembro!');
+        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha agregado un nuevo Miembro!');
         //return $request;
     }
 
@@ -498,14 +506,16 @@ class PostulantesController extends Controller
 
 
         if ($postulante->getMembers->count() > 0) {
-            return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+            // return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+            return back()->with('status', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
         }else{
 
         ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
         PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
         Postulante::find($request->delete_id)->delete();
 
-        return back()->with('error', 'Se ha eliminado el Postulante!');
+        // return back()->with('error', 'Se ha eliminado el Postulante!');
+        return back()->with('status', 'Se ha eliminado el Postulante!');
         }
 
     }

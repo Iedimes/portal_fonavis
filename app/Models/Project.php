@@ -32,10 +32,11 @@ class Project extends Model
     protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
     'typology_id','expsocial','exptecnico','action','households','certificate_pin','res_nro','finca_nro','fechares','coordenadax','coordenaday'];
 
-    //protected $with = ['getTypology'];
+    protected $with = ['getState', 'getModality'];
 
     public function getSat() {
         return $this->hasOne('App\Models\Sat','NucCod','sat_id');
+        //return $this->hasOne(Sat::class, 'NucCod', 'sat_id');
     }
 
     public function getLand() {

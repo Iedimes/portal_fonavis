@@ -22,8 +22,9 @@ use App\Models\ProjectStatus;
 use App\Models\User;
 use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
 use App\Http\Requests\StoreProject;
+use Illuminate\Support\Facades\Mail;
+//use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
@@ -324,17 +325,54 @@ class ProjectController extends Controller
         //
     }
 
-    public function send(Request $request,$id)
-    {
-        //return $id;
+    // public function send(Request $request,$id)
+    // {
+    //     //return $id;
+    //     //return "Enviar Correo a DG FONAVIS";
 
+    //     try {
+    //         $state = new ProjectStatus();
+    //         $state->project_id=$id;
+    //         $state->stage_id='1';
+    //         $state->user_id=Auth::user()->id;
+    //         $state->record='Proyecto Enviado!';
+    //         $state->save();
+
+    //         return [
+    //             'message' => 'success'
+    //         ];
+    //     } catch (\Throwable $th) {
+    //         return [
+    //             'message' => 'error '.$th
+    //         ];
+    //     }
+
+
+    //     //return redirect('projects/'.$request->send_id.'/postulantes')->with('success', 'El proyecto se ha enviado a MUVH correctamente!');*/
+    // }
+
+    public function send(Request $request, $id)
+    {
         try {
             $state = new ProjectStatus();
-            $state->project_id=$id;
-            $state->stage_id='1';
-            $state->user_id=Auth::user()->id;
-            $state->record='Proyecto Enviado!';
+            $state->project_id = $id;
+            $state->stage_id = '1';
+            $state->user_id = Auth::user()->id;
+            $state->record = 'Proyecto Enviado!';
             $state->save();
+
+            // Enviar correo electrónico
+            $project = Project::find($id);
+            $nombre = $project->name;
+            $email = 'osemidei@muvh.gov.py';
+            $subject = 'Nuevo proyecto enviado a MUVH';
+            $texto = 'Se ha enviado un nuevo proyecto a MUVH.';
+
+            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
+                $message->to($email);
+                $message->subject($subject);
+                $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
+            });
 
             return [
                 'message' => 'success'
@@ -344,9 +382,6 @@ class ProjectController extends Controller
                 'message' => 'error '.$th
             ];
         }
-
-
-        //return redirect('projects/'.$request->send_id.'/postulantes')->with('success', 'El proyecto se ha enviado a MUVH correctamente!');*/
     }
 
     public function destroyfile(Request $request)

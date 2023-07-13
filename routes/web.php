@@ -258,8 +258,10 @@ Route::get('projects/ajax/{state_id?}/local',[App\Http\Controllers\ProjectContro
 //Postulantes
 Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class,'index']);
 Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class,'create']);
+Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class,'createmiembro']);
 Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class,'destroy']);
 Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
+Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, 'storemiembro']);
 Route::get('imprimir/{id}','App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
 
 

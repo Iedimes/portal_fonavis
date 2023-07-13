@@ -4,18 +4,19 @@
 
 @section('content_header')
 <h1>{{ $title }}</h1>
-<ol class="breadcrumb">
+{{-- <ol class="breadcrumb">
 <li><a href="{{url('projects')}}"><i class="fa fa-home"></i>Inicio</a></li>
 <li><a href="{{url('projects/'.$project_id->id.'/postulantes')}}">Postulantes del Proyecto {{ $project_id->name }}</a></li>
  <li><a href="{{url('projects/'.$project_id->id.'/postulantes/'.$idpostulante)}}">Postulante </a></li>
 <li class="active"><a href="#">Agregar Miembro</a></li>
-</ol>
+</ol> --}}
 @stop
 
 @section('content')
 
 <div class="box box-primary">
-    <form role="form" action="{{isset($postulante['id'])?action('PostulantesController@updatemiembro',['id' => $postulante['id']]):action('PostulantesController@storemiembro') }}" method="post">
+    {{-- <form role="form" action="{{isset($postulante['id'])?action('PostulantesController@updatemiembro',['id' => $postulante['id']]):action('PostulantesController@storemiembro') }}" method="post"> --}}
+        <form role="form" action="{{url('savemiembro') }}" method="post">
             @csrf
             @if(isset($project['id']))
                 {!! method_field('post') !!}

@@ -86,9 +86,9 @@
                                         <td>@{{ item.name }}</td>
                                         <td>@{{ item.phone }}</td>
                                         <td>@{{ item.sat_id }}</td>
-                                        <td>@{{ item.state_id }}</td>
+                                        <td>@{{ item.get_state.DptoNom }}</td>
                                         <td>@{{ item.city_id }}</td>
-                                        <td>@{{ item.modalidad_id }}</td>
+                                        <td>@{{ item.get_modality.name }}</td>
                                         <td>@{{ item.leader_name }}</td>
                                         <td>@{{ item.localidad }}</td>
 

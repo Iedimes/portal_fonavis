@@ -65,11 +65,17 @@
         <i class="fa fa-file-excel-o"></i> Imprimir Listado
         </button></a>
   @endif
-  @if (session('status'))
+  {{-- @if (session('status'))
     <div class="alert alert-warning">
         {{ session('status') }}
     </div>
-  @endif
+  @endif --}}
+  @if (session('status'))
+    <div class="alert alert-warning" id="status-message" style="display: block;">
+        {{ session('status') }}
+    </div>
+@endif
+
   <br>
   @if (count($postulantes) > 0 )
   <div class="row">
@@ -116,7 +122,9 @@
                               {{--<li><a href="{!! url('PostulantesController@show', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Ver</a></li>--}}
                               @if (!isset($project->getEstado->stage_id))
                             <!--  <li><a href="{!! url('PostulantesController@edit', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Editar</a></li> -->
+                            <a class="dropdown-item feed-id"data-toggle="modal" data-target="#modal-default1" href="#">Agregar Miembro</a>
                             <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
+                            {{-- <li><a href="{{ url('PostulantesController@createmiembro', ['id' => $project->id, 'idpostulantes' => $post->getPostulante->id]) }}">Agregar Miembro</a></li> --}}
                               @endif
                             </div>
                     </div>
@@ -150,6 +158,33 @@
         </div>
         <div class="modal-body">
             <form action="{{ url('projects/'.$project->id.'/postulantes/create') }}" method="POST">
+                {{ csrf_field() }}
+                <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
+                    <input type="text" class="form-control" name="cedula"  value="">
+                    {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+            </form>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+
+  <div class="modal fade" id="modal-default1" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Ingrese Número de Cédula Miembro</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span></button>
+        </div>
+        <div class="modal-body">
+            <form action="{{ url('projects/'.$project->id.'/postulantes/198217/createmiembro') }}" method="POST">
                 {{ csrf_field() }}
                 <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
                     <input type="text" class="form-control" name="cedula"  value="">
@@ -214,6 +249,9 @@
         console.log($(this).attr('data-id'));
         console.log($(this).attr('data-title'));
         });
+        setTimeout(function() {
+        $('#status-message').attr('style', 'display:none');
+    }, 30000); // 30 segundos
 
     });
     </script>
