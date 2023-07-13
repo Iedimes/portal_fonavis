@@ -249,7 +249,7 @@
             $('select[name="city_id"]').append('<option value="">Selecciona el Distrito</option>');
 
             $.each(data, function(key, value) {
-            $('select[name="city_id"]').append('<option value="' + value + '">' + value + '</option>');
+            $('select[name="city_id"]').append('<option value="' + key + '">' + value + '</option>');
             });
           }
         });

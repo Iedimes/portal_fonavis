@@ -226,23 +226,18 @@ class ProjectController extends Controller
      */
     public function edit($id)
     {
+
         $title="Editar Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
         $dep = [2, 4, 5, 8, 10, 16, 22];
-        // $loc = [49, 123, 145, 179, 230];
-        // $departamentos = Departamento::where('DptoId','<',18)
-        //                 ->orderBy('DptoNom', 'asc')->get();
-        //return "Probando";
-        $departamentos = Departamento::whereIn('DptoId', $dep)
-                         ->orderBy('DptoNom', 'asc')
-                         ->get();
-        // $loc = [49, 123, 145, 179, 230];
-        // $localidad = Distrito::whereIn('CiuId', $loc)
-        //                                 ->orderBy('CiuNom', 'asc')->get();
+        $loc = [0, 900];
+        $departamentos = Departamento::where('DptoId','<',18)
+                         ->orderBy('DptoNom', 'asc')->get();
 
-        // $departamentos = Departamento::where('DptoId','<',18)
-        //                 ->orderBy('DptoNom', 'asc')->get();
+        $localidad = Distrito::whereNotIn('CiuId', $loc)
+                    ->orderBy('CiuNom', 'asc')->get();
+
         $project=Project::find($id);
         //$cities = $this->distrito($project->state_id);
         //$cities = json_decode($cities, true);
@@ -259,7 +254,7 @@ class ProjectController extends Controller
 
         $id = Auth::user()->id;
         $user = User::find($id);
-        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user'));
+        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user', 'localidad'));
     }
 
     /**
@@ -284,6 +279,12 @@ class ProjectController extends Controller
         $project->leader_name = $request->input("leader_name");
         $project->localidad = $request->input("localidad");
         $project->typology_id = $request->input("typology_id");
+        $project->res_nro = $request->input("res_nro");
+        $project->fechares = $request->input("fechares");
+        $project->coordenadax = $request->input("coordenadax");
+        $project->coordenaday = $request->input("coordenaday");
+        $project->finca_nro = $request->input("finca_nro");
+
         $project->save();
 
         return redirect('projects')->with('success', 'El proyecto fue actualizado!');

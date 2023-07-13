@@ -32,7 +32,8 @@ class Project extends Model
     protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
     'typology_id','expsocial','exptecnico','action','households','certificate_pin','res_nro','finca_nro','fechares','coordenadax','coordenaday'];
 
-    protected $with = ['getState', 'getModality'];
+    //protected $with = ['getState', 'getModality', 'getCity', 'getSat'];
+    protected $with = ['getState', 'getModality', 'getCity'];
 
     public function getSat() {
         return $this->hasOne('App\Models\Sat','NucCod','sat_id');
@@ -66,6 +67,17 @@ class Project extends Model
 
     public function getEstado() {
         return $this->hasOne('App\Models\ProjectStatus', 'project_id', 'id')->latest();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::retrieved(function ($model) {
+            if ($model->getSat) {
+                $model->getSat->NucCod = trim($model->getSat->NucCod);
+            }
+        });
     }
 
     protected $appends = ['resource_url'];

@@ -53,6 +53,7 @@
                                         <th is='sortable' :column="'name'">{{ trans('admin.project.columns.name') }}</th>
                                         <th is='sortable' :column="'phone'">{{ trans('admin.project.columns.phone') }}</th>
                                         <th is='sortable' :column="'sat_id'">{{ trans('admin.project.columns.sat_id') }}</th>
+                                        <th is='sortable' :column="'sat_nombre'">{{ trans('admin.project.columns.sat_nombre') }}</th>
                                         <th is='sortable' :column="'state_id'">{{ trans('admin.project.columns.state_id') }}</th>
                                         <th is='sortable' :column="'city_id'">{{ trans('admin.project.columns.city_id') }}</th>
                                         <th is='sortable' :column="'modalidad_id'">{{ trans('admin.project.columns.modalidad_id') }}</th>
@@ -86,8 +87,9 @@
                                         <td>@{{ item.name }}</td>
                                         <td>@{{ item.phone }}</td>
                                         <td>@{{ item.sat_id }}</td>
+                                        <td>@{{ item.get_sat.NucNomSat }}</td>
                                         <td>@{{ item.get_state.DptoNom }}</td>
-                                        <td>@{{ item.city_id }}</td>
+                                        <td>@{{ item.get_city.CiuNom }}</td>
                                         <td>@{{ item.get_modality.name }}</td>
                                         <td>@{{ item.leader_name }}</td>
                                         <td>@{{ item.localidad }}</td>

@@ -13,6 +13,8 @@ use App\Models\Land_project;
 use App\Models\Assignment;
 use App\Models\Stage;
 use App\Models\ProjectStatus;
+use App\Models\Sat;
+use App\Models\Departamento;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -37,6 +39,7 @@ class ProjectsController extends Controller
     public function index(IndexProject $request)
     {
         // create and AdminListing instance for a specific model and
+
         $data = AdminListing::create(Project::class)->processRequestAndGet(
             // pass the request with params
             $request,
@@ -45,8 +48,11 @@ class ProjectsController extends Controller
             ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
 
             // set columns to searchIn
-            ['id', 'name', 'phone', 'sat_id', 'city_id', 'leader_name', 'localidad', 'action', 'expsocial', 'exptecnico']
+            ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
+
         );
+
+        //return $data;
 
         if ($request->ajax()) {
             if ($request->has('bulk')) {
@@ -59,6 +65,11 @@ class ProjectsController extends Controller
 
         return view('admin.project.index', ['data' => $data]);
     }
+
+
+
+
+
 
     /**
      * Show the form for creating a new resource.

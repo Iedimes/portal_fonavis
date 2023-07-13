@@ -42,7 +42,7 @@
     <div class="col-sm-4 invoice-col">
     <address>
     <strong>Telefono:</strong> {{$project->phone}}<br>
-    <strong>Distrito:</strong> {{$project->city_id}}<br>
+    <strong>Distrito:</strong> {{ $project->city_id ? strtoupper($project->getCity->CiuNom) : "" }}<br>
     <strong>Tipo de Terreno:</strong> {{$project->land_id?$project->getLand->name:""}}<br>
     <strong>Cantidad de Viviendas:</strong> {{$postulantes->count()}}<br>
     </address>
