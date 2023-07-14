@@ -82,7 +82,7 @@ class ProjectController extends Controller
         // $localidad = Distrito::all();
 
         $localidad = Distrito::whereNotIn('CiuId', $loc)
-                     ->orderBy('CiuNom', 'asc')->get();;
+                     ->orderBy('CiuNom', 'asc')->get();
 
         $tipologias = Typology::all();
         $id = Auth::user()->id;

@@ -67,8 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
-
+    'timezone' => 'America/Asuncion',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

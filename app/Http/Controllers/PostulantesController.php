@@ -279,7 +279,10 @@ class PostulantesController extends Controller
                     $nroexp = $cedula;
                     $title="Agregar Miembro Familiar";
                     $project_id = Project::find($id);
-                    $parentesco = Parentesco::all();
+                    $par = [1, 8];
+                    $parentesco = Parentesco::whereIn('id', $par)
+                     ->orderBy('name', 'asc')->get();
+                    //$parentesco = Parentesco::all();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
                         //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
