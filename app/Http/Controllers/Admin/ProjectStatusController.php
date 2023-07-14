@@ -78,51 +78,51 @@ class ProjectStatusController extends Controller
      * @return array|RedirectResponse|Redirector
      */
 
-     public function store(StoreProjectStatus $request)
-     {
-         $sanitized = $request->getSanitized();
-         $sanitized['stage_id'] = $request->getStageId();
-         $email = $request->email;
-         $projecto = Project::where('id', $request->project_id)->get();
-         //return $projecto[0]->name;
+  public function store(StoreProjectStatus $request)
+{
+    $sanitized = $request->getSanitized();
+    $sanitized['stage_id'] = $request->getStageId();
+    $email = $request->email;
+    $projecto = Project::where('id', $request->project_id)->get();
+    //return $projecto[0]->name;
 
-         if ($sanitized['stage_id'] == 2) {
-             $nombre = Auth::user()->full_name;
-             $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO';
-             $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
+    if ($sanitized['stage_id'] == 2) {
+        $nombre = Auth::user()->full_name;
+        $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO';
+        $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
 
-             // Store the ProjectStatus
-             $projectStatus = ProjectStatus::create($sanitized);
+        // Store the ProjectStatus
+        $projectStatus = ProjectStatus::create($sanitized);
 
-
-             try {
-                 Mail::send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
-                     $message->to($email);
-                     $message->subject($subject);
-                     $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
-                 });
-
-                 return response()->json([
-                    'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
-                ]);
-             } catch (Exception $e) {
-                 // Manejo de errores
-             }
-         }else{
-            // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
+        try {
+            Mail::send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
+                $message->to($email);
+                $message->subject($subject);
+                $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
+            });
 
             return response()->json([
                 'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
             ]);
+        } catch (Exception $e) {
+            // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
+            return response()->json([
+                'error' => 'No se pudo enviar el correo electrónico'
+            ]);
+        }
+    } else {
+        // Store the ProjectStatus
+        $projectStatus = ProjectStatus::create($sanitized);
 
-         }
-
-         return response()->json([
+        return response()->json([
             'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
         ]);
-     }
+    }
 
+    return response()->json([
+        'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+    ]);
+}
 
     /**
      * Display the specified resource.
