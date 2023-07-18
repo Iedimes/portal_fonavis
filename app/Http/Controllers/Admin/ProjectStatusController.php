@@ -10,6 +10,8 @@ use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\UpdateProjectStatus;
 use App\Models\ProjectStatus;
 use App\Models\Project;
+use App\Models\User;
+use App\Models\Sat;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -82,13 +84,17 @@ class ProjectStatusController extends Controller
 {
     $sanitized = $request->getSanitized();
     $sanitized['stage_id'] = $request->getStageId();
-    $email = $request->email;
+    // return $email= Auth::user()->email;
     $projecto = Project::where('id', $request->project_id)->get();
+    $sat=$projecto[0]->sat_id;
+    $useremail=User::where('sat_ruc', $sat)->get()->first();
+    $satnombre=Sat::where('NucCod', $sat)->get()->first();
+    $email=$useremail['email'];
     //return $projecto[0]->name;
 
     if ($sanitized['stage_id'] == 2) {
-        $nombre = Auth::user()->full_name;
-        $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO';
+        $nombre=$satnombre->NucNomSat;
+        $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO - CORREO DE PRUEBA';
         $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
 
         // Store the ProjectStatus
