@@ -342,6 +342,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'ProjectStatusController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{projectStatus}',                             'ProjectStatusController@update')->name('update');
             Route::delete('/{projectStatus}',                           'ProjectStatusController@destroy')->name('destroy');
+            Route::get('/{projectStatus}/eliminar',                  'ProjectStatusController@eliminar')->name('eliminar');
         });
     });
 });

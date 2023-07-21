@@ -144,6 +144,13 @@ class ProjectStatusController extends Controller
         // TODO your code goes here
     }
 
+
+    public function eliminar($projectStatus)
+{
+    ProjectStatus::where('project_id', $projectStatus)->delete();
+
+    return redirect()->back()->with('success', 'El proyecto ha vuelto al estado Pendiente');
+}
     /**
      * Show the form for editing the specified resource.
      *

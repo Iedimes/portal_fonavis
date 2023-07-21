@@ -38,7 +38,18 @@
 
             </div>
             <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
+            <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a>
     </div>
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    <script>
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 10000);
+    </script>
+@endif
 
 </div>
 
