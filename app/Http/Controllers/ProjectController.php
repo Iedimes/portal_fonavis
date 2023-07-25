@@ -8,6 +8,7 @@ use App\Models\Land;
 use App\Models\Project;
 use App\Models\Departamento;
 use App\Models\Distrito;
+use App\Models\Sat;
 use App\Models\Modality;
 use App\Models\Document;
 use App\Models\DocumentCheck;
@@ -338,15 +339,26 @@ class ProjectController extends Controller
 
         // Enviar correo electrónico
         $project = Project::find($id);
+        $sat_id= $project->sat_id;
+        $sat_nombre = Sat::where('NucCod', $sat_id)->first();
+        $nombre_sat = $sat_nombre->NucNomSat;
         $nombre = $project->name;
-        $email = 'osemidei@muvh.gov.py';
-        $subject = 'Nuevo proyecto enviado a MUVH';
-        $texto = 'Se ha enviado un nuevo proyecto a MUVH.';
+        $lider = $project->leader_name;
+        $modalidad = Modality::where('id', $project->modalidad_id)->first();
+        $modalidad_nombre = $modalidad->name;
+        $tipo_terreno = Land::where('id',$project->land_id)->first();
+        $terreno = $tipo_terreno->name;
+        $departamento = Departamento::where('DptoId', $project->state_id)->first();
+        $dto = $departamento->DptoNom;
+        $ciudad = Distrito::where('CiuId', $project->city_id)->first();
+        $destrito = $ciudad->CiuNom;
+        $email = 'proyectos_ingresados@muvh.gov.py';
+        $subject = 'PROYECTO INGRESADO';
 
-        Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
+        Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno,'departamento' => $dto ,'project', 'distrito' => $destrito], function ($message) use ($email, $subject) {
             $message->to($email);
             $message->subject($subject);
-            $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
+            $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
         });
 
         return [

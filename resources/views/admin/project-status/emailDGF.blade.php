@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Correo Pryecto enviado a FONAVIS</title>
+    <title>Correo Proyecto enviado a FONAVIS</title>
 </head>
 <body>
-    <h1>{{ $nombre }}</h1>
-    <p>{{$texto}}.</p>
+    <p><strong>SAT:</strong> {{$sat}}</p>
+    <p><strong>DETALLE DEL PROYECTO:</strong></p>
+    <p><strong>NOMBRE DEL PROYECTO:</strong> {{ $nombre }}</p>
+    <p><strong>NOMBRE DEL REPRESENTANTE DEL GRUPO:</strong> {{ $lider }}</p>
+    <p><strong>MODALIDAD:</strong> {{ $modalidad }}</p>
+    <p><strong>TIPO TERRENO:</strong> {{ $terreno }} </p>
+    <p><strong>DEPARTAMENTO:</strong> {{ $departamento }}</p>
+    <p><strong>DISTRITO:</strong> {{ $distrito }}</p>
 </body>
 </html>
