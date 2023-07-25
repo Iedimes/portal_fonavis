@@ -37,8 +37,13 @@
             </div>
 
             </div>
+
+            @if (empty($project->getEstado))
+
+            @else
             <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-            <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a>
+             <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a>
+            @endif
     </div>
     @if(session('success'))
     <div class="alert alert-success">
