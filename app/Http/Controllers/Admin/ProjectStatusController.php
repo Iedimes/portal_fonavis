@@ -104,7 +104,7 @@ class ProjectStatusController extends Controller
             Mail::send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
                 $message->to($email);
                 $message->subject($subject);
-                $message->from('recuperacion@muvh.gov.py', 'DGTIC - MUVH');
+                $message->from('preseleccion_fonavis@muvh.gov.py', 'DG FONAVIS - MUVH');
             });
 
             return response()->json([
