@@ -25,7 +25,7 @@
             <div class="col-md-4">
               <p>
                 <strong>Departamento: </strong>{{$project->state_id?$project->getState->DptoNom:""}}<br>
-                <strong>Distrito:</strong> {{$project->city_id}}<br>
+                <strong>Distrito:</strong> {{$project->getcity->CiuNom}}<br>
                 <strong>Modalidad:</strong> {{$project->modalidad_id?$project->getModality->name:""}}<br>
                 <a href="{{ url('projects/'.$project->id) }}">
                     <button type="button" class="btn btn-info">
