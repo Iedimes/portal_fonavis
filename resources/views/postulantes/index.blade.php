@@ -121,10 +121,8 @@
                             <div class="dropdown-menu" role="menu">
                               {{--<li><a href="{!! url('PostulantesController@show', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Ver</a></li>--}}
                               @if (!isset($project->getEstado->stage_id))
-                            <!--  <li><a href="{!! url('PostulantesController@edit', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Editar</a></li> -->
-                            <a class="dropdown-item feed-id"data-toggle="modal" data-target="#modal-default1" href="#">Agregar Miembro</a>
-                            <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
-                            {{-- <li><a href="{{ url('PostulantesController@createmiembro', ['id' => $project->id, 'idpostulantes' => $post->getPostulante->id]) }}">Agregar Miembro</a></li> --}}
+                               <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Miembro</a>
+                               <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
                               @endif
                             </div>
                     </div>
@@ -177,30 +175,29 @@
 
   <div class="modal fade" id="modal-default1" style="display: none;">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Ingrese Número de Cédula Miembro</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">×</span></button>
-        </div>
-        <div class="modal-body">
-            <form action="{{ url('projects/'.$project->id.'/postulantes/198217/createmiembro') }}" method="POST">
-                {{ csrf_field() }}
-                <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
-                    <input type="text" class="form-control" name="cedula"  value="">
-                    {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ingrese Número de Cédula Miembro</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
             </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
-          <button type="submit" class="btn btn-primary">Enviar</button>
-        </div>
+            <div class="modal-body">
+                <form id="miembro-form" action="{{ url('projects/'.$project->id.'/postulantes/'.$post->postulante_id.'/createmiembro') }}" method="POST">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="postulante_id" id="postulante_id" value="{{ $post->postulante_id }}">
+                    <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
+                        <input type="text" class="form-control" name="cedula" value="">
+                        {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
             </form>
-      </div>
-      <!-- /.modal-content -->
+        </div>
     </div>
-    <!-- /.modal-dialog -->
-  </div>
+</div>
 
   <div class="modal modal-danger fade" id="modal-danger">
     <div class="modal-dialog">
@@ -252,7 +249,12 @@
         setTimeout(function() {
         $('#status-message').attr('style', 'display:none');
     }, 30000); // 30 segundos
+    });
 
+    $('.feed-id').click(function() {
+        var postulante_id = $(this).data('postulante-id');
+        $('#postulante_id').val(postulante_id); // Actualiza el valor del campo oculto postulante_id
+        $('#miembro-form').attr('action', '{{ url('projects/'.$project->id.'/postulantes/') }}' + '/' + postulante_id + '/createmiembro');
     });
     </script>
 @endsection
