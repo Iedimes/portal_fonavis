@@ -28,7 +28,7 @@
                     <li class="list-group-item">Cantidad de Viviendas: {{$project->households}}</li>
                     <li class="list-group-item">SAT: {{ utf8_encode($project->sat_id?$project->getSat->NucNomSat:"") }}</li>
                     <li class="list-group-item">Departamento: {{$project->state_id?$project->getState->DptoNom:""}}</li>
-                    <li class="list-group-item">Distrito: {{$project->city_id}}</li>
+                    <li class="list-group-item">Distrito: {{$project->getcity->CiuNom}}</li>
                     <li class="list-group-item">Modalidad: {{$project->modalidad_id?$project->getModality->name:""}}</li>
                     <li class="list-group-item">Tipo de Terreno: {{$project->land_id?$project->getLand->name:""}}</li>
                 </ul>
