@@ -12,6 +12,8 @@ use App\Models\ProjectStatus;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Sat;
+use App\Models\Distrito;
+use App\Models\Departamento;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -90,17 +92,20 @@ class ProjectStatusController extends Controller
          $useremail = User::where('sat_ruc', $sat)->get()->first();
          $satnombre = Sat::where('NucCod', $sat)->get()->first();
          $toEmail = $useremail['email'];
+         $ciudad = Distrito::where('CiuId', $projecto[0]->city_id)->first();
+         $distrito = $ciudad->CiuNom;
+         $departamento = Departamento::where('DptoId', $projecto[0]->state_id)->first();
+         $dto = $departamento->DptoNom;
+
 
          if ($sanitized['stage_id'] == 2) {
-             $nombre = $satnombre->NucNomSat;
-             $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO - CORREO DE PRUEBA';
-             $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
+             $subject = 'PROYECTO ' .$projecto[0]->name. ' PRESELECCIONADO';
 
              // Store the ProjectStatus
              $projectStatus = ProjectStatus::create($sanitized);
 
              try {
-                 Mail::mailer('mail2')->send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($toEmail, $subject) {
+                 Mail::mailer('mail2')->send('admin.project-status.email', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'distrito' => $distrito,'dpto' => $dto], function ($message) use ($toEmail, $subject) {
                      $message->to($toEmail);
                      $message->subject($subject);
                      $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
