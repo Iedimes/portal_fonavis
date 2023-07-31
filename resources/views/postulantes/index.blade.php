@@ -182,9 +182,9 @@
                     <span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-                <form id="miembro-form" action="{{ url('projects/'.$project->id.'/postulantes/'.$post->postulante_id.'/createmiembro') }}" method="POST">
+                <form id="miembro-form" action="{{ isset($post) ? url('projects/'.$project->id.'/postulantes/'.$post->postulante_id.'/createmiembro') : '#' }}" method="POST">
                     {{ csrf_field() }}
-                    <input type="hidden" name="postulante_id" id="postulante_id" value="{{ $post->postulante_id }}">
+                    <input type="hidden" name="postulante_id" id="postulante_id" value="{{ isset($post) ? $post->postulante_id : '' }}">
                     <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
                         <input type="text" class="form-control" name="cedula" value="">
                         {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}

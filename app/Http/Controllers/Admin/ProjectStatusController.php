@@ -80,56 +80,54 @@ class ProjectStatusController extends Controller
      * @return array|RedirectResponse|Redirector
      */
 
-  public function store(StoreProjectStatus $request)
-{
-    $sanitized = $request->getSanitized();
-    $sanitized['stage_id'] = $request->getStageId();
-    // return $email= Auth::user()->email;
-    $projecto = Project::where('id', $request->project_id)->get();
-    $sat=$projecto[0]->sat_id;
-    $useremail=User::where('sat_ruc', $sat)->get()->first();
-    $satnombre=Sat::where('NucCod', $sat)->get()->first();
-    $email=$useremail['email'];
-    //return $projecto[0]->name;
+     public function store(StoreProjectStatus $request)
+     {
+         $sanitized = $request->getSanitized();
+         $sanitized['stage_id'] = $request->getStageId();
 
-    if ($sanitized['stage_id'] == 2) {
-        $nombre=$satnombre->NucNomSat;
-        $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO - CORREO DE PRUEBA';
-        $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
+         $projecto = Project::where('id', $request->project_id)->get();
+         $sat = $projecto[0]->sat_id;
+         $useremail = User::where('sat_ruc', $sat)->get()->first();
+         $satnombre = Sat::where('NucCod', $sat)->get()->first();
+         $toEmail = $useremail['email'];
 
-        // Store the ProjectStatus
-        $projectStatus = ProjectStatus::create($sanitized);
+         if ($sanitized['stage_id'] == 2) {
+             $nombre = $satnombre->NucNomSat;
+             $subject = 'EL PROYECTO ' .$projecto[0]->name. ' FUE PRESELECCIONADO - CORREO DE PRUEBA';
+             $texto = 'El proyecto ' .$projecto[0]->id.'-'.$projecto[0]->name.'';
 
-        try {
-            Mail::send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($email, $subject) {
-                $message->to($email);
-                $message->subject($subject);
-                $message->from('preseleccion_fonavis@muvh.gov.py', 'DG FONAVIS - MUVH');
-            });
+             // Store the ProjectStatus
+             $projectStatus = ProjectStatus::create($sanitized);
 
-            return response()->json([
-                'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
-            ]);
-        } catch (Exception $e) {
-            // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-            return response()->json([
-                'error' => 'No se pudo enviar el correo electrónico'
-            ]);
-        }
-    } else {
-        // Store the ProjectStatus
-        $projectStatus = ProjectStatus::create($sanitized);
+             try {
+                 Mail::mailer('mail2')->send('admin.project-status.email', ['nombre' => $nombre, 'texto' => $texto], function ($message) use ($toEmail, $subject) {
+                     $message->to($toEmail);
+                     $message->subject($subject);
+                     $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
+                 });
 
-        return response()->json([
-            'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
-        ]);
-    }
+                 return response()->json([
+                     'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+                 ]);
+             } catch (Exception $e) {
+                 // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
+                 return response()->json([
+                     'error' => 'No se pudo enviar el correo electrónico'
+                 ]);
+             }
+         } else {
+             // Store the ProjectStatus
+             $projectStatus = ProjectStatus::create($sanitized);
 
-    return response()->json([
-        'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
-    ]);
-}
+             return response()->json([
+                 'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+             ]);
+         }
 
+         return response()->json([
+             'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+         ]);
+     }
     /**
      * Display the specified resource.
      *

@@ -48,6 +48,20 @@ return [
             'allow_self_signed' => true
         ],
 
+        'mail2' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL2_HOST'),
+            'port' => env('MAIL2_PORT'),
+            'username' => env('MAIL2_USERNAME'),
+            'password' => env('MAIL2_PASSWORD'),
+            'encryption' => env('MAIL2_ENCRYPTION'),
+            'timeout' => null,
+            'auth_mode' => null,
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
