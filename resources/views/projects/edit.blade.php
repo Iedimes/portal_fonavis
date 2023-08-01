@@ -61,7 +61,7 @@
                       <!-- Nueva columna para fecha de resolucion -->
                       <div class="form-group {{ $errors->has('fechares') ? 'has-error' : '' }}">
                           <label for="exampleInputPassword1">Fecha de Resolución</label>
-                          <input required type="text" class="form-control" name="fechares" value="{{ old('fechares',isset($project['fechares'])?$project['fechares']:'') }}" placeholder="Ingrese fecha de resolución">
+                          <input required type="date" class="form-control" name="fechares" value="{{ old('fechares',isset($project['fechares'])?$project['fechares']:'') }}" placeholder="Ingrese fecha de resolución">
                           {!! $errors->first('fechares','<span class="help-block">:message</span>') !!}
                       </div>
                   </div>
