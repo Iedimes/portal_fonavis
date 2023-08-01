@@ -163,31 +163,22 @@
             </thead>
             <tbody>
                 @if(count($postulantes) > 0)
-                    @foreach ($postulantes as $key=>$post)
-                        <tr>
-                            <td>{{$key+1}}</td>
-                            <td>{{ $post->postulante_id ? ($post->getPostulante ? $post->getPostulante->first_name ?? "" : "") : "" }} {{ $post->postulante_id ? ($post->getPostulante ? $post->getPostulante->last_name ?? "" : "") : "" }}</td>
-                            <td class="text-center">{{ $post->postulante_id ? ($post->getPostulante ? (is_numeric($post->getPostulante->cedula ?? "") ? number_format($post->getPostulante->cedula, 0, ".", ".") : $post->getPostulante->cedula ?? "") : "") : "" }}</td>
-                            <td class="text-center">{{ $post->postulante_id ? ($post->getPostulante ? (\Carbon\Carbon::parse($post->getPostulante->birthdate ?? "")->age) : "") : "" }}</td>
-                            @if (!empty($postulante))
-                                <?php $ingreso = App\Models\ProjectHasPostulantes::getIngreso($postulante->id); ?>
-                                <?php $total = $ingreso + ($postulante->ingreso ?? 0); ?>
-                                <td class="text-center">{{ number_format($total, 0, ".", ".") }}</td>
-                            @else
-                                <td class="text-center"></td>
-                            @endif
-                            @if (!empty($postulante))
-                                <?php
-                                    $ingreso = App\Models\ProjectHasPostulantes::getIngreso($postulante->id);
-                                    $postulanteIngreso = $postulante->ingreso ?? 0;
-                                    $grupo = $ingreso + $postulanteIngreso;
-                                ?>
-                                <td class="text-center">{{ number_format($grupo, 0, ".", ".") }}</td>
-                            @else
-                                <td class="text-center"></td>
-                            @endif
-                        </tr>
-                    @endforeach
+                    @foreach($postulantes as $key=>$post)
+            <tr>
+              <td>{{$key+1}}</td>
+              <td>{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}</td>
+                @if (is_numeric($post->postulante_id?$post->getPostulante->cedula:""))
+                <td class="text-center">{{ number_format($post->postulante_id?$post->getPostulante->cedula:"",0,".",".")  }} </td>
+                @else
+                <td class="text-center">{{ $post->postulante_id?$post->getPostulante->cedula:""  }} </td>
+                @endif
+              <td class="text-center">{{ \Carbon\Carbon::parse( $post->postulante_id?$post->getPostulante->birthdate:"")->age }} </td>
+              <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id),0,".",".") }} </td>
+              <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
+              <td class="text-center">{{ $post->getMembers->count() + 1 }}</td>
+
+            </tr>
+            @endforeach
                 @endif
             </tbody>
         </table>
