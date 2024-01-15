@@ -38,8 +38,9 @@ class StoreProject extends FormRequest
             'res_nro' => 'required',
             'finca_nro' => 'required',
             'fechares' => 'required',
-             'coordenadax' => 'required',
+            'coordenadax' => 'required',
             'coordenaday' => 'required',
+            'ubicacion' => 'required',
 
 
             //'body' => 'required',

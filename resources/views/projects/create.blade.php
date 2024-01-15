@@ -59,7 +59,7 @@
             </div>
 
 
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                 <!-- Nueva columna para fecha de resolucion -->
                 <div class="form-group {{ $errors->has('fechares') ? 'has-error' : '' }}">
                     <label for="exampleInputPassword1">Fecha de Resolución</label>
@@ -68,7 +68,16 @@
                 </div>
             </div>
 
-             <div class="col-md-4">
+            <div class="col-md-3">
+                <!-- Nueva columna para ubicacion -->
+                <div class="form-group {{ $errors->has('ubicacion') ? 'has-error' : '' }}">
+                    <label for="exampleInputPassword1">Ubicación</label>
+                    <input required type="text" class="form-control" name="ubicacion" value="{{ old('ubicacion',isset($project['ubicacion'])?$project['ubicacion']:'') }}" placeholder="Ingrese la ubicación">
+                    {!! $errors->first('ubicacion','<span class="help-block">:message</span>') !!}
+                </div>
+            </div>
+
+             <div class="col-md-3">
                 <!-- Nueva columna para coordenadax -->
                 <div class="form-group {{ $errors->has('coordenadax') ? 'has-error' : '' }}">
                     <label for="exampleInputPassword1">Coordenada X</label>
@@ -77,7 +86,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <!-- Nueva columna para coordenada Y -->
                 <div class="form-group {{ $errors->has('coordenaday') ? 'has-error' : '' }}">
                     <label for="exampleInputPassword1">Coordenada Y</label>
@@ -113,7 +122,7 @@
                 <div class="form-group {{ $errors->has('land_id') ? 'has-error' : '' }}">
                     <label for="exampleInputPassword1">Tipo Terreno</label>
                     <select class="form-control required" name="land_id">
-                        <option value="">Selecciona el Tipo de Terreno</option>
+                        <option value="">Selecciona el Tipo de Terreno</o   ption>
                         @if(isset($lands))
                             @foreach($tierra as $key=>$name)
                                 <option value="{{$name->id}}"

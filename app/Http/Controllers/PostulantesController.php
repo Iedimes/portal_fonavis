@@ -51,112 +51,122 @@ class PostulantesController extends Controller
         if ($request->input('cedula')) {
 
             //$expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
-            $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
-                                ->where('TexCod', 118)
-                                ->first();
-            $nroExp = $expedientes->NroExp;
-            // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
-            $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
-            if ($archivo){
-                //return redirect()->back()->with('status', 'El expediente tiene estado A!');
-                $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
-                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-                ->where('PylCod','!=' ,'P.F.')
-                ->get();
-                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+              $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
+                                   ->where('TexCod', 118)
+                                   ->orderBy('NroExp', 'desc')
+                                   ->first();
 
-                if($existe->count() >= 1){
-                    //Session::flash('error', 'Ya existe el postulante!');
-                    return redirect()->back()->with('status', 'Ya existe el postulante!');
-                }
 
-                if ($expedientes->count() >= 1) {
-                    // return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
+            if(!empty($expedientes) ){
+
+                   //return "Expediente existe";
+                   $nroExp = $expedientes->NroExp;
+                   // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
+                   //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
+                   $archivo = SIG006::where('NroExp', $nroExp)
+                   ->where('DEExpEst', 'A')
+                   ->first();
+                   if (!empty($archivo)){
+                       //return redirect()->back()->with('status', 'El expediente tiene estado A!');
+                       $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                       $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                       $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                       $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                       ->where('PylCod','!=' ,'P.F.')
+                       ->get();
+                       $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                       if($existe->count() >= 1){
+                           //Session::flash('error', 'Ya existe el postulante!');
+                           return redirect()->back()->with('status', 'Ya existe el postulante!');
+                       }
+
+                       if ($expedientes->count() >= 1) {
+                           // return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
+                       }else{
+                           $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                           ->where('SolEtapa','B')
+                           ->first();
+                           if ($todos) {
+                               return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                           }
+                       }
+
+                       if ($certificados->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                       }
+
+                       if ($certificadosconyuge->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                       }
+
+                       if ($cartera->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                       }
+
+                       if ($solicitantes) {
+                           //dd(trim($solicitantes->SolPerCod));
+                           $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                           ->where('PylCod','!=' ,'P.F.')
+                           ->get();
+                           if ($carterasol->count() >= 1) {
+                               return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                           }
+
+                       }
+
+
+
                 }else{
-                    $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                    ->where('SolEtapa','B')
-                    ->first();
-                    if ($todos) {
-                        return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                    }
+                    //return "Expediente No existe";
+               $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+               $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+               $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+               $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+               ->where('PylCod','!=' ,'P.F.')
+               ->get();
+               $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+               if($existe->count() >= 1){
+                   //Session::flash('error', 'Ya existe el postulante!');
+                   return redirect()->back()->with('status', 'Ya existe el postulante!');
+               }
+
+               $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                   ->where('SolEtapa','B')
+                   ->first();
+                   if ($todos) {
+                       return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                   }
+
+
+               if ($certificados->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+               }
+
+               if ($certificadosconyuge->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+               }
+
+               if ($cartera->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+               }
+
+               if ($solicitantes) {
+                   //dd(trim($solicitantes->SolPerCod));
+                   $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                   ->where('PylCod','!=' ,'P.F.')
+                   ->get();
+                   if ($carterasol->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                   }
+
+               }
                 }
-
-                if ($certificados->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-                }
-
-                if ($certificadosconyuge->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-                }
-
-                if ($cartera->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-                }
-
-                if ($solicitantes) {
-                    //dd(trim($solicitantes->SolPerCod));
-                    $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                    ->where('PylCod','!=' ,'P.F.')
-                    ->get();
-                    if ($carterasol->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                    }
-
-                }
-            }else{
-                //return redirect()->back()->with('status', 'El expediente NO tiene estado A!');
-
-                $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
-                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-                ->where('PylCod','!=' ,'P.F.')
-                ->get();
-                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
-
-                if($existe->count() >= 1){
-                    //Session::flash('error', 'Ya existe el postulante!');
-                    return redirect()->back()->with('status', 'Ya existe el postulante!');
-                }
-
-                if ($expedientes->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
-                }else{
-                    $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                    ->where('SolEtapa','B')
-                    ->first();
-                    if ($todos) {
-                        return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                    }
-                }
-
-                if ($certificados->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-                }
-
-                if ($certificadosconyuge->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-                }
-
-                if ($cartera->count() >= 1) {
-                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-                }
-
-                if ($solicitantes) {
-                    //dd(trim($solicitantes->SolPerCod));
-                    $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                    ->where('PylCod','!=' ,'P.F.')
-                    ->get();
-                    if ($carterasol->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                    }
-
-                }
-
             }
 
+            // return "sale por el ya existe, pero se le debe dejar continuar";
+            // return "sale por el no existe";
 
 
 
