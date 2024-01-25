@@ -297,15 +297,16 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
+
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('projects')->name('projects/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin')->group(static function() {
+        Route::prefix('projects')->name('projects')->group(static function() {
             Route::get('/',                                             'ProjectsController@index')->name('index');
             Route::get('/create',                                       'ProjectsController@create')->name('create');
             Route::post('/',                                            'ProjectsController@store')->name('store');
             Route::get('/{project}/show',                               'ProjectsController@show');
-            Route::get('/{project}/transition',                         'ProjectsController@transition');
+            Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{project}',                                   'ProjectsController@update')->name('update');

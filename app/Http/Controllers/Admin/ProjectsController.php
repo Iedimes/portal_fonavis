@@ -132,7 +132,7 @@ class ProjectsController extends Controller
 
     public function transition(Project $project)
     {
-       //return $project->getEstado->getStage->id;
+        $project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $email = Auth::user()->email;
         $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
