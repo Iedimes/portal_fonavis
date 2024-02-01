@@ -7,8 +7,10 @@ use App\Http\Requests\Admin\ProjectStatus\BulkDestroyProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\DestroyProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\IndexProjectStatus;
 use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatus;
+use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatusE;
 use App\Http\Requests\Admin\ProjectStatus\UpdateProjectStatus;
 use App\Models\ProjectStatus;
+use App\Models\ProjectStatusDeletes;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Sat;
@@ -26,6 +28,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ProjectStatusController extends Controller
 {
@@ -148,12 +152,41 @@ class ProjectStatusController extends Controller
     }
 
 
-    public function eliminar($projectStatus)
-{
-    ProjectStatus::where('project_id', $projectStatus)->delete();
+    public function eliminar(Request $request, $projectId) {
 
-    return redirect()->back()->with('success', 'El proyecto ha vuelto al estado Pendiente');
-}
+        //return $request;
+        //return $request['project_id'];
+
+        $projectStatus = ProjectStatus::where('project_id', $projectId)->first();
+
+        $userId = auth()->id();
+
+        $projectStatusDeletes = new ProjectStatusDeletes;
+
+        // Copiar todos los datos de $projectStatus
+        $projectStatusDeletes->fill($projectStatus->toArray());
+
+        // Agregar id de usuario
+        $projectStatusDeletes->user_id_deleted = $userId;
+        $recordValue = $request->input('record');
+
+        $projectStatusDeletes->record = $recordValue;
+
+        $projectStatusDeletes->save();
+
+        // Borrar registro original
+        $projectStatus->delete();
+
+        //return redirect()->route('projects.show', ['project' => $projectStatus->project_id]);
+        // return view('admin.project/'.$projectId.'/show');
+        //return back();
+
+        return response()->json([
+            'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
+        ]);
+
+      }
+
     /**
      * Show the form for editing the specified resource.
      *

@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Project\DestroyProject;
 use App\Http\Requests\Admin\Project\IndexProject;
 use App\Http\Requests\Admin\Project\StoreProject;
 use App\Http\Requests\Admin\Project\UpdateProject;
+use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatusE;
 use App\Models\Project;
 use App\Models\Land_project;
 use App\Models\Assignment;
@@ -145,6 +146,24 @@ class ProjectsController extends Controller
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
         return view('admin.project.transition', compact('project', 'user','mensaje','stages','email'));
+
+    }
+
+    public function transitionEliminar(Project $project)
+    {
+        $project->getEstado->getStage->id;
+        $user = Auth::user()->id;
+        $email = Auth::user()->email;
+        $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+
+        /*if ($workflowState->id == 26) {
+            $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
+        }else{
+            $mensaje = 'Este cambio de estado quedara registrado en el historial de la solicitud';
+        }*/
+        $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
+
+        return view('admin.project.transitionEliminar', compact('project', 'user','mensaje','stages','email'));
 
     }
 

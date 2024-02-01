@@ -307,6 +307,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/',                                            'ProjectsController@store')->name('store');
             Route::get('/{project}/show',                               'ProjectsController@show');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
+            Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{project}',                                   'ProjectsController@update')->name('update');
@@ -343,7 +344,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'ProjectStatusController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{projectStatus}',                             'ProjectStatusController@update')->name('update');
             Route::delete('/{projectStatus}',                           'ProjectStatusController@destroy')->name('destroy');
-            Route::get('/{projectStatus}/eliminar',                  'ProjectStatusController@eliminar')->name('eliminar');
+            Route::match(['get', 'post'], '/{projectStatus}/eliminar', 'ProjectStatusController@eliminar')->name('eliminar');
         });
     });
 });

@@ -42,7 +42,8 @@
 
             @else
             <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-             <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a>
+            <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+             {{-- <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a> --}}
             @endif
     </div>
     @if(session('success'))
