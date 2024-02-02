@@ -274,6 +274,12 @@ Route::post('postulantes/destroyfile', 'PostulantesController@destroyfile');
 Route::post('postulantes/destroy', 'PostulantesController@destroy');
 Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro');*/
 
+//Adjuntar documentos
+
+// Route::post('/upload', 'ProjectController@upload')->name('upload');
+// Route::get('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
+Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
+
 
 //validacion qr
 Route::get('/{key}',[App\Http\Controllers\HomeController::class,'verification']);

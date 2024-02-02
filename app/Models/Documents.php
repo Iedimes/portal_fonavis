@@ -24,7 +24,7 @@ class Documents extends Model
     // protected $primaryKey = 'id';
      //public $timestamps = false;
     // protected $guarded = ['id'];
-    protected $fillable = ['title','project_id','document_id','title','file_path'];
+    protected $fillable = ['project_id','document_id','title','file_path'];
     // protected $hidden = [];
     // protected $dates = [];
     //protected $dateFormat = 'Y-m-d H:i:s.v';

@@ -25,6 +25,10 @@ use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Requests\StoreProject;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+
 //use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
@@ -292,29 +296,92 @@ class ProjectController extends Controller
         return redirect('projects')->with('success', 'El proyecto fue actualizado!');
     }
 
+    // public function upload(Request $request)
+    // {
+    //     //return $title = $request->title;
+    //      return $request;
+    //     // return "Upload";
+    // 	/*$this->validate($request, [
+    // 		//'title' => 'required',
+    //         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    //     ]);*/
+
+
+    //     $input['file_path'] = time().'.'.$request->image->getClientOriginalExtension();
+    //     $request->image->move(public_path('images/'.$request->project_id.'/project/general'), $input['file_path']);
+
+    //     return $title = Document::find($request->title);
+    //     //return $title->name;
+    //     $input['per_page'] = $title->per_page;
+    //     $input['page'] = $request->page;
+    //     $input['orderBy'] = $request->page;
+    //     $input['orderDirection'] = $request->orderDirection;
+    //     Documents::create($input);
+
+    //     //return $input;
+
+    // 	return back()
+    //         ->with('success', 'Se ha agregado un Archivo!');
+    // }
+
     public function upload(Request $request)
     {
-    	/*$this->validate($request, [
-    		//'title' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);*/
+
+      // Validación
+      $this->validate($request, [
+        'archivo' => 'required'
+      ]);
+
+      // Obtener ids
+      $project_id = $request->project_id;
+      $document_id = $request->document_id;
+
+      // Ruta de carpetas
+      $folder = "uploads/$project_id/$document_id";
+
+      // Validar documento existente
+      $exists = Documents::where('document_id', $document_id)->first();
+
+      if($exists){
+        // return back()->withErrors('Documento ya existe')
+        //                 ->with('document_id', $request->document_id);
+        //dd($project_id);
+            return redirect("/projects/$project_id")->withErrors('Documento ya existe');
 
 
-        $input['file_path'] = time().'.'.$request->image->getClientOriginalExtension();
-        $request->image->move(public_path('images/'.$request->project_id.'/project/general'), $input['file_path']);
+      }
 
-        $title = Document::find($request->title);
-        //return $title->name;
-        $input['per_page'] = $title->per_page;
-        $input['page'] = $request->page;
-        $input['orderBy'] = $request->page;
-        $input['orderDirection'] = $request->orderDirection;
-        Documents::create($input);
+      // Obtener archivo
+      $file = $request->file('archivo');
 
-        //return $input;
+      // Generar nombre archivo
+      $filename = time().rand().'.'.$file->getClientOriginalExtension();
 
-    	return back()
-            ->with('success', 'Se ha agregado un Archivo!');
+      // Guardar archivo
+      try {
+
+        if(!Storage::exists($folder)) {
+          Storage::makeDirectory($folder);
+        }
+
+        $file->storeAs($folder, $filename);
+
+      } catch (\Exception $e) {
+        return back()->withErrors('Error subiendo archivo');
+      }
+
+      // Guardar en BD
+      $document = new Documents;
+
+      $document->project_id = $request->project_id;
+      $document->document_id = $request->document_id;
+      $document->file_path = $filename;
+      $document->title = $request->title;
+
+      $document->save();
+
+      return redirect("/projects/{$request->project_id}")->with('message', 'Archivo subido');
+
     }
 
     /**
