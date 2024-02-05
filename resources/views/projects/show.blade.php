@@ -100,54 +100,56 @@
             </tr>
             </thead>
             <tbody>
-            @foreach ($docproyecto as $key => $item)
-            <tr>
-                <td>{{ $key+1 }}</td>
-                <td>{{ $item->document->name}}</td>
-                <td>
-                    <div class="row">
-                        <div class="col-6">
-                            <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{'sheet-'.$item->document_id}}" placeholder=""
-                            value="{{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }}">
+                @foreach ($docproyecto as $key => $item)
+                <tr>
+                    <td>{{ $key+1 }}</td>
+                    <td>{{ $item->document->name }}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{ 'sheet-' . $item->document_id }}" placeholder=""
+                                value="{{ $item->check()->where('project_id', '=', $project->id)->first() ? $item->check()->where('project_id', '=', $project->id)->first()['sheets']  : '0' }}">
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>
+                    </td>
+                    <td>
+                        <form action="/upload" method="POST" enctype="multipart/form-data">
+                            @csrf
 
-                        <form action="/upload" method="POST"  enctype="multipart/form-data">
-                        @csrf
-
-                        <input type="hidden" name="project_id" value="{{ $project->id }}">
-                        <input type="file" name="archivo">
-                        <input type="hidden" name="title" value="{{ $item->document->name }}">
-                        <input type="hidden" name="document_id" value="{{ $item->document->id }}">
-                        <button type="submit">Subir</button>
+                            <input type="hidden" name="project_id" value="{{ $project->id }}">
+                            <input type="file" name="archivo">
+                            <input type="hidden" name="title" value="{{ $item->document->name }}">
+                            <input type="hidden" name="document_id" value="{{ $item->document->id }}">
+                            <button type="submit">Subir</button>
 
                         </form>
-                        @if(session('message'))
-                        <div class="alert alert-success">
-                            {{ session('message') }}
-                        </div>
-                        @endif
 
-                        @if($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                            </ul>
+                    </td>
+                    <td>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }} {{ $item->check()->where('project_id', '=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{ $item->document_id }}">
+                            <label class="custom-control-label" for="{{ $item->document_id }}"></label>
                         </div>
-                        @endif
-                </td>
-                <td>
-                    <div class="custom-control custom-switch">
-                    <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }}  {{ $item->check()->where('project_id','=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{$item->document_id}}">
-                    <label class="custom-control-label" for="{{$item->document_id}}"></label>
+                    </td>
+                </tr>
+                @endforeach
+
+                @if(session('message'))
+                    <div class="alert alert-success" id="success-message">
+                        {{ session('message') }}
                     </div>
-                </td>
-            </tr>
-            @endforeach
+                @endif
+
+
+                @if($errors->any())
+                <div class="alert alert-danger" id="error-message">
+                    <ul>
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
             </tbody>
             </table>
             </div>
@@ -379,6 +381,40 @@
         }
         //console.log(def);
     }
+
+     // Obtén las referencias a los elementos de mensaje
+     var successMessage = document.getElementById('success-message');
+    var errorMessage = document.getElementById('error-message');
+
+    // Establece el tiempo de desaparición en milisegundos (5 segundos en este caso)
+    var tiempoDesaparicion = 5000;
+
+    // Cambia el color de fondo y establece la opacidad para los mensajes de éxito y error
+    if (successMessage) {
+        successMessage.style.backgroundColor = 'lightgreen'; // Cambia el color de fondo a verde claro
+        successMessage.style.opacity = 1; // Establece la opacidad al máximo
+        successMessage.style.border = 'none'; // Elimina el borde del mensaje de éxito
+    }
+
+    if (errorMessage) {
+        errorMessage.style.backgroundColor = 'lightcoral'; // Cambia el color de fondo a coral claro
+        errorMessage.style.opacity = 1; // Establece la opacidad al máximo
+        errorMessage.style.border = 'none'; // Elimina el borde del mensaje de error
+    }
+
+    // Función para desvanecer y ocultar los mensajes después del tiempo de desaparición
+    function ocultarMensajes() {
+        if (successMessage) {
+            successMessage.style.opacity = 0; // Establece la opacidad a 0 para desvanecer el mensaje de éxito
+        }
+
+        if (errorMessage) {
+            errorMessage.style.opacity = 0; // Establece la opacidad a 0 para desvanecer el mensaje de error
+        }
+    }
+
+    // Inicia el temporizador para ocultar los mensajes después del tiempo de desaparición
+    setTimeout(ocultarMensajes, tiempoDesaparicion);
 </script>
 
 @endsection

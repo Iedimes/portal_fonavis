@@ -296,33 +296,6 @@ class ProjectController extends Controller
         return redirect('projects')->with('success', 'El proyecto fue actualizado!');
     }
 
-    // public function upload(Request $request)
-    // {
-    //     //return $title = $request->title;
-    //      return $request;
-    //     // return "Upload";
-    // 	/*$this->validate($request, [
-    // 		//'title' => 'required',
-    //         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    //     ]);*/
-
-
-    //     $input['file_path'] = time().'.'.$request->image->getClientOriginalExtension();
-    //     $request->image->move(public_path('images/'.$request->project_id.'/project/general'), $input['file_path']);
-
-    //     return $title = Document::find($request->title);
-    //     //return $title->name;
-    //     $input['per_page'] = $title->per_page;
-    //     $input['page'] = $request->page;
-    //     $input['orderBy'] = $request->page;
-    //     $input['orderDirection'] = $request->orderDirection;
-    //     Documents::create($input);
-
-    //     //return $input;
-
-    // 	return back()
-    //         ->with('success', 'Se ha agregado un Archivo!');
-    // }
 
     public function upload(Request $request)
     {
@@ -343,9 +316,7 @@ class ProjectController extends Controller
       $exists = Documents::where('document_id', $document_id)->first();
 
       if($exists){
-        // return back()->withErrors('Documento ya existe')
-        //                 ->with('document_id', $request->document_id);
-        //dd($project_id);
+
             return redirect("/projects/$project_id")->withErrors('Documento ya existe');
 
 
@@ -380,7 +351,7 @@ class ProjectController extends Controller
 
       $document->save();
 
-      return redirect("/projects/{$request->project_id}")->with('message', 'Archivo subido');
+      return redirect("/projects/$project_id")->with('message', 'Archivo subido');
 
     }
 
