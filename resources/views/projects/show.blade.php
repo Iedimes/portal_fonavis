@@ -95,45 +95,45 @@
             <th>#</th>
             <th>Documento</th>
             <th>N° FOLIO</th>
-            <th>Adjuntar Documento</th>
+            {{-- <th>Adjuntar Documento</th> --}}
             <th>Check</th>
             </tr>
             </thead>
             <tbody>
                 @foreach ($docproyecto as $key => $item)
-    <tr>
-        <td>{{ $key+1 }}</td>
-        <td>{{ $item->document->name }}</td>
-        <td>
-            <div class="row">
-                <div class="col-6">
-                    <input type="number" {{ $project->getEstado ? 'disabled' : '' }} class="form-control" id="{{ 'sheet-' . $item->document_id }}" placeholder=""
-                        value="{{ $item->check()->where('project_id', '=', $project->id)->first() ? $item->check()->where('project_id', '=', $project->id)->first()['sheets'] : '0' }}">
-                </div>
-            </div>
-        </td>
-        <td>
-            @if ($uploadedFiles[$item->document_id])
-                <p>Ya cuenta con un documento adjunto</p>
-            @else
-                <form action="/upload" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="project_id" value="{{ $project->id }}">
-                    <input type="file" name="archivo">
-                    <input type="hidden" name="title" value="{{ $item->document->name }}">
-                    <input type="hidden" name="document_id" value="{{ $item->document->id }}">
-                    <button type="submit">Subir</button>
-                </form>
-            @endif
-        </td>
-        <td>
-            <div class="custom-control custom-switch">
-                <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }} {{ $uploadedFiles[$item->document_id] ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{ $item->document_id }}">
-                <label class="custom-control-label" for="{{ $item->document_id }}"></label>
-            </div>
-        </td>
-    </tr>
-@endforeach
+                <tr>
+                    <td>{{ $key+1 }}</td>
+                    <td>{{ $item->document->name }}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" {{ $project->getEstado ? 'disabled' : '' }}  class="form-control" id="{{ 'sheet-' . $item->document_id }}" placeholder=""
+                                value="{{ $item->check()->where('project_id', '=', $project->id)->first() ? $item->check()->where('project_id', '=', $project->id)->first()['sheets']  : '0' }}">
+                            </div>
+                        </div>
+                    </td>
+                    {{-- <td>
+                        <form action="/upload" method="POST" enctype="multipart/form-data">
+                            @csrf
+
+                            <input type="hidden" name="project_id" value="{{ $project->id }}">
+                            <input type="file" name="archivo">
+                            <input type="hidden" name="title" value="{{ $item->document->name }}">
+                            <input type="hidden" name="document_id" value="{{ $item->document->id }}">
+                            <button type="submit">Subir</button>
+
+                        </form>
+
+                    </td> --}}
+                    <td>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }} {{ $item->check()->where('project_id', '=', $project->id)->first() ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{ $item->document_id }}">
+                            <label class="custom-control-label" for="{{ $item->document_id }}"></label>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+
                 @if(session('message'))
                     <div class="alert alert-success" id="success-message">
                         {{ session('message') }}

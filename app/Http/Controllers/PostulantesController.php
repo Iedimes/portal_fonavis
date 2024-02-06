@@ -65,6 +65,7 @@ class PostulantesController extends Controller
                    //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
                    $archivo = SIG006::where('NroExp', $nroExp)
                    ->where('DEExpEst', 'A')
+                   ->OrWhere('DEExpEst', 'C')
                    ->first();
                    if (!empty($archivo)){
                        //return redirect()->back()->with('status', 'El expediente tiene estado A!');
@@ -308,6 +309,7 @@ class PostulantesController extends Controller
                 //return "No esta vacío";
                 $archivo = SIG006::where('NroExp', $nroExp)
                    ->where('DEExpEst', 'A')
+                   ->OrWhere('DEExpEst', 'C')
                    ->first();
                    if(!empty($archivo)){
                     //return "No esta vacio archivo";
@@ -536,10 +538,10 @@ class PostulantesController extends Controller
                     $nroexp = $cedula;
                     $title="Agregar Miembro Familiar";
                     $project_id = Project::find($id);
-                    $par = [1, 8];
-                    $parentesco = Parentesco::whereIn('id', $par)
-                     ->orderBy('name', 'asc')->get();
-                    //$parentesco = Parentesco::all();
+                    // $par = [1, 8];
+                    // $parentesco = Parentesco::whereIn('id', $par)
+                    //  ->orderBy('name', 'asc')->get();
+                    $parentesco = Parentesco::all();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
                         //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
