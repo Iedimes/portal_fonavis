@@ -164,32 +164,63 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    // public function show($id)
+    // {
+    //     $project=Project::find($id);
+    //     $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
+    //     //return $postulantes;
+    //     $title="Resumen Proyecto ".$project->name;
+
+    //     $tipoproy = Land_project::where('land_id',$project->land_id)->first();
+    //     //dd($tipoproy);
+    //     //$documentos = Documents::where('project_id',$id)->get();
+
+    //     $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
+    //     //->whereNotIn('document_id', $documentos->pluck('document_id'))
+    //     ->where('category_id',1)
+    //     //->where('stage_id',1)
+    //     ->get();
+    //     $claves = $docproyecto->pluck('document_id');
+    //     $history = ProjectStatus::where('project_id',$project['id'])
+    //                 ->orderBy('created_at')
+    //                 ->get();
+    //     //return $history;
+    //     //return $docproyecto->pluck('document_id')->toArray();
+    //     //dd($docproyecto);
+    //     //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
+    //     return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history','postulantes'));
+    // }
+
     public function show($id)
-    {
-        $project=Project::find($id);
-        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
-        //return $postulantes;
-        $title="Resumen Proyecto ".$project->name;
+{
+    $project = Project::find($id);
+    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+    $title = "Resumen Proyecto " . $project->name;
 
-        $tipoproy = Land_project::where('land_id',$project->land_id)->first();
-        //dd($tipoproy);
-        //$documentos = Documents::where('project_id',$id)->get();
+    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-        $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
-        //->whereNotIn('document_id', $documentos->pluck('document_id'))
-        ->where('category_id',1)
-        //->where('stage_id',1)
+    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        ->where('category_id', 1)
         ->get();
-        $claves = $docproyecto->pluck('document_id');
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-        //return $history;
-        //return $docproyecto->pluck('document_id')->toArray();
-        //dd($docproyecto);
-        //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history','postulantes'));
+
+    $claves = $docproyecto->pluck('document_id');
+
+    $history = ProjectStatus::where('project_id', $project['id'])
+        ->orderBy('created_at')
+        ->get();
+
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles = [];
+    foreach ($docproyecto as $item) {
+        $uploadedFile = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile && $uploadedFile->file_path;
+        $uploadedFiles[$item->document_id] = $documentExists;
     }
+
+    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles'));
+}
 
     public function generatePDF($id)
     {
