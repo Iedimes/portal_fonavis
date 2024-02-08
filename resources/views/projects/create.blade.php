@@ -71,7 +71,7 @@
             <div class="col-md-3">
                 <!-- Nueva columna para ubicacion -->
                 <div class="form-group {{ $errors->has('ubicacion') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Ubicación</label>
+                    <label for="exampleInputPassword1">Ubicación UTM</label>
                     <input required type="text" class="form-control" name="ubicacion" value="{{ old('ubicacion',isset($project['ubicacion'])?$project['ubicacion']:'') }}" placeholder="Ingrese la ubicación">
                     {!! $errors->first('ubicacion','<span class="help-block">:message</span>') !!}
                 </div>
@@ -80,7 +80,7 @@
              <div class="col-md-3">
                 <!-- Nueva columna para coordenadax -->
                 <div class="form-group {{ $errors->has('coordenadax') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Coordenada X</label>
+                    <label for="exampleInputPassword1">Coordenada X (Latitud)</label>
                     <input required type="text" class="form-control" name="coordenadax" value="{{ old('coordenadax',isset($project['coordenadax'])?$project['coordenadax']:'') }}" placeholder="Ingrese la coordenada X">
                     {!! $errors->first('coordenadax','<span class="help-block">:message</span>') !!}
                 </div>
@@ -89,7 +89,7 @@
             <div class="col-md-3">
                 <!-- Nueva columna para coordenada Y -->
                 <div class="form-group {{ $errors->has('coordenaday') ? 'has-error' : '' }}">
-                    <label for="exampleInputPassword1">Coordenada Y</label>
+                    <label for="exampleInputPassword1">Coordenada Y (Longitud)</label>
                     <input required type="text" class="form-control" name="coordenaday" value="{{ old('coordenaday',isset($project['coordenaday'])?$project['coordenaday']:'') }}" placeholder="Ingrese la Coordenada Y">
                     {!! $errors->first('coordenaday','<span class="help-block">:message</span>') !!}
                 </div>

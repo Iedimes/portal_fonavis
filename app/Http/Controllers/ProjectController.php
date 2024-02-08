@@ -25,9 +25,10 @@ use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Requests\StoreProject;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\File;
+// use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\File;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -201,6 +202,7 @@ class ProjectController extends Controller
 
     $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
         ->where('category_id', 1)
+        ->where('stage_id', 1)
         ->get();
 
     $claves = $docproyecto->pluck('document_id');
@@ -330,59 +332,82 @@ class ProjectController extends Controller
 
     public function upload(Request $request)
     {
+        // Validación
+        $this->validate($request, [
+            'archivo' => 'required'
+        ]);
 
-      // Validación
-      $this->validate($request, [
-        'archivo' => 'required'
-      ]);
+        // Obtener ids
+        $project_id = $request->project_id;
+        $document_id = $request->document_id;
 
-      // Obtener ids
-      $project_id = $request->project_id;
-      $document_id = $request->document_id;
+        // Ruta de carpetas
+        $folder = "uploads/$project_id/$document_id";
 
-      // Ruta de carpetas
-      $folder = "uploads/$project_id/$document_id";
+        // Validar documento existente
+        $exists = Documents::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->first();
 
-      // Validar documento existente
-      $exists = Documents::where('document_id', $document_id)->first();
-
-      if($exists){
-
-            return redirect("/projects/$project_id")->withErrors('Documento ya existe');
-
-
-      }
-
-      // Obtener archivo
-      $file = $request->file('archivo');
-
-      // Generar nombre archivo
-      $filename = time().rand().'.'.$file->getClientOriginalExtension();
-
-      // Guardar archivo
-      try {
-
-        if(!Storage::exists($folder)) {
-          Storage::makeDirectory($folder);
+        if ($exists) {
+            return redirect("/projects/$project_id")->withErrors('El documento ya existe');
         }
 
-        $file->storeAs($folder, $filename);
+        // Obtener archivo
+        $file = $request->file('archivo');
 
-      } catch (\Exception $e) {
-        return back()->withErrors('Error subiendo archivo');
-      }
+        // Generar nombre archivo
+        $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
-      // Guardar en BD
-      $document = new Documents;
+        try {
+            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
 
-      $document->project_id = $request->project_id;
-      $document->document_id = $request->document_id;
-      $document->file_path = $filename;
-      $document->title = $request->title;
+            if (!$remoteDisk->exists($folder)) {
+                $remoteDisk->makeDirectory($folder);
+            }
 
-      $document->save();
+            $remoteDisk->putFileAs($folder, $file, $filename);
 
-      return redirect("/projects/$project_id")->with('message', 'Archivo subido');
+        } catch (\Exception $e) {
+            return back()->withErrors('Error subiendo archivo');
+        }
+
+        // Guardar en BD
+         $document = new Documents;
+
+        $document->project_id = $request->project_id;
+        $document->document_id = $request->document_id;
+        $document->file_path = $filename;
+        $document->title = $request->title;
+
+         $document->save();
+
+        // Verificar si todos los documentos están cargados
+        // $project = Project::find($request->project_id);
+
+        // $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+        // $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        //     ->where('category_id', 1)
+        //     ->get();
+        // $totalDocuments=count($docproyecto);
+
+        // $upload = Documents::where('project_id', $request->project_id)->get();
+        // $totalUpload = count($upload);
+
+        // if ($totalDocuments === $totalUpload) {
+        //     $bandera = true;
+        // }  else {
+        //      $bandera = false;
+        // }
+
+
+        // return redirect("/projects/$project_id")
+        //     ->with('message', 'Archivo subido')
+        //     ->with('bandera', $bandera);
+
+        return redirect("/projects/$project_id")
+               ->with('message', 'Archivo subido');
+
 
     }
 

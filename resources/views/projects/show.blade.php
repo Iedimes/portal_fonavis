@@ -11,18 +11,40 @@
     <div class="col-12">
     <h4>
     <i class="fas fa-university"></i> Proyecto: {{ $project->name }}
-    @if ($project->getEstado)
+    {{-- @if ($project->getEstado) --}}
     {{-- <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
         <i class="fas fa-download"></i> IMPRIMIR PDF
     </a> --}}
-    @else
+    {{-- @else
     <button type="button" class="btn btn-success float-right" onclick="allchecked()">
         <i class="fa fa-plus-circle"></i> Enviar al MUVH
         </button>
-    @endif
+    @endif --}}
     {{--<a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
         <i class="fas fa-download"></i> IMPRIMIR PDF
         </a>--}}
+
+        <button type="button" class="btn btn-success float-right" onclick="allchecked()">
+            <i class="fa fa-plus-circle"></i> Enviar al MUVH
+            </button>
+        {{-- @if (isset($project->getEstado) && $project->getEstado->stage_id == 1)
+            <button type="button" class="btn btn-success float-right" onclick="allchecked()">
+                <i class="fa fa-plus-circle"></i> Enviar al MUVH
+            </button>
+        @else
+            <!-- Código o lógica adicional cuando la condición no se cumple -->
+        @endif
+
+
+
+        {{-- @if (session('bandera'))
+    @php
+        $bandera = session('bandera');
+    @endphp
+    <button type="button" class="btn btn-success float-right" {{ $bandera ? '' : 'disabled' }}>
+        <i class="fa fa-plus-circle"></i> Enviar al MUVH
+    </button>
+@endif --}}
 
     </h4>
     </div>
@@ -286,59 +308,6 @@
 
 <script>
 
-    function Check(value) {
-      //document.getElementById('verdict').innerHTML = value.checked;
-      //console.log('oiko');
-      var sites = {!! json_encode($project['id']) !!};
-      var abc = sites;
-      var sheets = document.getElementById('sheet-'+value.id).value;
-      //console.log(sheets);
-      //console.log(document.getElementById('sheet-'+value.id).value);
-      //console.log(sites);
-
-      if (document.getElementById(value.id).checked == false) {
-        console.log('cambio a falso');
-        document.getElementById('sheet-'+value.id).value = 0;
-      }
-
-      if (sheets >= 1) {
-            $.ajax({
-                url: '{{URL::to('/projects')}}/ajax/'+value.id+"/checkdocuments/"+abc+"/"+sheets,
-                type: "GET",
-                dataType: "json",
-                success:function(data) {
-                    console.log(data);
-                }
-            });
-
-            $(document).Toasts('create', {
-                            icon: 'fas fa-exclamation',
-                            class: 'bg-success m-1',
-                            autohide: true,
-                            delay: 5000,
-                            title: 'Importante!',
-                            body: 'Cambio guardado correctamente'
-                        })
-
-        }else{
-            alert('Debe completar el campo folio para checkear este documento')
-            document.getElementById(value.id).checked = false
-        }
-
-    };
-
-    function checkFolio(input) {
-  var row = input.closest('tr');
-  var archivoInput = row.querySelector('input[type="file"]');
-  var folioValue = parseInt(input.value);
-
-  if (folioValue > 0) {
-    archivoInput.disabled = false;
-  } else {
-    archivoInput.disabled = true;
-  }
-};
-
     function delay(time) {
         return new Promise(resolve => setTimeout(resolve, time));
     }
@@ -351,23 +320,7 @@
         var def = keys;
         var si = 0;
         var no = 0
-        def.forEach(element => {
-            //console.log('Id document: '+element);
-            if (document.getElementById(element).checked) {
-                //console.log('checkbox: '+element+' esta seleccionado');
-                si += 1;
-            }else
-            {
-                no += 1;
-            }
-        });
-
-        console.log('Total si: '+si+' Total No: '+no);
-        if (no >= 1) {
-            alert('Debe completar todos los checks para enviar al MUVH')
-        }else
-        {
-            if (applicants >= 2) {
+            if (applicants >= 4) {
                 console.log('Puede Enviar al MUVH');
             $.ajax({
                 url: '{{URL::to('/projects/send')}}/'+sites,
@@ -393,18 +346,13 @@
                 }
             });
             } else {
-                alert('Debe tener al menos 2(dos) postulante para enviar el proyecto al MUVH')
+                alert('Debe tener al menos 4(cuatro) postulante para enviar el proyecto al MUVH')
             }
 
-
-
-
-        }
-        //console.log(def);
     }
 
-     // Obtén las referencias a los elementos de mensaje
-     var successMessage = document.getElementById('success-message');
+    // Obtén las referencias a los elementos de mensaje
+    var successMessage = document.getElementById('success-message');
     var errorMessage = document.getElementById('error-message');
 
     // Establece el tiempo de desaparición en milisegundos (5 segundos en este caso)
@@ -436,6 +384,22 @@
 
     // Inicia el temporizador para ocultar los mensajes después del tiempo de desaparición
     setTimeout(ocultarMensajes, tiempoDesaparicion);
+
+    function todos() {
+        var fileInputs = document.querySelectorAll('input[type="file"]'); // Obtener todos los inputs de tipo file
+        var allFilesUploaded = true;
+
+        fileInputs.forEach(function(input) {
+            if (!input.files.length) {
+                allFilesUploaded = false;
+                return;
+            }
+        });
+
+        // Habilitar o deshabilitar el botón según la condición de carga de los archivos
+        var enviarBtn = document.querySelector('.btn-success');
+        enviarBtn.disabled = !allFilesUploaded;
+    }
 </script>
 
 @endsection
