@@ -280,8 +280,21 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 
 Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
 
+// Ver documento
+
+// Route::get('/ver/{project}/{document}', [App\Http\Controllers\ProjectController::class, 'ver'])->name('ver');
+
 //Eliminar documentos
 Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
+
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+    $path = storage_path("app/{$folder}/{$filename}");
+    if (file_exists($path)) {
+        return response()->file($path);
+    } else {
+        abort(404);
+    }
+})->where('filename', '(.*)');
 
 
 //validacion qr

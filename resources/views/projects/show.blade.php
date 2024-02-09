@@ -181,12 +181,18 @@
                     @method('DELETE')
 
                     <button type="submit" class="btn btn-danger">
-                        <i class="fa fa-trash"></i> Eliminar archivo
+                        <i class="fa fa-trash"></i>
                     </button>
                 </form>
             @endif
             @endif
         </td>
+        {{-- <td>
+                <a class="btn btn-sm btn-success" href="/ver/{{$project->id}}/{{$item->document->id}}" target="_blank" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
+                    <i class="fa fa-eye"></i>
+                </a>
+
+        </td> --}}
     </tr>
 @endforeach
 

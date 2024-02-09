@@ -341,10 +341,14 @@ class ProjectController extends Controller
 
     public function upload(Request $request)
     {
-        // Validación
-        $this->validate($request, [
-            'archivo' => 'required'
-        ]);
+
+       // Validación
+    $this->validate($request, [
+        'archivo' => 'required|max:30000'
+    ], [
+        'archivo.required' => 'Debe seleccionar un archivo.',
+        'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+    ]);
 
         // Obtener ids
         $project_id = $request->project_id;
@@ -391,34 +395,30 @@ class ProjectController extends Controller
 
          $document->save();
 
-        // Verificar si todos los documentos están cargados
-        // $project = Project::find($request->project_id);
-
-        // $tipoproy = Land_project::where('land_id', $project->land_id)->first();
-        // $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        //     ->where('category_id', 1)
-        //     ->get();
-        // $totalDocuments=count($docproyecto);
-
-        // $upload = Documents::where('project_id', $request->project_id)->get();
-        // $totalUpload = count($upload);
-
-        // if ($totalDocuments === $totalUpload) {
-        //     $bandera = true;
-        // }  else {
-        //      $bandera = false;
-        // }
-
-
-        // return redirect("/projects/$project_id")
-        //     ->with('message', 'Archivo subido')
-        //     ->with('bandera', $bandera);
-
         return redirect("/projects/$project_id")
                ->with('message', 'Archivo subido');
 
 
     }
+
+    // public function ver($project, $document)
+    // {
+    //     //return $document;
+    //     $documento = Documents::where('project_id', $project)->where('document_id', $document)->firstOrFail();
+    //     $fileName=$documento->file_path;
+    //     // Aquí puedes realizar las acciones necesarias con los parámetros recibidos
+    //     // Por ejemplo, obtener el nombre del archivo
+
+    //     $filePath = "192.168.98.55/uploads/{$project}/{$document}/{$fileName}";
+
+    //     if (file_exists($filePath)) {
+    //         return response()->file($filePath);
+    //     } else {
+    //         abort(404);
+    //     }
+
+    //     // Realizar otras operaciones con el nombre del archivo...
+    // }
 
 
     public function eliminar(Request $request)
