@@ -9,8 +9,8 @@
             <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-user"></i> {{ $postulante->first_name }} {{ $postulante->last_name }}</h3>
             {{-- @if (!isset($project->getEstado->stage_id))
-                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
-                        <i class="fa fa-plus-circle"></i> Agregar Postulante
+                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-miembro">
+                        <i class="fa fa-plus-circle"></i> Agregar Miembro
                     </button>
                     @endif --}}
             </div>
@@ -26,6 +26,15 @@
                             <i class="fa fa-undo"></i> Volver al Proyecto
                         </button>
                     </a>
+                    <button type="button" class="btn btn-info" onclick="goBack()">
+                        <i class="fa fa-undo"></i> Volver a Postulantes
+                    </button>
+
+                    <script>
+                        function goBack() {
+                            window.history.back();
+                        }
+                    </script>
                     </p>
                 </div>
             <div class="col-md-4">
@@ -38,12 +47,12 @@
             <div class="col-md-4">
             <p>
                 <strong>Ingreso:</strong> {{$postulante->ingreso}}<br>
-                <strong>Estado: </strong>  <br>
+                {{-- <strong>Estado: </strong>  <br>
                 @if (isset($project->getEstado->stage_id))
-                <label for="" class="text-green"> {{-- $project->getEstado->stage_id?$project->getEstado->getStage->name:"" --}}</label>
+                <label for="" class="text-green"> {{ $project->getEstado->stage_id?$project->getEstado->getStage->name:"" }}</label>
                 @else
                 <label for="" class="text-yellow">Pendiente</label>
-                @endif
+                @endif --}}
 
             </p>
 
@@ -116,15 +125,15 @@
             <span aria-hidden="true">×</span></button>
           <h4 class="modal-title">Ingrese Número de Cédula</h4>
         </div>
-        {{-- <div class="modal-body">
-            <form action="{{ action('PostulantesController@createmiembro', ['id' => $project->id ]) }}" method="POST">
+        <div class="modal-body">
+            {{--<form action="{{ action('PostulantesController@createmiembro', ['id' => $project->id ]) }}" method="POST"> --}}
                 {{ csrf_field() }}
                 <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
                     <input type="text" name="postulante_id" value="{{$postulante->id}}" hidden>
                     <input type="text" class="form-control" name="cedula"  value="">
                     {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
             </div>
-        </div> --}}
+        {{--</div> --}}
         <div class="modal-footer">
           <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
           <button type="submit" class="btn btn-primary">Enviar</button>

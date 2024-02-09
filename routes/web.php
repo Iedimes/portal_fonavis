@@ -278,9 +278,10 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 
 //Adjuntar documentos
 
-// Route::post('/upload', 'ProjectController@upload')->name('upload');
-// Route::get('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
+
+//Eliminar documentos
+Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
 
 
 //validacion qr

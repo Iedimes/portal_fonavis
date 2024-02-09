@@ -221,7 +221,16 @@ class ProjectController extends Controller
         $uploadedFiles[$item->document_id] = $documentExists;
     }
 
-    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles'));
+    // Verificar si todos los documentos están cargados
+    $todosCargados = true;
+    foreach ($docproyecto as $item) {
+        if (!isset($uploadedFiles[$item->document_id])) {
+            $todosCargados = false;
+            break;
+        }
+    }
+
+    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados'));
 }
 
     public function generatePDF($id)
@@ -411,6 +420,23 @@ class ProjectController extends Controller
 
     }
 
+
+    public function eliminar(Request $request)
+    {
+        $project_id = $request->input('project_id');
+        $document_id = $request->input('document_id');
+
+        // Obtener el documento por project_id y document_id
+        $document = Documents::where('project_id', $project_id)->where('document_id', $document_id)->firstOrFail();
+
+        // Eliminar el archivo físicamente
+        Storage::disk('remote')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+
+        // Eliminar el registro de la base de datos
+        $document->delete();
+
+        return redirect()->back()->with('message', 'Archivo eliminado correctamente');
+    }
     /**
      * Remove the specified resource from storage.
      *

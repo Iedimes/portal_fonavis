@@ -24,9 +24,26 @@
         <i class="fas fa-download"></i> IMPRIMIR PDF
         </a>--}}
 
-        <button type="button" class="btn btn-success float-right" onclick="allchecked()">
+        {{-- <button type="button" class="btn btn-success float-right" onclick="allchecked()">
             <i class="fa fa-plus-circle"></i> Enviar al MUVH
-            </button>
+            </button> --}}
+
+            <!-- Botón -->
+        {{-- <button type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
+            <i class="fa fa-plus-circle"></i> Enviar al MUVH
+        </button> --}}
+
+        @if ($project->getEstado)
+
+        @else
+        <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
+            <i class="fa fa-plus-circle"></i> Enviar al MUVH
+        </button>
+        @endif
+
+        {{-- <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
+            <i class="fa fa-plus-circle"></i> Enviar al MUVH
+        </button> --}}
         {{-- @if (isset($project->getEstado) && $project->getEstado->stage_id == 1)
             <button type="button" class="btn btn-success float-right" onclick="allchecked()">
                 <i class="fa fa-plus-circle"></i> Enviar al MUVH
@@ -123,26 +140,20 @@
             <th></th>
             <th></th>
             <th>Adjuntar Documento</th>
+            <th>Accion</th>
             {{-- <th>Check</th> --}}
             </tr>
             </thead>
             <tbody>
-                @foreach ($docproyecto as $key => $item)
+                @php
+    $todosCargados = true;
+@endphp
+
+@foreach ($docproyecto as $key => $item)
     <tr>
         <td>{{ $key+1 }}</td>
         <td>{{ $item->document->name }}</td>
-         <td>
-            {{--<div class="row">
-                <div class="col-6">
-                    {{-- <input type="number" {{ $project->getEstado ? 'disabled' : '' }} class="form-control" id="{{ 'sheet-' . $item->document_id }}" placeholder=""
-                        value="{{ $item->check()->where('project_id', '=', $project->id)->first() ? $item->check()->where('project_id', '=', $project->id)->first()['sheets'] : '0' }}"> --}}
-             {{--            <input type="number" {{ $project->getEstado ? 'disabled' : '' }} class="form-control folio-input" id="{{ 'sheet-' . $item->document_id }}"
-    placeholder="" value="{{ $item->check()->where('project_id', '=', $project->id)->first() ? $item->check()->where('project_id', '=', $project->id)->first()['sheets'] : '0' }}"
-    oninput="checkFolio(this)">
-                </div>
-            </div> --}}
-        </td>
-        <td></td><td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
         <td>
             @if ($uploadedFiles[$item->document_id])
                 <p>Ya cuenta con un documento adjunto</p>
@@ -155,16 +166,30 @@
                     <input type="hidden" name="document_id" value="{{ $item->document->id }}">
                     <button type="submit">Subir</button>
                 </form>
+                @php
+                    $todosCargados = false;
+                @endphp
             @endif
         </td>
-        {{-- <td>
-            <div class="custom-control custom-switch">
-                <input type="checkbox" {{ $project->getEstado ? 'disabled' : '' }} {{ $uploadedFiles[$item->document_id] ? 'checked' : ''}} onchange="Check(this)" class="custom-control-input" id="{{ $item->document_id }}">
-                <label class="custom-control-label" for="{{ $item->document_id }}"></label>
-            </div>
-        </td> --}}
+        <td>
+            @if ($project->getEstado)
+
+            @else
+            @if ($uploadedFiles[$item->document_id])
+                <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-trash"></i> Eliminar archivo
+                    </button>
+                </form>
+            @endif
+            @endif
+        </td>
     </tr>
 @endforeach
+
                 @if(session('message'))
                     <div class="alert alert-success" id="success-message">
                         {{ session('message') }}
@@ -312,22 +337,54 @@
         return new Promise(resolve => setTimeout(resolve, time));
     }
 
-    function allchecked(){
-        var sites = {!! json_encode($project['id']) !!};
-        var abc = sites;
-        var keys = {!! json_encode($claves) !!};
-        var applicants = {!! $postulantes->count()   !!}
-        var def = keys;
-        var si = 0;
-        var no = 0
-            if (applicants >= 4) {
-                console.log('Puede Enviar al MUVH');
+    function allchecked() {
+    var sites = {!! json_encode($project['id']) !!};
+    var abc = sites;
+    var keys = {!! json_encode($claves) !!};
+    var applicants = {!! $postulantes->count() !!}
+    var def = keys;
+    var si = 0;
+    var no = 0;
+
+    if (applicants >= 4) {
+        // var adjuntosCompletos = true;
+
+        // Verificar si todos los elementos tienen adjuntos
+        // Agrega tu lógica de verificación aquí
+        // Puedes usar un bucle o cualquier otra forma de verificar los adjuntos
+        // Si algún elemento no tiene adjunto, establece adjuntosCompletos en false
+        // Ejemplo de lógica de verificación:
+        // console.log(keys)
+        // for (var i = 0; i < def.length; i++) {
+        //     console.log(def[i].adjunto)
+        //     if (!def[i].adjunto) {
+        //         adjuntosCompletos = false;
+        //         break;
+        //     }
+        // }
+
+        let todosCargados = true; // Variable en JavaScript
+
+        // Verificar si todos los documentos están cargados
+        const rows = document.querySelectorAll('tr');
+        rows.forEach(row => {
+            const uploadForm = row.querySelector('form[action="/upload"]');
+            if (uploadForm) {
+                todosCargados = false;
+            }
+        });
+
+        if (todosCargados) {
+            console.log('Puede Enviar al MUVH');
+            // Mostrar mensaje de éxito o realizar cualquier acción adicional
+            //alert('Todos los documentos están adjuntos y cargados. Puede enviar al MUVH.');
+
+            // Realizar la llamada AJAX solo si todos los documentos están adjuntos
             $.ajax({
-                url: '{{URL::to('/projects/send')}}/'+sites,
+                url: '{{URL::to('/projects/send')}}/' + sites,
                 type: "GET",
                 dataType: "json",
-                success:async function(data) {
-                    //console.log(data.message);
+                success: async function(data) {
                     if (data.message == 'success') {
                         $(document).Toasts('create', {
                             icon: 'fas fa-exclamation',
@@ -336,20 +393,23 @@
                             delay: 5000,
                             title: 'Importante!',
                             body: 'El proyecto ha cambiado de estado'
-                        })
+                        });
                         await delay(3000);
-                        location.reload()
+                        location.reload();
                         console.log('refrescar');
                     } else {
                         console.log('no hace nada');
                     }
                 }
             });
-            } else {
-                alert('Debe tener al menos 4(cuatro) postulante para enviar el proyecto al MUVH')
-            }
-
+        } else {
+            // Mostrar mensaje de error o realizar cualquier acción adicional
+            alert('Debe adjuntar y cargar todos los documentos para enviar al MUVH.');
+        }
+    } else {
+        alert('Debe tener al menos 4 (cuatro) postulantes para enviar el proyecto al MUVH.');
     }
+}
 
     // Obtén las referencias a los elementos de mensaje
     var successMessage = document.getElementById('success-message');
