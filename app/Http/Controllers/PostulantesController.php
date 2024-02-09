@@ -8,7 +8,7 @@ use App\Models\Postulante;
 use GuzzleHttp\Client;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Document;
-use App\Models\PostulantesDocuments;
+// use App\Models\PostulantesDocuments;
 use App\Models\Assignment;
 use App\Models\Land_project;
 use App\Models\Discapacidad;
@@ -625,14 +625,14 @@ class PostulantesController extends Controller
         $title="Resumen Postulante ";
         //dd($project);
         $tipoproy = Land_project::where('land_id',$project->land_id)->first();
-        $documentos = PostulantesDocuments::where('postulante_id',$idpostulante)->get();
-        $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
-        ->whereNotIn('document_id', $documentos->pluck('document_id'))
-        ->where('category_id',2)
-        ->get();
+        // $documentos = PostulantesDocuments::where('postulante_id',$idpostulante)->get();
+        // $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
+        // ->whereNotIn('document_id', $documentos->pluck('document_id'))
+        // ->where('category_id',2)
+        // ->get();
         $miembros = PostulanteHasBeneficiary::where('postulante_id',$postulante->id)->get();
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('postulantes.show',compact('title','project','miembros','documentos','docproyecto','postulante'));
+        return view('postulantes.show',compact('title','project','miembros','postulante'));
     }
 
     public function edit($id,$idpostulante)

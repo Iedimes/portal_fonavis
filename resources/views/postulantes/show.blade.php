@@ -5,18 +5,18 @@
 @section('content_header')
 
 <ol class="breadcrumb">
-<li><a href="{{url('projects')}}"><i class="fa fa-home"></i>Inicio</a></li>
+{{-- <li><a href="{{url('projects')}}"><i class="fa fa-home"></i>Inicio</a></li>
 <li><a href="{{url('projects/'.$project->id.'/postulantes')}}">Postulantes del Proyecto {{ $project->name }}</a></li>
-<li class="active"><a href="#">Resumen Postulante</a></li>
+<li class="active"><a href="#">Resumen Postulante</a></li> --}}
 </ol>
-<br>
+{{-- <br> --}}
 @stop
 
 @section('content')
 
 <section class="invoice">
     <!-- title row -->
-    <div class="row">
+    {{-- <div class="row">
       <div class="col-xs-12">
         <h2 class="page-header">
           <i class="fa fa-user"></i> {{ $postulante->first_name }} {{ $postulante->last_name }}
@@ -24,9 +24,9 @@
         </h2>
       </div>
       <!-- /.col -->
-    </div>
+    </div> --}}
     <!-- info row -->
-    <div class="row invoice-info">
+    {{-- <div class="row invoice-info">
       <div class="col-sm-4 invoice-col">
         <address>
         <strong>Cedula: </strong>{{$postulante->cedula}}<br>
@@ -48,23 +48,23 @@
 
       </div>
       <!-- /.col -->
-    </div>
+    </div> --}}
     <div class="row">
         <div class="col-md-12">
           <!-- Custom Tabs -->
           <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
+            {{-- <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Miembros</a></li>
               <li><a href="#tab_2" data-toggle="tab">Documentos</a></li>
-            </ul>
+            </ul> --}}
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                 @include('postulantes.ficha.miembros')
               </div>
               <!-- /.tab-pane -->
-              <div class="tab-pane" id="tab_2">
-                @include('postulantes.ficha.documentos')
-              </div>
+              {{-- <div class="tab-pane" id="tab_2">
+                {{-- @include('postulantes.ficha.documentos')
+              </div> --}}
 
             </div>
             <!-- /.tab-content -->
@@ -76,7 +76,7 @@
 
     <!-- /.row -->
   </section>
-  <div class="modal fade" id="modal-default" style="display: none;">
+  {{-- <div class="modal fade" id="modal-default" style="display: none;">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -114,11 +114,11 @@
       <!-- /.modal-content -->
     </div>
     <!-- /.modal-dialog -->
-  </div>
+  </div> --}}
 
 <!-- Modal para Borrar Imagen -->
 
-<div class="modal modal-danger fade" id="modal-danger">
+{{-- <div class="modal modal-danger fade" id="modal-danger">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -141,9 +141,9 @@
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
-      </div>
+      </div> --}}
 
-      <div class="modal modal-danger fade" id="modal-danger">
+      {{-- <div class="modal modal-danger fade" id="modal-danger">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -166,7 +166,7 @@
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
-      </div>
+      </div> --}}
 
 @stop
 

@@ -122,6 +122,9 @@
                               {{--<li><a href="{!! url('PostulantesController@show', ['id'=>$project->id,'idpostulantes'=>$post->postulante_id?$post->getPostulante->id:""]) !!}">Ver</a></li>--}}
                               @if (!isset($project->getEstado->stage_id))
                                <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Miembro</a>
+                               {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Ver Miembros</a> --}}
+                               {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a> --}}
+                               <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a>
                                <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
                               @endif
                             </div>

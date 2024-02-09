@@ -265,8 +265,10 @@ Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, '
 Route::get('imprimir/{id}','App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
 
 
-/*Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
-Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
+// Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
+// Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show']);
+Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show'])->name('projects.postulantes.show');
+/*Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
 Route::post('editpostulante', 'PostulantesController@update');
 Route::post('postulantes/upload', 'PostulantesController@upload');
 Route::post('postulantes/destroyfile', 'PostulantesController@destroyfile');

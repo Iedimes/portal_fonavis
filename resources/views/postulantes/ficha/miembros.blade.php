@@ -1,25 +1,80 @@
-@if (!isset($project->getEstado->stage_id))
+{{-- @if (!isset($project->getEstado->stage_id))
 <!--<button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#modal-miembro">
     <i class="fa fa-plus-circle"></i> Nuevo Miembro
 </button> -->
-@endif
+@endif --}}
+{{-- <div class="row"> --}}
+    <div class="col-md-12"><br>
+        <div class="box">
+            <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-user"></i> {{ $postulante->first_name }} {{ $postulante->last_name }}</h3>
+            {{-- @if (!isset($project->getEstado->stage_id))
+                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
+                        <i class="fa fa-plus-circle"></i> Agregar Postulante
+                    </button>
+                    @endif --}}
+            </div>
+            <div class="box-body">
+                <div class="row">
+                <div class="col-md-4">
+                    <p>
+                    <strong>Fecha de Nacimiento: </strong>{{ date('d/m/Y', strtotime($postulante->birthdate)) }}<br>
+                    <strong>Cedula:</strong> {{$postulante->cedula}}<br>
+                    <strong>Estado civil:</strong> {{$postulante->marital_status}}<br>
+                    <a href="{{ url('projects/'.$project->id) }}">
+                        <button type="button" class="btn btn-info">
+                            <i class="fa fa-undo"></i> Volver al Proyecto
+                        </button>
+                    </a>
+                    </p>
+                </div>
+            <div class="col-md-4">
+            <p>
+                <strong>Edad:</strong> {{\Carbon\Carbon::parse($postulante->birthdate)->age}}<br>
+                <strong>Nacionalidad:</strong> {{$postulante->nacionalidad}}<br>
+                <strong>Sexo:</strong> {{$postulante->gender}}
+            </p>
+            </div>
+            <div class="col-md-4">
+            <p>
+                <strong>Ingreso:</strong> {{$postulante->ingreso}}<br>
+                <strong>Estado: </strong>  <br>
+                @if (isset($project->getEstado->stage_id))
+                <label for="" class="text-green"> {{-- $project->getEstado->stage_id?$project->getEstado->getStage->name:"" --}}</label>
+                @else
+                <label for="" class="text-yellow">Pendiente</label>
+                @endif
+
+            </p>
+
+            </div>
+        </div>
+    </div>
+
+
 
 <br>
 <br>
 <div class="row">
-    <div class="col-xs-12 table-responsive">
-        <table class="table table-striped">
-            <tbody>
-            <tr>
-              <th>#</th>
-              <th>Nombre</th>
-              <th class="text-center">Cédula</th>
-              <th class="text-center">Edad</th>
-              <th>Parentesco</th>
-              <th class="text-center">Ingreso</th>
-              <th class="text-center">Acciones</th>
-            </tr>
-            @foreach($miembros as $key=>$mi)
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header">
+                <h4 class="box-title">Listado de Miembros</h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th class="text-center">Cédula</th>
+                            <th class="text-center">Edad</th>
+                            <th>Parentesco</th>
+                            <th class="text-center">Ingreso</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        @foreach($miembros as $key=>$mi)
             <tr>
               <td>{{$key+1}}</td>
               <td>{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}</td>
@@ -36,7 +91,7 @@
                             </button>
                             <ul class="dropdown-menu" role="menu">
                                 @if (!isset($project->getEstado->stage_id))
-                                <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li>
+                                {{-- <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li> --}}
                                 <li><a class="feed-idmiembro"data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="">Eliminar</a></li>
                                 @endif
                             </ul>
@@ -44,13 +99,15 @@
               </td>
             </tr>
             @endforeach
-          </tbody>
-        </table>
-        <br>
-        <br>
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer clearfix">
+            </div>
+        </div>
     </div>
-  </div>
-
+</div>
 <div class="modal fade" id="modal-miembro" style="display: none;">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -59,7 +116,7 @@
             <span aria-hidden="true">×</span></button>
           <h4 class="modal-title">Ingrese Número de Cédula</h4>
         </div>
-        <div class="modal-body">
+        {{-- <div class="modal-body">
             <form action="{{ action('PostulantesController@createmiembro', ['id' => $project->id ]) }}" method="POST">
                 {{ csrf_field() }}
                 <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
@@ -67,7 +124,7 @@
                     <input type="text" class="form-control" name="cedula"  value="">
                     {!! $errors->first('state_id','<span class="help-block">:message</span>') !!}
             </div>
-        </div>
+        </div> --}}
         <div class="modal-footer">
           <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
           <button type="submit" class="btn btn-primary">Enviar</button>
@@ -87,7 +144,7 @@
             <span aria-hidden="true">×</span></button>
           <h4 class="modal-title"><i class="fa  fa-warning"></i> Eliminar Miembro</h4>
         </div>
-        <div class="modal-body">
+        {{-- <div class="modal-body">
             <form action="{{ action('PostulantesController@destroymiembro') }}" method="post">
                     {{ csrf_field() }}
             <p id="demo"></p>
@@ -98,7 +155,7 @@
           <button type="submit" class="btn btn-outline">Eliminar</button>
         </div>
     </form>
-      </div>
+      </div> --}}
       <!-- /.modal-content -->
     </div>
     <!-- /.modal-dialog -->
