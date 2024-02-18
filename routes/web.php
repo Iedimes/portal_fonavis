@@ -20,8 +20,8 @@ Route::get('/', function () {
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('admin-users')->name('admin-users/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('admin-users')->name('admin-users/')->group(static function () {
             Route::get('/',                                             'AdminUsersController@index')->name('index');
             Route::get('/create',                                       'AdminUsersController@create')->name('create');
             Route::post('/',                                            'AdminUsersController@store')->name('store');
@@ -36,7 +36,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
         Route::get('/profile',                                      'ProfileController@editProfile')->name('edit-profile');
         Route::post('/profile',                                     'ProfileController@updateProfile')->name('update-profile');
         Route::get('/password',                                     'ProfileController@editPassword')->name('edit-password');
@@ -46,8 +46,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('modalities')->name('modalities/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('modalities')->name('modalities/')->group(static function () {
             Route::get('/',                                             'ModalitiesController@index')->name('index');
             Route::get('/create',                                       'ModalitiesController@create')->name('create');
             Route::post('/',                                            'ModalitiesController@store')->name('store');
@@ -61,8 +61,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('lands')->name('lands/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('lands')->name('lands/')->group(static function () {
             Route::get('/',                                             'LandsController@index')->name('index');
             Route::get('/create',                                       'LandsController@create')->name('create');
             Route::post('/',                                            'LandsController@store')->name('store');
@@ -76,8 +76,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('documents')->name('documents/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('documents')->name('documents/')->group(static function () {
             Route::get('/',                                             'DocumentsController@index')->name('index');
             Route::get('/create',                                       'DocumentsController@create')->name('create');
             Route::post('/',                                            'DocumentsController@store')->name('store');
@@ -91,8 +91,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('categories')->name('categories/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('categories')->name('categories/')->group(static function () {
             Route::get('/',                                             'CategoriesController@index')->name('index');
             Route::get('/create',                                       'CategoriesController@create')->name('create');
             Route::post('/',                                            'CategoriesController@store')->name('store');
@@ -106,8 +106,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('project-types')->name('project-types/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('project-types')->name('project-types/')->group(static function () {
             Route::get('/',                                             'ProjectTypeController@index')->name('index');
             Route::get('/create',                                       'ProjectTypeController@create')->name('create');
             Route::post('/',                                            'ProjectTypeController@store')->name('store');
@@ -121,8 +121,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('stages')->name('stages/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('stages')->name('stages/')->group(static function () {
             Route::get('/',                                             'StagesController@index')->name('index');
             Route::get('/create',                                       'StagesController@create')->name('create');
             Route::post('/',                                            'StagesController@store')->name('store');
@@ -136,8 +136,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('typologies')->name('typologies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('typologies')->name('typologies/')->group(static function () {
             Route::get('/',                                             'TypologiesController@index')->name('index');
             Route::get('/create',                                       'TypologiesController@create')->name('create');
             Route::post('/',                                            'TypologiesController@store')->name('store');
@@ -151,8 +151,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('parentescos')->name('parentescos/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('parentescos')->name('parentescos/')->group(static function () {
             Route::get('/',                                             'ParentescoController@index')->name('index');
             Route::get('/create',                                       'ParentescoController@create')->name('create');
             Route::post('/',                                            'ParentescoController@store')->name('store');
@@ -166,8 +166,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('discapacidads')->name('discapacidads/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('discapacidads')->name('discapacidads/')->group(static function () {
             Route::get('/',                                             'DiscapacidadController@index')->name('index');
             Route::get('/create',                                       'DiscapacidadController@create')->name('create');
             Route::post('/',                                            'DiscapacidadController@store')->name('store');
@@ -181,8 +181,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('modality-has-lands')->name('modality-has-lands/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('modality-has-lands')->name('modality-has-lands/')->group(static function () {
             Route::get('/',                                             'ModalityHasLandsController@index')->name('index');
             Route::get('/create',                                       'ModalityHasLandsController@create')->name('create');
             Route::post('/',                                            'ModalityHasLandsController@store')->name('store');
@@ -196,8 +196,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('land-has-project-types')->name('land-has-project-types/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('land-has-project-types')->name('land-has-project-types/')->group(static function () {
             Route::get('/',                                             'LandHasProjectTypeController@index')->name('index');
             Route::get('/create',                                       'LandHasProjectTypeController@create')->name('create');
             Route::post('/',                                            'LandHasProjectTypeController@store')->name('store');
@@ -211,8 +211,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('assignments')->name('assignments/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('assignments')->name('assignments/')->group(static function () {
             Route::get('/',                                             'AssignmentsController@index')->name('index');
             Route::get('/create',                                       'AssignmentsController@create')->name('create');
             Route::post('/',                                            'AssignmentsController@store')->name('store');
@@ -226,8 +226,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('project-type-has-typologies')->name('project-type-has-typologies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('project-type-has-typologies')->name('project-type-has-typologies/')->group(static function () {
             Route::get('/',                                             'ProjectTypeHasTypologiesController@index')->name('index');
             Route::get('/create',                                       'ProjectTypeHasTypologiesController@create')->name('create');
             Route::post('/',                                            'ProjectTypeHasTypologiesController@store')->name('store');
@@ -245,29 +245,31 @@ Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->n
 
 Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
 
+Route::get('get/{project}/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'downloadFile'])->name('downloadFile');
+
 Route::resource('projects', ProjectController::class);
 Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
 
-Route::get('generate-pdf/{id}',[App\Http\Controllers\ProjectController::class,'generatePDF']);
+Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF']);
 
-Route::get('projects/ajax/{state_id?}/cities',[App\Http\Controllers\ProjectController::class,'distrito']);
-Route::get('projects/ajax/{state_id?}/lands',[App\Http\Controllers\ProjectController::class,'lands']);
-Route::get('projects/ajax/{state_id?}/typology',[App\Http\Controllers\ProjectController::class,'typology']);
-Route::get('projects/ajax/{state_id?}/local',[App\Http\Controllers\ProjectController::class,'distrito']);
+Route::get('projects/ajax/{state_id?}/cities', [App\Http\Controllers\ProjectController::class, 'distrito']);
+Route::get('projects/ajax/{state_id?}/lands', [App\Http\Controllers\ProjectController::class, 'lands']);
+Route::get('projects/ajax/{state_id?}/typology', [App\Http\Controllers\ProjectController::class, 'typology']);
+Route::get('projects/ajax/{state_id?}/local', [App\Http\Controllers\ProjectController::class, 'distrito']);
 
 //Postulantes
-Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class,'index']);
-Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class,'create']);
-Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class,'createmiembro']);
-Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class,'destroy']);
+Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class, 'index']);
+Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class, 'create']);
+Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class, 'createmiembro']);
+Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class, 'destroy']);
 Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
 Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, 'storemiembro']);
-Route::get('imprimir/{id}','App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
+Route::get('imprimir/{id}', 'App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
 
 
 // Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
 // Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show']);
-Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show'])->name('projects.postulantes.show');
+Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'show'])->name('projects.postulantes.show');
 /*Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
 Route::post('editpostulante', 'PostulantesController@update');
 Route::post('postulantes/upload', 'PostulantesController@upload');
@@ -298,16 +300,16 @@ Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
 
 
 //validacion qr
-Route::get('/{key}',[App\Http\Controllers\HomeController::class,'verification']);
+Route::get('/{key}', [App\Http\Controllers\HomeController::class, 'verification']);
 
 //
-Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}',[App\Http\Controllers\ProjectController::class,'checkdocuments']);
+Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [App\Http\Controllers\ProjectController::class, 'checkdocuments']);
 
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('users')->name('users/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('users')->name('users/')->group(static function () {
             Route::get('/',                                             'UsersController@index')->name('index');
             Route::get('/create',                                       'UsersController@create')->name('create');
             Route::post('/',                                            'UsersController@store')->name('store');
@@ -322,8 +324,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin')->group(static function() {
-        Route::prefix('projects')->name('projects')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin')->group(static function () {
+        Route::prefix('projects')->name('projects')->group(static function () {
             Route::get('/',                                             'ProjectsController@index')->name('index');
             Route::get('/create',                                       'ProjectsController@create')->name('create');
             Route::post('/',                                            'ProjectsController@store')->name('store');
@@ -341,8 +343,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('document-checks')->name('document-checks/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('document-checks')->name('document-checks/')->group(static function () {
             Route::get('/',                                             'DocumentChecksController@index')->name('index');
             Route::get('/create',                                       'DocumentChecksController@create')->name('create');
             Route::post('/',                                            'DocumentChecksController@store')->name('store');
@@ -357,8 +359,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('project-statuses')->name('project-statuses/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('project-statuses')->name('project-statuses/')->group(static function () {
             Route::get('/',                                             'ProjectStatusController@index')->name('index');
             Route::get('/create',                                       'ProjectStatusController@create')->name('create');
             Route::post('/',                                            'ProjectStatusController@store')->name('store');

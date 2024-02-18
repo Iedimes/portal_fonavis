@@ -17,16 +17,16 @@ class Documents extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function getDateFormat()
+    /*public function getDateFormat()
     {
         return 'Y-d-m H:i:s.v';
-    }
+    }*/
 
     protected $table = 'project_documentations';
     // protected $primaryKey = 'id';
-     //public $timestamps = false;
+    //public $timestamps = false;
     // protected $guarded = ['id'];
-    protected $fillable = ['project_id','document_id','title','file_path'];
+    protected $fillable = ['project_id', 'document_id', 'title', 'file_path'];
     // protected $hidden = [];
     // protected $dates = [];
     //protected $dateFormat = 'Y-m-d H:i:s.v';

@@ -21,6 +21,7 @@ use App\Models\ModalityHasLand;
 use App\Models\Project_tipologies;
 use App\Models\ProjectStatus;
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Response;
 use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Requests\StoreProject;
@@ -53,18 +54,18 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $title="Lista de Proyectos";
+        $title = "Lista de Proyectos";
 
         $id = Auth::user()->id;
         $currentuser = User::find($id);
 
         $projects = Project::where('sat_id', trim($currentuser->sat_ruc))
-        ->where('action','=',null)
-        ->get();
+            ->where('action', '=', null)
+            ->get();
 
         //return $projects;
         //Mapper::map(-24.3697635, -56.5912129, ['zoom' => 6, 'type' => 'ROADMAP']);
-        return view('projects.index',compact('projects','title'));
+        return view('projects.index', compact('projects', 'title'));
     }
 
     /**
@@ -75,7 +76,7 @@ class ProjectController extends Controller
     public function create()
     {
         //
-        $title="Crear Proyecto";
+        $title = "Crear Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
         //$dep = [18, 21, 999];
@@ -83,12 +84,12 @@ class ProjectController extends Controller
         //$departamentos = Departamento::all();
         // $departamentos = Departamento::whereNotIn('DptoId', $dep)
         //                  ->orderBy('DptoNom', 'asc')->get();
-        $departamentos = Departamento::where('DptoId','<',18)
-        ->orderBy('DptoNom', 'asc')->get();
+        $departamentos = Departamento::where('DptoId', '<', 18)
+            ->orderBy('DptoNom', 'asc')->get();
         // $localidad = Distrito::all();
 
         $localidad = Distrito::whereNotIn('CiuId', $loc)
-                     ->orderBy('CiuNom', 'asc')->get();
+            ->orderBy('CiuNom', 'asc')->get();
 
         $tipologias = Typology::all();
         $id = Auth::user()->id;
@@ -96,7 +97,7 @@ class ProjectController extends Controller
 
         //return $user->sat_ruc;
         //return $user->getSat->NucNomSat;
-        return view('projects.create',compact('title','tierra','departamentos', 'localidad', 'modalidad','tipologias','user'));
+        return view('projects.create', compact('title', 'tierra', 'departamentos', 'localidad', 'modalidad', 'tipologias', 'user'));
     }
 
     /**
@@ -129,12 +130,12 @@ class ProjectController extends Controller
 
 
 
-    public function checkdocuments($id,$project_id,$sheets)
+    public function checkdocuments($id, $project_id, $sheets)
     {
         //return $sheets;
         $aux = DocumentCheck::where('project_id', $project_id)
-                            ->where('document_id', $id)
-                            ->first();
+            ->where('document_id', $id)
+            ->first();
 
         if (!$aux) {
             $status = new DocumentCheck;
@@ -151,7 +152,7 @@ class ProjectController extends Controller
 
 
 
-        return "controlador laravel con id: ".$id." y proyecto: ".$project_id;
+        return "controlador laravel con id: " . $id . " y proyecto: " . $project_id;
         //
         //return $request;
         //Project::create($request->all());
@@ -193,64 +194,83 @@ class ProjectController extends Controller
     // }
 
     public function show($id)
-{
-    $project = Project::find($id);
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-    $title = "Resumen Proyecto " . $project->name;
+    {
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
 
-    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->where('category_id', 1)
-        ->where('stage_id', 1)
-        ->get();
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->where('category_id', 1)
+            ->where('stage_id', 1)
+            ->get();
 
-    $claves = $docproyecto->pluck('document_id');
+        $claves = $docproyecto->pluck('document_id');
 
-    $history = ProjectStatus::where('project_id', $project['id'])
-        ->orderBy('created_at')
-        ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles = [];
-    foreach ($docproyecto as $item) {
-        $uploadedFile = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile && $uploadedFile->file_path;
-        $uploadedFiles[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si todos los documentos están cargados
-    $todosCargados = true;
-    foreach ($docproyecto as $item) {
-        if (!isset($uploadedFiles[$item->document_id])) {
-            $todosCargados = false;
-            break;
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
         }
+
+        //return $uploadedFiles;
+        //return Storage::disk('local');
+        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        //return $data;
+        // Verificar si todos los documentos están cargados
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados'));
     }
 
-    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados'));
-}
+    function downloadFile($project, $document_id, $file_name)
+    {
+        //return $file_name;
+        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        /*$file = Storage::disk('remote')->get($file_name);
+        //return Storage::disk('remote')->download($file_name);
+        return (new Response($file, 200))
+            ->header('Content-Type', '*');*/
+    }
 
     public function generatePDF($id)
     {
-        $project=Project::find($id);
+        $project = Project::find($id);
         //$postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
-        $tipoproy = Land_project::where('land_id',$project->land_id)->first();
-        $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
-        ->where('category_id',1)
-        ->get();
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->where('category_id', 1)
+            ->get();
         $codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
-        $data = ['title' => 'Welcome to HDTuto.com',
-                'project' => $project,
-                'documents' => $docproyecto,
-                'valor' => $codigoQr,
-                ];
+        $data = [
+            'title' => 'Welcome to HDTuto.com',
+            'project' => $project,
+            'documents' => $docproyecto,
+            'valor' => $codigoQr,
+        ];
         //$codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
         $pdf = PDF::loadView('myPDF', $data);
 
-        return $pdf->download('FORMULARIO-INGRESO-'.$project->name.'.pdf');
+        return $pdf->download('FORMULARIO-INGRESO-' . $project->name . '.pdf');
     }
 
     public function verification($key)
@@ -274,18 +294,18 @@ class ProjectController extends Controller
     public function edit($id)
     {
 
-        $title="Editar Proyecto";
+        $title = "Editar Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
         $dep = [2, 4, 5, 8, 10, 16, 22];
         $loc = [0, 900];
-        $departamentos = Departamento::where('DptoId','<',18)
-                         ->orderBy('DptoNom', 'asc')->get();
+        $departamentos = Departamento::where('DptoId', '<', 18)
+            ->orderBy('DptoNom', 'asc')->get();
 
         $localidad = Distrito::whereNotIn('CiuId', $loc)
-                    ->orderBy('CiuNom', 'asc')->get();
+            ->orderBy('CiuNom', 'asc')->get();
 
-        $project=Project::find($id);
+        $project = Project::find($id);
         //$cities = $this->distrito($project->state_id);
         //$cities = json_decode($cities, true);
         $tipologias = Typology::all();
@@ -301,7 +321,7 @@ class ProjectController extends Controller
 
         $id = Auth::user()->id;
         $user = User::find($id);
-        return view('projects.edit',compact('title','tierra','typology','lands','departamentos','modalidad','project','tipologias','user', 'localidad'));
+        return view('projects.edit', compact('title', 'tierra', 'typology', 'lands', 'departamentos', 'modalidad', 'project', 'tipologias', 'user', 'localidad'));
     }
 
     /**
@@ -342,13 +362,13 @@ class ProjectController extends Controller
     public function upload(Request $request)
     {
 
-       // Validación
-    $this->validate($request, [
-        'archivo' => 'required|max:30000'
-    ], [
-        'archivo.required' => 'Debe seleccionar un archivo.',
-        'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
-    ]);
+        // Validación
+        $this->validate($request, [
+            'archivo' => 'required|max:30000'
+        ], [
+            'archivo.required' => 'Debe seleccionar un archivo.',
+            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+        ]);
 
         // Obtener ids
         $project_id = $request->project_id;
@@ -380,25 +400,22 @@ class ProjectController extends Controller
             }
 
             $remoteDisk->putFileAs($folder, $file, $filename);
-
         } catch (\Exception $e) {
             return back()->withErrors('Error subiendo archivo');
         }
 
         // Guardar en BD
-         $document = new Documents;
+        $document = new Documents;
 
         $document->project_id = $request->project_id;
         $document->document_id = $request->document_id;
         $document->file_path = $filename;
         $document->title = $request->title;
 
-         $document->save();
+        $document->save();
 
         return redirect("/projects/$project_id")
-               ->with('message', 'Archivo subido');
-
-
+            ->with('message', 'Archivo subido');
     }
 
     // public function ver($project, $document)
@@ -448,51 +465,51 @@ class ProjectController extends Controller
         //
     }
 
-   public function send(Request $request, $id)
-{
-    try {
-        $state = new ProjectStatus();
-        $state->project_id = $id;
-        $state->stage_id = '1';
-        $state->user_id = Auth::user()->id;
-        $state->record = 'Proyecto Enviado!';
-        $state->save();
+    public function send(Request $request, $id)
+    {
+        try {
+            $state = new ProjectStatus();
+            $state->project_id = $id;
+            $state->stage_id = '1';
+            $state->user_id = Auth::user()->id;
+            $state->record = 'Proyecto Enviado!';
+            $state->save();
 
-        // Enviar correo electrónico
-        $project = Project::find($id);
-        $sat_id= $project->sat_id;
-        $sat_nombre = Sat::where('NucCod', $sat_id)->first();
-        $nombre_sat = $sat_nombre->NucNomSat;
-        $nombre = $project->name;
-        $lider = $project->leader_name;
-        $modalidad = Modality::where('id', $project->modalidad_id)->first();
-        $modalidad_nombre = $modalidad->name;
-        $tipo_terreno = Land::where('id',$project->land_id)->first();
-        $terreno = $tipo_terreno->name;
-        $departamento = Departamento::where('DptoId', $project->state_id)->first();
-        $dto = $departamento->DptoNom;
-        $ciudad = Distrito::where('CiuId', $project->city_id)->first();
-        $destrito = $ciudad->CiuNom;
-        $email = 'proyectos_ingresados@muvh.gov.py';
-        $subject = 'PROYECTO INGRESADO';
+            // Enviar correo electrónico
+            $project = Project::find($id);
+            $sat_id = $project->sat_id;
+            $sat_nombre = Sat::where('NucCod', $sat_id)->first();
+            $nombre_sat = $sat_nombre->NucNomSat;
+            $nombre = $project->name;
+            $lider = $project->leader_name;
+            $modalidad = Modality::where('id', $project->modalidad_id)->first();
+            $modalidad_nombre = $modalidad->name;
+            $tipo_terreno = Land::where('id', $project->land_id)->first();
+            $terreno = $tipo_terreno->name;
+            $departamento = Departamento::where('DptoId', $project->state_id)->first();
+            $dto = $departamento->DptoNom;
+            $ciudad = Distrito::where('CiuId', $project->city_id)->first();
+            $destrito = $ciudad->CiuNom;
+            $email = 'proyectos_ingresados@muvh.gov.py';
+            $subject = 'PROYECTO INGRESADO';
 
-        Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno,'departamento' => $dto ,'project', 'distrito' => $destrito], function ($message) use ($email, $subject) {
-            $message->to($email);
-            $message->subject($subject);
-            $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
-        });
+            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project', 'distrito' => $destrito], function ($message) use ($email, $subject) {
+                $message->to($email);
+                $message->subject($subject);
+                $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+            });
 
-        return [
-            'message' => 'success'
-        ];
-    } catch (\Exception $e) {
-        throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+            return [
+                'message' => 'success'
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+        }
     }
-}
 
     public function destroyfile(Request $request)
     {
-    	//Documents::find($id)->delete();
+        //Documents::find($id)->delete();
         //return back()->with('error', 'Se ha eliminado el archivo!');
         //return $request;
         $file = Documents::find($request->delete_id);
@@ -506,9 +523,10 @@ class ProjectController extends Controller
         return back()->with('error', 'Se ha eliminado el archivo!');
     }
 
-    public function distrito($dptoid){
-        $dpto = Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","CiuId");
-        return json_encode($dpto , JSON_UNESCAPED_UNICODE);
+    public function distrito($dptoid)
+    {
+        $dpto = Distrito::where('CiuDptoID', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom", "CiuId");
+        return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
 
 
@@ -519,25 +537,28 @@ class ProjectController extends Controller
     //     //return json_encode($dpto , JSON_UNESCAPED_UNICODE);
     // }
 
-    public function lands($dptoid){
+    public function lands($dptoid)
+    {
         $dpto = ModalityHasLand::join('lands', 'modality_has_lands.land_id', '=', 'lands.id')
-        ->where('modality_id', $dptoid)->get()->sortBy("name")->pluck("name","land_id");
+            ->where('modality_id', $dptoid)->get()->sortBy("name")->pluck("name", "land_id");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
 
-    public function typology($dptoid){
-        $tipo = Land_project::where('land_id',$dptoid)->first();
+    public function typology($dptoid)
+    {
+        $tipo = Land_project::where('land_id', $dptoid)->first();
         //dd($tipo);
         $dpto = Project_tipologies::join('typologies', 'project_type_has_typologies.typology_id', '=', 'typologies.id')
-        ->where('project_type_id',$tipo->project_type_id)->get()->sortBy("name")->pluck("name","typology_id");
+            ->where('project_type_id', $tipo->project_type_id)->get()->sortBy("name")->pluck("name", "typology_id");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
 
-    public function typologyedit($dptoid){
+    public function typologyedit($dptoid)
+    {
         //$tipo = Land_project::where('land_id',$dptoid)->first();
         //dd($tipo);
         $dpto = Project_tipologies::join('typologies', 'project_type_has_typologies.typology_id', '=', 'typologies.id')
-        ->where('typology_id',$dptoid)->get()->sortBy("name")->pluck("name","typology_id");
+            ->where('typology_id', $dptoid)->get()->sortBy("name")->pluck("name", "typology_id");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
 
@@ -548,11 +569,12 @@ class ProjectController extends Controller
     //     return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     // }
 
-    public function localedit($dptoid){
+    public function localedit($dptoid)
+    {
         //$tipo = Land_project::where('land_id',$dptoid)->first();
         //dd($tipo);
         $dpto = Departamento::join('LOCALIDA', 'BAMDPT.DptoId', '=', 'LOCALIDA.CiuId')
-        ->where('LOCALIDA.CiuId',$dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom","LOCALIDA.CiuId");
+            ->where('LOCALIDA.CiuId', $dptoid)->get()->sortBy("CiuNom")->pluck("CiuNom", "LOCALIDA.CiuId");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
     }
 
