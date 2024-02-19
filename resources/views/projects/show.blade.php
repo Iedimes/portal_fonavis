@@ -197,9 +197,17 @@
                                                     @if ($project->getEstado)
                                                     @else
                                                         @if ($uploadedFiles[$item->document_id])
-                                                            <form
+                                                            {{-- <form
                                                                 action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}"
                                                                 method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>
+                                                            </form> --}}
+                                                            <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
                                                                 @csrf
                                                                 @method('DELETE')
 

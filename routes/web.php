@@ -287,7 +287,8 @@ Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload'])
 // Route::get('/ver/{project}/{document}', [App\Http\Controllers\ProjectController::class, 'ver'])->name('ver');
 
 //Eliminar documentos
-Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
+// Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
+Route::get('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
 
 Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
     $path = storage_path("app/{$folder}/{$filename}");

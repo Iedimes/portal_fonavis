@@ -242,8 +242,12 @@ class ProjectController extends Controller
 
     function downloadFile($project, $document_id, $file_name)
     {
-        //return $file_name;
-        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        //Esto es para descargar del disco remoto
+        // return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+
+        //Esto es para descargar del disco local
+        return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+
         //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
         //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
         /*$file = Storage::disk('remote')->get($file_name);
@@ -393,13 +397,21 @@ class ProjectController extends Controller
         $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
         try {
-            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+            // $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
 
-            if (!$remoteDisk->exists($folder)) {
-                $remoteDisk->makeDirectory($folder);
+            // if (!$remoteDisk->exists($folder)) {
+            //     $remoteDisk->makeDirectory($folder);
+            // }
+
+            // $remoteDisk->putFileAs($folder, $file, $filename);
+
+            $localDisk = Storage::disk('local'); // Acceder al disco local
+
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
             }
 
-            $remoteDisk->putFileAs($folder, $file, $filename);
+            $localDisk->putFileAs($folder, $file, $filename);
         } catch (\Exception $e) {
             return back()->withErrors('Error subiendo archivo');
         }
@@ -438,16 +450,17 @@ class ProjectController extends Controller
     // }
 
 
-    public function eliminar(Request $request)
+    public function eliminar(Request $request, $project_id, $document_id)
     {
-        $project_id = $request->input('project_id');
-        $document_id = $request->input('document_id');
 
         // Obtener el documento por project_id y document_id
         $document = Documents::where('project_id', $project_id)->where('document_id', $document_id)->firstOrFail();
 
-        // Eliminar el archivo físicamente
-        Storage::disk('remote')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+        // Eliminar el archivo físicamente del disco remoto
+        // Storage::disk('remote')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+
+        // Eliminar el archivo físicamente del disco local
+         Storage::disk('local')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
 
         // Eliminar el registro de la base de datos
         $document->delete();
