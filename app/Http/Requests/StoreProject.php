@@ -36,7 +36,7 @@ class StoreProject extends FormRequest
             'leader_name' => 'required',
             'localidad' => 'required',
             'res_nro' => 'required',
-            'finca_nro' => 'required',
+            //'finca_nro' => 'required',
             'fechares' => 'required',
             'coordenadax' => 'required',
             'coordenaday' => 'required',
@@ -61,7 +61,7 @@ class StoreProject extends FormRequest
             'leader_name.required'  => 'El campo Nombre del Lider es Requerido',
             'localidad.required'  => 'El campo Localidad es Requerido',
             'res_nro.required'  => 'El campo Resolucion Nro es Requerido',
-            'finca_nro.required'  => 'El campo  Fecha Resolucion es Requerido',
+            //'finca_nro.required'  => 'El campo  Fecha Resolucion es Requerido',
             'fechares.required'  => 'El campo  Fecha Resolucion es Requerido',
             'coordenadax.required'  => 'El campo Coordenada X es Requerido',
             'coordenaday.required'  => 'El campo Coordenada Y es Requerido',
@@ -78,6 +78,4 @@ class StoreProject extends FormRequest
 
         return $sanitized;
     }
-
-
 }
