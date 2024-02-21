@@ -14,7 +14,7 @@ class AddColumnsToProjectsTable extends Migration
     public function up()
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->bigInteger('res_nro')->nullable();
+            //$table->bigInteger('res_nro')->nullable();
             $table->date('fechares')->nullable();
             $table->char('coordenadax')->nullable();
             $table->char('coordenaday')->nullable();
