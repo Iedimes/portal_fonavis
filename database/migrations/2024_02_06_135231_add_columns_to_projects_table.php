@@ -15,10 +15,10 @@ class AddColumnsToProjectsTable extends Migration
     {
         Schema::table('projects', function (Blueprint $table) {
             //$table->bigInteger('res_nro')->nullable();
-            $table->date('fechares')->nullable();
-            $table->char('coordenadax')->nullable();
-            $table->char('coordenaday')->nullable();
-            $table->string('finca_nro')->nullable();
+            //$table->date('fechares')->nullable();
+            //$table->char('coordenadax')->nullable();
+            //$table->char('coordenaday')->nullable();
+            //$table->string('finca_nro')->nullable();
             $table->char('ubicacion')->nullable();
         });
     }
