@@ -55,7 +55,7 @@ return [
         'remote' => [
             'driver' => 'local',
             //'root' => '\\\\192.168.98.55\\C$\\fonavis',
-            'root' => '\\\\Muvh-storage\repo_fonavis',
+            'root' => '\\\\192.168.100.183\repo_fonavis',
             'username' => 'Repositorio',
             'password' => 'fon@vis.2024'
 
