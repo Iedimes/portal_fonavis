@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\AdminUser\ImpersonalLoginAdminUser;
 use App\Http\Requests\Admin\AdminUser\IndexAdminUser;
 use App\Http\Requests\Admin\AdminUser\StoreAdminUser;
 use App\Http\Requests\Admin\AdminUser\UpdateAdminUser;
-use Brackets\AdminAuth\Models\AdminUser;
+use App\Models\AdminUser;
 use Spatie\Permission\Models\Role;
 use Brackets\AdminAuth\Activation\Facades\Activation;
 use Brackets\AdminAuth\Services\ActivationService;
@@ -54,7 +54,7 @@ class AdminUsersController extends Controller
     public function index(IndexAdminUser $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(AdminUser::class)->processRequestAndGet(
+       return $data = AdminListing::create(AdminUser::class)->processRequestAndGet(
             // pass the request with params
             $request,
 

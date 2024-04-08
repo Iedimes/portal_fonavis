@@ -373,3 +373,34 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
         });
     });
 });
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('dependencies')->name('dependencies/')->group(static function() {
+            Route::get('/',                                             'DependenciesController@index')->name('index');
+            Route::get('/create',                                       'DependenciesController@create')->name('create');
+            Route::post('/',                                            'DependenciesController@store')->name('store');
+            Route::get('/{dependency}/edit',                            'DependenciesController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'DependenciesController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{dependency}',                                'DependenciesController@update')->name('update');
+            Route::delete('/{dependency}',                              'DependenciesController@destroy')->name('destroy');
+        });
+    });
+});
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function() {
+            Route::get('/',                                             'AdminUsersDependenciesController@index')->name('index');
+            Route::get('/create',                                       'AdminUsersDependenciesController@create')->name('create');
+            Route::post('/',                                            'AdminUsersDependenciesController@store')->name('store');
+            Route::get('/{adminUsersDependency}/edit',                  'AdminUsersDependenciesController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'AdminUsersDependenciesController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{adminUsersDependency}',                      'AdminUsersDependenciesController@update')->name('update');
+            Route::delete('/{adminUsersDependency}',                    'AdminUsersDependenciesController@destroy')->name('destroy');
+        });
+    });
+});
