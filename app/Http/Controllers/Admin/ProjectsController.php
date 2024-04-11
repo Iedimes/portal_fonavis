@@ -16,6 +16,8 @@ use App\Models\Stage;
 use App\Models\ProjectStatus;
 use App\Models\Sat;
 use App\Models\Departamento;
+use App\Models\ProjectHasPostulantes;
+use App\Models\Documents;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -116,8 +118,9 @@ class ProjectsController extends Controller
     public function show(Project $project)
     {
         $this->authorize('admin.project.show', $project);
-
+        $id=$project->id;
         $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
         $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
         ->where('category_id',1)
         ->get();
@@ -125,9 +128,21 @@ class ProjectsController extends Controller
                     ->orderBy('created_at')
                     ->get();
 
+                    // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
         //return $history;
 
-        return view('admin.project.show', compact('project', 'docproyecto','history'));
+        return view('admin.project.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
     }
 
 

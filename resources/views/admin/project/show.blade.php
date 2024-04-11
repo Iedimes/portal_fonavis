@@ -12,7 +12,7 @@
         <div class="row invoice-info">
             <div class="col-sm-4 invoice-col">
             <address>
-            <strong>Lider:</strong> {{utf8_encode($project->leader_name)}}<br>
+            <strong>Lider:</strong> {{($project->leader_name)}}<br>
             <strong>Departamento: </strong>{{utf8_encode($project->state_id?$project->getState->DptoNom:"")}}<br>
             <strong>Modalidad:</strong> {{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}<br>
             <strong>Estado:</strong> <span class="badge bg-success " style="font-size:1.1em; color:white">  {{ $project->getEstado ? $project->getEstado->getStage->name : "Pendiente"}}</span><br>
@@ -24,7 +24,7 @@
             <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
             <strong>Distrito:</strong> {{utf8_encode($project->city_id)}}<br>
             <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
-            <strong>Cantidad de Viviendas:</strong> {{utf8_encode($project->households)}}<br>
+            <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
             </address>
             </div>
 
@@ -41,9 +41,16 @@
             @if (empty($project->getEstado))
 
             @else
-            <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-            <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
-             {{-- <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a> --}}
+
+                    @if ( $project->getEstado->stage_id == 2 && Auth::user()->rol_app->dependency_id == 1)
+
+                    @else
+                        <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
+                    @endif
+                    @if ( $project->getEstado->stage_id == 1)
+                    <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+                    {{-- <a href="{{ url('admin/project-statuses/'. $project->id .'/eliminar') }}" type="button"  class="btn btn-primary">VOLVER A ESTADO ANTERIOR</a> --}}
+                    @endif
             @endif
     </div>
     @if(session('success'))
@@ -71,9 +78,7 @@
                     <tr>
                     <th>#</th>
                     <th>Documento</th>
-                    <th class="text-center">N° FOLIO</th>
-                    <th class="text-center">Check</th>
-                    <th></th>
+                    <th>Ver</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,14 +86,21 @@
                 <tr>
                     <td>{{ $key+1 }}</td>
                     <td>{{ $item->document->name}}</td>
-                    <td class="text-center">
-                        {{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }}
-                    </td>
-                    <td class="text-center">
+                    <td>@if ($uploadedFiles[$item->document_id])
 
-                        <i class="fa fa-check-square text-success " aria-hidden="true"></i>
+                        <a
+                            href="{{ url('get/' . $project->id . '/' . $item->document_id . '/' . $uploadedFiles[$item->document_id]) }}">
+                            <button class="btn btn-info">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </a>
+@endif</td>
+
+
+                    <td>
+
                     </td>
-                    <td></td>
+
                 </tr>
                 @endforeach
                 </tbody>
