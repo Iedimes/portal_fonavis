@@ -54,7 +54,7 @@ class AdminUsersController extends Controller
     public function index(IndexAdminUser $request)
     {
         // create and AdminListing instance for a specific model and
-       return $data = AdminListing::create(AdminUser::class)->processRequestAndGet(
+       $data = AdminListing::create(AdminUser::class)->processRequestAndGet(
             // pass the request with params
             $request,
 
