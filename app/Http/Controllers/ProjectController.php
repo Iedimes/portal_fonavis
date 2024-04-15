@@ -19,7 +19,7 @@ use App\Models\ProjectHasPostulantes;
 use App\Models\Land_project;
 use App\Models\ModalityHasLand;
 use App\Models\Project_tipologies;
-use App\Models\ProjectStatus;
+use App\Models\ProjectStatusF;
 use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use PDF;
@@ -208,7 +208,7 @@ class ProjectController extends Controller
 
         $claves = $docproyecto->pluck('document_id');
 
-        $history = ProjectStatus::where('project_id', $project['id'])
+        $history = ProjectStatusF::where('project_id', $project['id'])
             ->orderBy('created_at')
             ->get();
 
@@ -481,7 +481,7 @@ class ProjectController extends Controller
     public function send(Request $request, $id)
     {
         try {
-            $state = new ProjectStatus();
+            $state = new ProjectStatusF();
             $state->project_id = $id;
             $state->stage_id = '1';
             $state->user_id = Auth::user()->id;

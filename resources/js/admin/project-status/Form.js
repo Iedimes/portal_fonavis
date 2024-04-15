@@ -11,7 +11,8 @@ Vue.component('project-status-form', {
                 user_id:  this.user,
                 record:  '' ,
 
-            }
+            },
+            mediaCollections: ['gallery']
         }
     }
 

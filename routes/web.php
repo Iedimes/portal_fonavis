@@ -280,7 +280,10 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 
 //Adjuntar documentos
 
-Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
+// Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
+Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
+
+
 
 // Ver documento
 

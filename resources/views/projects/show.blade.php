@@ -177,7 +177,7 @@
                                                             </button>
                                                         </a>
                                                     @else
-                                                        <form action="/upload" method="POST" enctype="multipart/form-data">
+                                                        <form action="/levantar" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <input type="hidden" name="project_id"
                                                                 value="{{ $project->id }}">

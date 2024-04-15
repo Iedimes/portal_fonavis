@@ -46,11 +46,6 @@
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
-                    @include('brackets/admin-ui::admin.includes.media-uploader', [
-                        'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),
-                        //'media' => $call->getThumbs200ForCollection('gallery'),
-                        'label' => 'Documentos Adjuntos'
-                    ])
                 </div>
 
                 <div class="card-footer">
