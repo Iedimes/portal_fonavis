@@ -39,13 +39,13 @@
             </div>
 
             @if (empty($project->getEstado))
-                {{-- <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a> --}}
+
             @else
 
-                    @if ( $project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
+                    @if ( $project->getEstado->stage_id == 2 && Auth::user()->rol_app->dependency_id == 2)
                         <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-                        <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
                     @endif
+
             @endif
     </div>
     @if(session('success'))

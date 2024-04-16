@@ -43,6 +43,8 @@ class ProjectsController extends Controller
     {
         // create and AdminListing instance for a specific model and
 
+        $usuarioRol = Auth::user()->rol_app->dependency_id;
+
         $data = AdminListing::create(Project::class)->processRequestAndGet(
             // pass the request with params
             $request,
@@ -66,7 +68,7 @@ class ProjectsController extends Controller
             return ['data' => $data];
         }
 
-        return view('admin.project.index', ['data' => $data]);
+        return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol]);
     }
 
 
@@ -145,10 +147,41 @@ class ProjectsController extends Controller
         return view('admin.project.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
     }
 
+    public function showDGJN(Project $project)
+    {
+        $this->authorize('admin.project.show', $project);
+        $id=$project->id;
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+        ->where('category_id',1)
+        ->get();
+        $history = ProjectStatus::where('project_id',$project['id'])
+                    ->orderBy('created_at')
+                    ->get();
+
+                    // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
+        //return $history;
+
+        return view('admin.project.DGJN.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
 
     public function transition(Project $project)
     {
         $project->getEstado->getStage->id;
+        $estado=$project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $email = Auth::user()->email;
         $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
@@ -160,7 +193,7 @@ class ProjectsController extends Controller
         }*/
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
-        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email'));
+        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado'));
 
     }
 

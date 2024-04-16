@@ -334,6 +334,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/create',                                       'ProjectsController@create')->name('create');
             Route::post('/',                                            'ProjectsController@store')->name('store');
             Route::get('/{project}/show',                               'ProjectsController@show');
+            Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');

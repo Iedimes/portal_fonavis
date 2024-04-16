@@ -35,6 +35,7 @@
         <project-status-form
             :action="'{{ url('admin/project-statuses') }}'"
             :project="{{$project->id}}"
+            :estado={{$estado}}
             :stages="{{ $stages->toJson() }}"
             :user="{{$user}}"
             email={{$email}}
@@ -46,11 +47,16 @@
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
+                    @if ($estado==1)
+
+                    @else
                     @include('brackets/admin-ui::admin.includes.media-uploader', [
                         'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),
                         //'media' => $call->getThumbs200ForCollection('gallery'),
                         'label' => 'Documentos Adjuntos'
                     ])
+                    @endif
+
                 </div>
 
                 <div class="card-footer">

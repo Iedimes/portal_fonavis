@@ -62,6 +62,20 @@ return [
             'allow_self_signed' => true
         ],
 
+        'mail3' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL3_HOST'),
+            'port' => env('MAIL3_PORT'),
+            'username' => env('MAIL3_USERNAME'),
+            'password' => env('MAIL3_PASSWORD'),
+            'encryption' => env('MAIL3_ENCRYPTION'),
+            'timeout' => null,
+            'auth_mode' => null,
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

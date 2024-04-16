@@ -59,6 +59,8 @@
                                         <th is='sortable' :column="'modalidad_id'">{{ trans('admin.project.columns.modalidad_id') }}</th>
                                         <th is='sortable' :column="'leader_name'">{{ trans('admin.project.columns.leader_name') }}</th>
                                         <th is='sortable' :column="'localidad'">{{ trans('admin.project.columns.localidad') }}</th>
+                                        {{-- <th is='sortable' :column="'estado'">{{ trans('Estado') }}</th>
+                                        <th is='sortable' :column="'rol'">{{ trans('Rol') }}</th> --}}
 
 
                                         <th></th>
@@ -93,13 +95,24 @@
                                         <td>@{{ item.get_modality.name }}</td>
                                         <td>@{{ item.leader_name }}</td>
                                         <td>@{{ item.localidad }}</td>
-
+                                        {{-- <td>@{{ item.get_estado ? item.get_estado.stage_id : '' }}</td>
+                                        <td>@{{ item.usuarioRol }}</td> --}}
+                                        <td>{{Auth::user()->rol_app->dependency_id}}</td>
 
                                         <td>
                                             <div class="row no-gutters">
-                                                <div class="col-auto">
+                                                @if (Auth::user()->rol_app->dependency_id == 1)
+                                                <div class="col-auto"  v-if="!item.get_estado || item.get_estado === 1">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/show'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
+                                                @elseif (Auth::user()->rol_app->dependency_id == 2)
+                                                <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id == 2">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+                                                @endif
+                                                {{-- <div class="col-auto" v-else-if="item.get_estado && item.get_estado.stage_id == 2">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div> --}}
                                                 {{--<div class="col-auto">
                                                     <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
                                                 </div>--}}
