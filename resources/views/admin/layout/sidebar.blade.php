@@ -24,6 +24,7 @@
            {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/project-statuses') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.project-status.title') }}</a></li>--}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/dependencies') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.dependency.title') }}</a></li>
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.admin-users-dependency.title') }}</a></li> --}}
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/media') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.medium.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 
@@ -55,7 +56,8 @@
             {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/project-statuses') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.project-status.title') }}</a></li>--}}
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/dependencies') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.dependency.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.admin-users-dependency.title') }}</a></li>
-            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/media') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.medium.title') }}</a></li>
+           {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 
              <li class="nav-title">{{ trans('brackets/admin-ui::admin.sidebar.settings') }}</li>

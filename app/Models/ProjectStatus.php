@@ -22,11 +22,17 @@ class ProjectStatus extends Model implements HasMedia
     protected $table = 'project_status';
 
     protected $fillable = ['project_id','stage_id','user_id','record'];
+    protected $with = ['imagen'];
 
     /*public function getDateFormat()
     {
         return 'Y-d-m H:i:s.v';
     }*/
+    public function imagen()
+    {
+        return $this->hasMany('App\Models\Medium', 'model_id', 'id');
+
+    }
 
     public function getStage() {
         return $this->hasOne('App\Models\Stage','id','stage_id');

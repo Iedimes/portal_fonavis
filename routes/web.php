@@ -335,6 +335,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/',                                            'ProjectsController@store')->name('store');
             Route::get('/{project}/show',                               'ProjectsController@show');
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
+            Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
@@ -390,6 +391,37 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'DependenciesController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{dependency}',                                'DependenciesController@update')->name('update');
             Route::delete('/{dependency}',                              'DependenciesController@destroy')->name('destroy');
+        });
+    });
+});
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function() {
+            Route::get('/',                                             'AdminUsersDependenciesController@index')->name('index');
+            Route::get('/create',                                       'AdminUsersDependenciesController@create')->name('create');
+            Route::post('/',                                            'AdminUsersDependenciesController@store')->name('store');
+            Route::get('/{adminUsersDependency}/edit',                  'AdminUsersDependenciesController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'AdminUsersDependenciesController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{adminUsersDependency}',                      'AdminUsersDependenciesController@update')->name('update');
+            Route::delete('/{adminUsersDependency}',                    'AdminUsersDependenciesController@destroy')->name('destroy');
+        });
+    });
+});
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('media')->name('media/')->group(static function() {
+            Route::get('/',                                             'MediaController@index')->name('index');
+            Route::get('/create',                                       'MediaController@create')->name('create');
+            Route::post('/',                                            'MediaController@store')->name('store');
+            Route::get('/{medium}/edit',                                'MediaController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'MediaController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{medium}',                                    'MediaController@update')->name('update');
+            Route::delete('/{medium}',                                  'MediaController@destroy')->name('destroy');
         });
     });
 });

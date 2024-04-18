@@ -18,6 +18,7 @@ use App\Models\Sat;
 use App\Models\Departamento;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Documents;
+use App\Models\Medium;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -175,6 +176,22 @@ class ProjectsController extends Controller
         //return $history;
 
         return view('admin.project.DGJN.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
+    public function showFONAVIS(Project $project)
+    {
+        $this->authorize('admin.project.show', $project);
+        $id=$project->id;
+        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 3)->get();
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+
+
+
+        //return $history;
+
+        return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
     }
 
 

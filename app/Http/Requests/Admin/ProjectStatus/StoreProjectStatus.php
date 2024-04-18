@@ -24,15 +24,24 @@ class StoreProjectStatus extends FormRequest
      * @return array
      */
     public function rules(): array
-    {
-        return [
-            'project_id' => ['required'],
-            'stage' => ['required'],
-            'user_id' => ['required', 'integer'],
-            'record' => ['required', 'string'],
+{
+    $rules = [
+        'project_id' => ['required'],
+        'stage' => ['required'],
+        'user_id' => ['required', 'integer'],
+        'record' => ['required', 'string'],
+    ];
 
-        ];
+    $stageId = $this->getStageId(); // Almacenar el valor antes de la condición
+
+    if ($stageId === 3) {
+        $rules['gallery'] = ['required'];
+    } else {
+        //dd('Sale por Else'.$stageId); // Imprimir el valor si no se entra en la condición
     }
+
+    return $rules;
+}
 
     /**
     * Modify input data
@@ -53,3 +62,4 @@ class StoreProjectStatus extends FormRequest
          return $this->get('stage')['id'];
      }
 }
+
