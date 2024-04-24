@@ -83,8 +83,7 @@
                     <td>{{ $item->document->name}}</td>
                     <td>@if ($uploadedFiles[$item->document_id])
 
-                        <a
-                            href="{{ url('get/' . $project->id . '/' . $item->document_id . '/' . $uploadedFiles[$item->document_id]) }}">
+                        <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
                             <button class="btn btn-info">
                                 <i class="fa fa-search"></i>
                             </button>

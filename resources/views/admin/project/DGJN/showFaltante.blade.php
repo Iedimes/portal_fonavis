@@ -42,7 +42,7 @@
 
             @else
 
-                    @if ( $project->getEstado->stage_id == 2 && Auth::user()->rol_app->dependency_id == 2)
+                    @if ( $project->getEstado->stage_id == 5 && Auth::user()->rol_app->dependency_id == 2)
                         <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
                     @endif
 
@@ -77,13 +77,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach ($docproyecto as $key => $item)
+                @foreach ($documentos as $key => $item)
                 <tr>
                     <td>{{ $key+1 }}</td>
-                    <td>{{ $item->document->name}}</td>
+                    <td>{{ $item->file_path}}</td>
                     <td>@if ($uploadedFiles[$item->document_id])
 
-                        <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+                        {{-- <a
+                            href="{{ url('get/' . $project->id . '/faltantes/' . $item->document_id . '/' . $uploadedFiles[$item->document_id]) }}">
+                            <button class="btn btn-info">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </a> --}}
+                        <a href="{{ route('bajarDocumento', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
                             <button class="btn btn-info">
                                 <i class="fa fa-search"></i>
                             </button>

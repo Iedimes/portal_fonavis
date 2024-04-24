@@ -34,7 +34,7 @@ class StoreProjectStatus extends FormRequest
 
     $stageId = $this->getStageId(); // Almacenar el valor antes de la condición
 
-    if ($stageId === 3) {
+    if ($stageId === 3 || $stageId === 5) {
         $rules['gallery'] = ['required'];
     } else {
         //dd('Sale por Else'.$stageId); // Imprimir el valor si no se entra en la condición

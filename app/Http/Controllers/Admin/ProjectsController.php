@@ -18,6 +18,7 @@ use App\Models\Sat;
 use App\Models\Departamento;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Documents;
+use App\Models\Documentsmissing;
 use App\Models\Medium;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
@@ -178,9 +179,38 @@ class ProjectsController extends Controller
         return view('admin.project.DGJN.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
     }
 
+    public function showDGJNFALTANTE(Project $project)
+    {
+        // $this->authorize('admin.project.show', $project);
+        //return "DOCUMENTO FALTANTE";
+        $id=$project->id;
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $documentos = Documentsmissing::where('project_id',$id)->get();
+        $history = ProjectStatus::where('project_id',$project['id'])
+                    ->orderBy('created_at')
+                    ->get();
+
+                    // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($documentos as $item) {
+            $uploadedFile = Documentsmissing::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
+        //return $history;
+
+        return view('admin.project.DGJN.showFaltante', compact('project','history', 'postulantes','uploadedFiles', 'documentos'));
+    }
+
     public function showFONAVIS(Project $project)
     {
-        $this->authorize('admin.project.show', $project);
+        // $this->authorize('admin.project.show', $project);
         $id=$project->id;
         $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 3)->get();
         $project_type= Land_project::where('land_id',$project->land_id)->first();

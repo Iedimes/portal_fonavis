@@ -101,16 +101,17 @@
                                                 'btn btn-success': item.get_estado && item.get_estado.stage_id === 1,
                                                 'btn btn-warning': item.get_estado && item.get_estado.stage_id === 2,
                                                 'btn btn-danger': item.get_estado && item.get_estado.stage_id === 3,
-                                                'btn btn-orange': item.get_estado && item.get_estado.stage_id === 4,
-                                                'text-light': item.get_estado && (item.get_estado.stage_id === 1 || item.get_estado.stage_id === 3)
+                                                'btn btn-info': item.get_estado && item.get_estado.stage_id === 4,
+                                                'text-light': item.get_estado && (item.get_estado.stage_id === 1 || item.get_estado.stage_id === 4)
                                             }">
                                                 @{{ item.get_estado && item.get_estado.stage_id === 1 ? 'ENVIADO' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 2 ? 'REVISION PRELIMINAR' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 3 ? 'APROBADO DGJN' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 4 ? 'ARCHIVADO DGJN' : '' }}
-                                                @{{ item.get_estado && item.get_estado.stage_id === 5 ? 'RECHAZADO DGJN' : '' }}
-                                                @{{ item.get_estado && item.get_estado.stage_id === 6 ? 'EVALUACION SOCIAL' : '' }}
-                                                @{{ item.get_estado && item.get_estado.stage_id === 7 ? 'ENVIAR GRUPO FAMILIAR' : '' }}
+                                                @{{ item.get_estado && item.get_estado.stage_id === 5 ? 'CON DOCUMENTACION DGJN' : '' }}
+                                                @{{ item.get_estado && item.get_estado.stage_id === 6 ? 'RECHAZADO DGJN' : '' }}
+                                                @{{ item.get_estado && item.get_estado.stage_id === 7 ? 'EVALUACION SOCIAL' : '' }}
+                                                @{{ item.get_estado && item.get_estado.stage_id === 8 ? 'ENVIAR GRUPO FAMILIAR' : '' }}
                                             </span>
                                         </td>
 
@@ -126,12 +127,22 @@
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 2">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
+
                                                 @endif
+
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 3">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 2)
+
+                                                <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 5">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJNFALTANTE'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+
                                                 @endif
 
 

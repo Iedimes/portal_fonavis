@@ -211,21 +211,30 @@ class ProjectStatusController extends Controller
                 ]);
             }
         }elseif ($sanitized['stage_id'] == 4) { //Estado ARCHIVADO DGJN
-            return "Estado ARCHIVADO DGJN";
             $projecto = Project::where('id', $request->project_id)->get();
             $sat = $projecto[0]->sat_id;
+            $useremail = User::where('sat_ruc', $sat)->get()->first();
+            $satnombre = Sat::where('NucCod', $sat)->get()->first();
 
-            //return "Estamos en estado 4, aqui vamos a devolver el correo a Fonavis";
-            $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Aqui debe ir el correo de DGFO, DGSO y SAT - Recibe de DNJN
-            $toEmail = $useremail1;
-            $subject = 'INFORME DGJN '.$projecto[0]->name;
+            // Crear un array para almacenar las direcciones de correo electrónico
+            $toEmails = [];
+
+            if ($useremail) {
+                $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
+            }
+
+            // Agregar otras direcciones de correo duro
+            $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
+            $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+
+            $subject = 'INFORME DGJN EN ARCHIVO '.$projecto[0]->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
-                    $message->to($toEmail);
+                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+                    $message->to($toEmails);
                     $message->subject($subject);
                     $message->from('osemidei@muvh.gov.py', env('APP_NAME'));
                 });

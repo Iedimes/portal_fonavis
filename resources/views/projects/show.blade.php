@@ -33,13 +33,20 @@
             <i class="fa fa-plus-circle"></i> Enviar al MUVH
         </button> --}}
 
-                    @if ($project->getEstado)
-                    @else
-                        <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()"
-                            {{ $todosCargados ? '' : 'disabled' }}>
-                            <i class="fa fa-plus-circle"></i> Enviar al MUVH
-                        </button>
-                    @endif
+        @if (($project->getEstado))
+
+        @else
+            <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()"
+                {{ $todosCargados ? '' : 'disabled' }}>
+                <i class="fa fa-plus-circle"></i> Enviar al MUVH
+            </button>
+        @endif
+
+        @if ($project->getEstado && $project->getEstado->stage_id == 4)
+            <a href="{{ url('projectsDoc/'.$project->id) }}" class="btn btn-success float-right">
+                <i class="fa fa-plus-circle"></i> Enviar Documento solicitado
+            </a>
+        @endif
 
                     {{-- <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
             <i class="fa fa-plus-circle"></i> Enviar al MUVH
@@ -413,7 +420,7 @@
                 // Verificar si todos los documentos están cargados
                 const rows = document.querySelectorAll('tr');
                 rows.forEach(row => {
-                    const uploadForm = row.querySelector('form[action="/upload"]');
+                    const uploadForm = row.querySelector('form[action="/levantar"]');
                     if (uploadForm) {
                         todosCargados = false;
                     }

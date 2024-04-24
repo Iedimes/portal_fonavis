@@ -245,7 +245,10 @@ Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->n
 
 Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
 
-Route::get('get/{project}/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'downloadFile'])->name('downloadFile');
+Route::get('download/{project}/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'downloadFile'])->name('downloadFile');
+
+Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
+
 
 Route::resource('projects', ProjectController::class);
 Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
@@ -282,6 +285,8 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 
 // Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
+Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
+Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
 
 
 
@@ -292,6 +297,8 @@ Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload'
 //Eliminar documentos
 // Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
 Route::get('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
+Route::get('documents/eliminardocumento/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
+Route::post('/enviar-documentos-faltantes', [App\Http\Controllers\ProjectController::class, 'enviarDocumentosFaltantes'])->name('enviarDocumentosFaltantes');
 
 Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
     $path = storage_path("app/{$folder}/{$filename}");
@@ -335,6 +342,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/',                                            'ProjectsController@store')->name('store');
             Route::get('/{project}/show',                               'ProjectsController@show');
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
+            Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');
             Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
