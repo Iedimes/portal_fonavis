@@ -249,24 +249,24 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico'
                 ]);
             }
-        }elseif ($sanitized['stage_id'] == 5) { //Estado RECHAZADO DGJN
-            return "Estado RECHAZADO DGJN";
+        }elseif ($sanitized['stage_id'] == 6) { //Estado RECHAZADO DGJN
+            //return "Estado RECHAZADO DGJN";
             $projecto = Project::where('id', $request->project_id)->get();
             $sat = $projecto[0]->sat_id;
 
-            //return "Estamos en estado 3, aqui vamos a devolver el correo a Fonavis";
+            //return "Estamos en estado 6, aqui vamos a devolver el correo a Fonavis";
             $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Aqui debe ir el correo de DGFO - Recibe de DNJN
             $toEmail = $useremail1;
-            $subject = 'INFORME DGJN '.$projecto[0]->name;
+            $subject = 'INFORME PROYECTO RECHAZADO POR DGJN '.$projecto[0]->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
-                    $message->from('osemidei@muvh.gov.py', env('APP_NAME'));
+                    $message->from('osemidei@muvh.gov.py', env('APP_NAME')); // Mi correo está como si fuera DGJN
                 });
 
                 return response()->json([

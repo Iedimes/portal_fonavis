@@ -96,13 +96,15 @@
                                         <td>@{{ item.leader_name }}</td>
                                         <td>@{{ item.localidad }}</td>
                                         {{-- <td>@{{ item.get_estado ? item.get_estado.stage_id : '' }}</td> --}}
-                                        <td>
+                                        {{-- <td>
                                             <span v-bind:class="{
                                                 'btn btn-success': item.get_estado && item.get_estado.stage_id === 1,
                                                 'btn btn-warning': item.get_estado && item.get_estado.stage_id === 2,
                                                 'btn btn-danger': item.get_estado && item.get_estado.stage_id === 3,
-                                                'btn btn-info': item.get_estado && item.get_estado.stage_id === 4,
-                                                'text-light': item.get_estado && (item.get_estado.stage_id === 1 || item.get_estado.stage_id === 4)
+                                                'btn btn-success': item.get_estado && item.get_estado.stage_id === 4,
+                                                'btn btn-warning': item.get_estado && item.get_estado.stage_id === 5,
+                                                'btn btn-danger': item.get_estado && item.get_estado.stage_id === 6,
+                                                'text-light': item.get_estado && (item.get_estado.stage_id === 1 || item.get_estado.stage_id === 6)
                                             }">
                                                 @{{ item.get_estado && item.get_estado.stage_id === 1 ? 'ENVIADO' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 2 ? 'REVISION PRELIMINAR' : '' }}
@@ -112,6 +114,51 @@
                                                 @{{ item.get_estado && item.get_estado.stage_id === 6 ? 'RECHAZADO DGJN' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 7 ? 'EVALUACION SOCIAL' : '' }}
                                                 @{{ item.get_estado && item.get_estado.stage_id === 8 ? 'ENVIAR GRUPO FAMILIAR' : '' }}
+                                            </span>
+                                        </td> --}}
+
+                                        <td>
+                                            <span>
+                                                <button v-if="item.get_estado && item.get_estado.stage_id === 1"
+                                                        class="btn"
+                                                        style="background-color: green; color: white;">
+                                                    ENVIADO
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 2"
+                                                        class="btn"
+                                                        style="background-color: orange; color: white;">
+                                                    REVISION PRELIMINAR
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 3"
+                                                        class="btn"
+                                                        style="background-color: rgb(3, 78, 20); color: white;">
+                                                    APROBADO DGJN
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 4"
+                                                        class="btn"
+                                                        style="background-color: rgb(169, 197, 7); color: white;">
+                                                    ARCHIVADO DGJN
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 5"
+                                                        class="btn"
+                                                        style="background-color: rgb(68, 128, 123); color: white;">
+                                                    CON DOCUMENTACION DGJN
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 6"
+                                                        class="btn"
+                                                        style="background-color: red; color: white;">
+                                                    RECHAZADO DGJN
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 7"
+                                                        class="btn"
+                                                        style="background-color: blue; color: white;">
+                                                    EVALUACION SOCIAL
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 8"
+                                                        class="btn"
+                                                        style="background-color: purple; color: white;">
+                                                    ENVIAR GRUPO FAMILIAR
+                                                </button>
                                             </span>
                                         </td>
 
