@@ -118,30 +118,31 @@
 
 <!-- Modal para Borrar Imagen -->
 
-{{-- <div class="modal modal-danger fade" id="modal-danger">
-        <div class="modal-dialog">
-          <div class="modal-content">
+<div class="modal modal-danger fade" id="modal-danger">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span></button>
-              <h4 class="modal-title"><i class="fa  fa-warning"></i> Eliminar Documento</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-warning"></i> Eliminar Miembro</h4>
             </div>
             <div class="modal-body">
-                <form action="{{ action('PostulantesController@destroyfile') }}" method="post">
-                        {{ csrf_field() }}
-                <p id="demo"></p>
-                <input id="delete_id" name="delete_id" type="hidden" value="" />
+                <form action="{{ route('eliminar-miembro') }}" method="post">
+                    {{ csrf_field() }}
+                    <p id="demo"></p>
+                    <input id="delete_id" name="delete_id" type="hidden" value="" />
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
-              <button type="submit" class="btn btn-outline">Eliminar</button>
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-outline">Eliminar</button>
             </div>
-        </form>
-          </div>
-          <!-- /.modal-content -->
+                </form>
         </div>
-        <!-- /.modal-dialog -->
-      </div> --}}
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
 
       {{-- <div class="modal modal-danger fade" id="modal-danger">
         <div class="modal-dialog">

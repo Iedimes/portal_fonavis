@@ -157,7 +157,12 @@
                                                 <button v-else-if="item.get_estado && item.get_estado.stage_id === 8"
                                                         class="btn"
                                                         style="background-color: purple; color: white;">
-                                                    ENVIAR GRUPO FAMILIAR
+                                                    GRUPO FAMILIAR ENVIADO
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 9"
+                                                        class="btn"
+                                                        style="background-color: rgb(9, 170, 170); color: white;">
+                                                    CON DICTAMEN SOCIAL
                                                 </button>
                                             </span>
                                         </td>
@@ -188,6 +193,14 @@
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 5">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJNFALTANTE'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 3)
+
+                                                <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 8">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGSO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
 
                                                 @endif

@@ -42,7 +42,7 @@
 
             @else
 
-                    @if ( $project->getEstado->stage_id == 3 && Auth::user()->rol_app->dependency_id == 1)
+                    @if ( $project->getEstado->stage_id == 8 && Auth::user()->rol_app->dependency_id == 3)
                         <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
                     @endif
 
@@ -62,57 +62,46 @@
 </div>
 
 
-@if ($project->getEstado->stage_id == 7 && Auth::user()->rol_app->dependency_id == 1)
-    <div class="card">
-        <div class="card-header text-center">
-            SAT DEBE PRESENTAR CARPETA SOCIAL
-        </div>
+<div class="card">
+    <div class="card-header text-center">
+        DOCUMENTOS PRESENTADOS
     </div>
-@else
-    <!-- Código adicional cuando la condición no se cumple -->
-    <div class="card">
-        <div class="card-header text-center">
-            INFORME DGJN
-        </div>
-        <div class="card-body">
+    <div class="card-body">
             <div class="card-block">
                 <table class="table table-hover table-listing">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Documento</th>
-                            {{-- <th>Opciones</th> --}}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $imagenCount = 0; // Variable de conteo inicializada a 0
-                        @endphp
-                        @foreach ($proyectoEstado as $key => $item)
-                            @foreach ($item->imagen as $imagen)
-                                <tr>
-                                    <td>{{ ++$imagenCount }}</td>
-                                    <td>DOCUMENTO ADJUNTO</td>
-                                    {{-- <td>{{ $imagen->file_name }}</td> --}}
-                                    <td>
-                                        <div>
-                                            <p class="card-text">
-                                                <strong>VER DOCUMENTO ADJUNTO:</strong>
-                                                <a class="btn btn-sm btn-danger" href="/media/{{$imagen->id}}/{{$imagen->file_name}}" target="_blank" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
-                                                    <i class="fa fa-file-pdf-o"></i> PDF
-                                                </a>
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
+                <thead>
+                    <tr>
+                    <th>#</th>
+                    <th>Documento</th>
+                    <th>Ver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach ($docproyecto as $key => $item)
+                <tr>
+                    <td>{{ $key+1 }}</td>
+                    <td>{{ $item->document->name}}</td>
+                    <td>@if ($uploadedFiles[$item->document_id])
+
+                        <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+                            <button class="btn btn-info">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </a>
+@endif</td>
+
+
+                    <td>
+
+                    </td>
+
+                </tr>
+                @endforeach
+                </tbody>
                 </table>
             </div>
-        </div>
     </div>
-@endif
+</div>
 
 
 @endsection

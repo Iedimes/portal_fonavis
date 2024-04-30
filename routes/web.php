@@ -253,7 +253,7 @@ Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\
 Route::resource('projects', ProjectController::class);
 Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
 
-Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF']);
+Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF'])->name('generate-pdf');
 
 Route::get('projects/ajax/{state_id?}/cities', [App\Http\Controllers\ProjectController::class, 'distrito']);
 Route::get('projects/ajax/{state_id?}/lands', [App\Http\Controllers\ProjectController::class, 'lands']);
@@ -279,7 +279,9 @@ Route::post('postulantes/upload', 'PostulantesController@upload');
 Route::post('postulantes/destroyfile', 'PostulantesController@destroyfile');
 
 Route::post('postulantes/destroy', 'PostulantesController@destroy');
-Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro');*/
+*/
+
+Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro')->name('eliminar-miembro');
 
 //Adjuntar documentos
 
@@ -287,6 +289,8 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
 Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
+Route::get('projectsMiembros/{id}', [App\Http\Controllers\ProjectController::class, 'showProyMiembros']);
+
 
 
 
@@ -344,6 +348,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');
             Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
+            Route::get('/{project}/showDGSO',                           'ProjectsController@showDGSO')->name('DGSO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');

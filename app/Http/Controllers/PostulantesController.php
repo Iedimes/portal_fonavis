@@ -18,6 +18,7 @@ use App\Models\SIG006;
 use App\Models\SHMCER;
 use App\Models\PRMCLI;
 use App\Models\IVMSOL;
+use App\Models\ProjectStatus;
 use App\Models\PostulanteHasDiscapacidad;
 use App\Models\PostulanteHasBeneficiary;
 use App\Http\Requests\StorePostulante;
@@ -291,8 +292,12 @@ class PostulantesController extends Controller
     public function createmiembro(Request $request, $id, $x){
 
         //return $request;
+
         //return $id;
         //return $x;
+
+        $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
+        $ultimoEstado = $proyectoEstado->stage_id;
 
         //return "Crear Miembro";
 
@@ -539,12 +544,23 @@ class PostulantesController extends Controller
                     $title="Agregar Miembro Familiar";
                     $project_id = Project::find($id);
                     $par = [1, 8];
+                    if ($ultimoEstado==7){
+
+                        $parentesco = Parentesco::whereNotIn('id', $par)
+                                              ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
+
+                    }else{
+
                     $parentesco = Parentesco::whereIn('id', $par)
-                                             ->orderBy('name', 'asc')->get();
-                    //$parentesco = Parentesco::all();
+                                              ->orderBy('name', 'asc')->get();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
                         //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                    }
+
+                    //return "parentesco:".$parentesco;
                     return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
                     'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
                 }
@@ -785,6 +801,7 @@ class PostulantesController extends Controller
     public function destroymiembro(Request $request)
     {
 
+        return "Eliminar";
         PostulanteHasBeneficiary::where('miembro_id',$request->delete_idmiembro)->delete();
         PostulanteHasDiscapacidad::where('postulante_id',$request->delete_idmiembro)->delete();
         Postulante::find($request->delete_idmiembro)->delete();

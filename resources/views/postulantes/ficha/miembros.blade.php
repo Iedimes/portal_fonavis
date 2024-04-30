@@ -13,6 +13,7 @@
                         <i class="fa fa-plus-circle"></i> Agregar Miembro
                     </button>
                     @endif --}}
+
             </div>
             <div class="box-body">
                 <div class="row">
@@ -99,9 +100,9 @@
                               <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                @if (!isset($project->getEstado->stage_id))
-                                {{-- <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li> --}}
-                                <li><a class="feed-idmiembro"data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="">Eliminar</a></li>
+                                @if (!isset($project->getEstado->stage_id) || $project->getEstado->stage_id == 7)
+                                    {{-- <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li> --}}
+                                    <li><a class="feed-idmiembro" data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="">Eliminar</a></li>
                                 @endif
                             </ul>
                           </div>

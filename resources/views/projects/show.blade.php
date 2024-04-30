@@ -11,10 +11,11 @@
             <div class="col-12">
                 <h4>
                     <i class="fas fa-university"></i> Proyecto: {{ $project->name }}
-                    {{-- @if ($project->getEstado) --}}
-                    {{-- <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
-        <i class="fas fa-download"></i> IMPRIMIR PDF
-    </a> --}}
+                    @if ($project->getEstado && $project->getEstado->stage_id == 8)
+                        <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
+                            <i class="fas fa-download"></i> IMPRIMIR PDF
+                        </a>
+                    @endif
                     {{-- @else
     <button type="button" class="btn btn-success float-right" onclick="allchecked()">
         <i class="fa fa-plus-circle"></i> Enviar al MUVH
@@ -47,6 +48,12 @@
                 <i class="fa fa-plus-circle"></i> Enviar Documento solicitado
             </a>
         @endif
+
+        {{-- @if ($project->getEstado && $project->getEstado->stage_id == 7)
+            <a href="{{ url('projectsMiembros/'.$project->id) }}" class="btn btn-success float-right">
+                <i class="fa fa-plus-circle"></i> Enviar Grupo Familiar
+            </a>
+        @endif --}}
 
                     {{-- <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
             <i class="fa fa-plus-circle"></i> Enviar al MUVH

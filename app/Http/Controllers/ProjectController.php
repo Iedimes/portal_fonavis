@@ -289,6 +289,59 @@ class ProjectController extends Controller
         return view('projects.showDocumento', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'documents'));
     }
 
+    public function showProyMiembros($id)
+{
+    try {
+        $state = new ProjectStatusF();
+        $state->project_id = $id;
+        $state->stage_id = '8';
+        $state->user_id = Auth::user()->id;
+        $state->record = 'GRUPO FAMILIAR ENVIADO!';
+        $state->save();
+
+        // Enviar correo electrónico
+
+        $projecto = Project::where('id', $id)->get();
+        $sat = $projecto[0]->sat_id;
+        // $useremail = User::where('sat_ruc', $sat)->get()->first();
+        $satnombre = Sat::where('NucCod', $sat)->get()->first();
+
+        $useremail = 'preseleccionfonavis@muvh.gov.py';
+        $subject = 'GRUPO FAMILIAR ENVIADO';
+
+        // Crear un array para almacenar las direcciones de correo electrónico
+        $toEmails = [];
+
+        if ($useremail) {
+            $toEmails[] = $useremail; // Mail de FONAVIS
+        }
+
+        // Agregar otras direcciones de correo duro
+        //$toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
+        //$toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+
+        // Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $distrito], function ($message) use ($toEmails, $subject) {
+            Mail::send('admin.project-status.emailSISASGOFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+            $message->to($toEmails);
+            $message->subject($subject);
+            $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+        });
+
+        return response()->json(['message' => 'Grupo Familiar enviado exitosamente!!!']);
+        // return [
+        //     'message' => 'success'
+        // ];
+        return response()->json(['message' => 'success']);
+
+    } catch (\Exception $e) {
+
+        throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+    }
+}
+
+
+
+
     function downloadFile($project, $document_id, $file_name)
     {
         //Esto es para descargar del disco remoto

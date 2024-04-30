@@ -1,128 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lista de Postulantes</title>
+    <title>Contraseña Mesa de Entrada</title>
     <style>
-
-
-
-            /** Define the header rules **/
-    header {
-        position: fixed;
-        top: 0cm;
-        left: 0cm;
-        right: 0cm;
-        height: 3cm;
-    }
-
-    body {
-                margin-top: 2cm;
-
-            }
-
-    #cabecera {
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    font-size: x-small;
-    }
-
-    #customers {
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-    }
-
-    .center{
-    text-align:center;
-    }
-
-    .right{
-        text-align: right;
-    }
-
-    #customers td, #customers th {
-    border: 1px solid #DDDDDD;
-    font-size: x-small;
-    padding: 8px;
-    }
-
-    #customers tr:nth-child(even){background-color: #fff;}
-
-
-    #customers tr:hover {
-        background-color: #DDD;
+        /** Define los estilos generales **/
+        body {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-    #customers th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    font-size: x-small;
-    background-color: #0e3d80;
-    color: white;
-    }
+        h4 {
+            text-align: center;
+            position: relative;
+        }
+
+        h4::after {
+            content: "";
+            display: block;
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background-color: black;
+        }
+
+        #logo {
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        #logo img {
+            width: 690px;
+            border: 1px solid #DDD;
+        }
+
+        #logo::after {
+            content: "";
+            display: block;
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            width: 80px;
+            height: 2px;
+            background-color: black;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #DDD;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #DDDDDD;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #0e3d80;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fff;
+        }
+
+        tr:hover {
+            background-color: #DDD;
+        }
+
+        td:nth-child(2) {
+            border: none;
+        }
     </style>
 </head>
 <body>
-        <script type="text/php">
-            if (isset($pdf)) {
-              $font = $fontMetrics->getFont("Arial", "bold");
-              $today = date("d/m/Y h:i:s");
-              $pdf->page_text(535, 760, "Pagina {PAGE_NUM}", $font, 10, array(0, 0, 0));
-              $pdf->page_text(40, 760, "Fecha de Impresión: {$today}", $font, 10, array(0, 0, 0));
-            }
-          </script>
     <header>
-        <img src="{{storage_path('images/logofull.png')}}" class="imagencentro" width="690" >
+        <div id="logo">
+            <img src="{{ storage_path('images/logofull.png') }}" alt="Logo">
+        </div>
     </header>
-    <table style="width: 100%; padding-top:10px">
+
+    <h4>CONTRASEÑA <span style="font-weight: normal;">PARA MESA DE ENTRADA</span></h4>
+
+    <hr>
+
+    <table>
         <tr>
             <td style="width: 40%">
-                <strong>Proyecto:</strong> {{$project->name}}<br>
-                <div id="cabecera">
-                <strong>Código:</strong> {{$project->id}}<br>
+                <strong>Proyecto:</strong> {{ $project->name }}<br>
+                <strong>Código:</strong> {{ $project->id }}<br>
                 <strong>Programa:</strong> FONAVIS<br>
-                <strong>Cantidad de Viviendas:</strong> {{$project->households}}<br>
-                <strong>SAT:</strong> {{ utf8_encode($project->sat_id?$project->getSat->NucNomSat:"") }}<br>
-                <strong>Departamento: </strong> {{$project->state_id?$project->getState->DptoNom:""}}<br>
-                <strong>Distrito:</strong> {{$project->city_id}}<br>
-                <strong>Modalidad:</strong> {{$project->modalidad_id?$project->getModality->name:""}}<br>
-                <strong>Tipo de Terreno:</strong> {{$project->land_id?$project->getLand->name:""}}<br>
+                <strong>Cantidad de Viviendas:</strong> {{ $project->households }}<br>
+                <strong>SAT:</strong> {{ utf8_encode($project->sat_id ? $project->getSat->NucNomSat : '') }}<br>
+                <strong>Departamento:</strong> {{ $project->state_id ? $project->getState->DptoNom : '' }}<br>
+                <strong>Distrito:</strong> {{ $project->city_id }}<br>
+                <strong>Modalidad:</strong> {{ $project->modalidad_id ? $project->getModality->name : '' }}<br>
+                <strong>Tipo de Terreno:</strong> {{ $project->land_id ? $project->getLand->name : '' }}<br>
             </td>
-            <td style="width: 10%"></td>
             <td style="text-align: right">
-                <img  src="data:image/png;base64, {{ base64_encode($valor) }}" alt="">
+                <img src="data:image/png;base64, {{ base64_encode($valor) }}" alt="">
             </td>
         </tr>
-    </table>
-
-
-
-
-              <h2>Lista de Documentos</h2>
-
-    </div>
-
-    <table class="table" id="customers">
-        <tbody>
-        <tr>
-          <th class="center" style="width:3px;">#</th>
-          <th style="width:400px;">Documento</th>
-          <th style="width:20px;">N° de FOLIO</th>
-          <th class="center" style="width:10px;">Check</th>
-        </tr>
-
-        @foreach ($documents as $key=>$item)
-        <tr>
-            <td style="width:3px;">{{$key+1}}</td>
-            <td style="width:3px;">{{$item->document->name}}</td>
-            <td> {{ $item->check()->where('project_id','=', $project->id)->first() ? $item->check()->where('project_id','=', $project->id)->first()['sheets']  : '0' }} </td>
-            <td style="width:3px;">{{ $item->check()->where('project_id','=', $project->id)->first() ? 'SI' : ''}}</td>
-        </tr>
-
-        @endforeach
-
-      </tbody>
     </table>
 </body>
-
 </html>
