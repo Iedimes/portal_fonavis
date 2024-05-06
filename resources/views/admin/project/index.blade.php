@@ -164,6 +164,16 @@
                                                         style="background-color: rgb(9, 170, 170); color: white;">
                                                     CON DICTAMEN SOCIAL
                                                 </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 10"
+                                                        class="btn"
+                                                        style="background-color: rgb(214, 101, 8); color: white;">
+                                                    EVALUACION TECNICA
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 11"
+                                                        class="btn"
+                                                        style="background-color: rgb(83, 5, 5); color: white;">
+                                                    DOCUMENTACION TECNICA ENVIADA
+                                                </button>
                                             </span>
                                         </td>
 
@@ -186,6 +196,12 @@
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 3">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 1)
+                                                    <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 9">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISSOCIAL'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
                                                 @endif
 

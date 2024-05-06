@@ -51,7 +51,11 @@
                     <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" role="menu" style="">
+                    @if (isset($project->getEstado->stage_id) && $project->getEstado->stage_id == 10)
+                            <a class="dropdown-item" href="{{ url('projectsDocTec/'.$project->id) }}">Documentación Técnica</a>
+                    @else
                     <a class="dropdown-item" href="{{ url('projects/'.$project->id) }}">Ver</a>
+                    @endif
                     <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="{{ url('projects/'.$project->id.'/edit') }}">Editar</a>
                     <div class="dropdown-divider"></div>
                     {{-- <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled'}} " href="{{ url('projects/'.$project->id.'/postulantes') }}">Postulantes</a> --}}

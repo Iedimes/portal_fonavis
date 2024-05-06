@@ -195,51 +195,69 @@ class ProjectController extends Controller
     // }
 
     public function show($id)
-    {
-        $project = Project::find($id);
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $title = "Resumen Proyecto " . $project->name;
+{
+    $project = Project::find($id);
+    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+    $title = "Resumen Proyecto " . $project->name;
 
-        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-            ->where('category_id', 1)
-            ->where('stage_id', 1)
-            ->get();
+    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        ->where('category_id', 1)
+        ->where('stage_id', 1)
+        ->get();
 
-        $claves = $docproyecto->pluck('document_id');
+    // Documentación técnica
+    $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        ->where('category_id', 2)
+        ->where('stage_id', 1)
+        ->get();
 
-        $history = ProjectStatusF::where('project_id', $project['id'])
-            ->orderBy('created_at')
-            ->get();
+    $documentIds = $datosAdiciones->pluck('document_id');
 
-        // Verificar si se ha cargado un archivo para cada elemento
-        $uploadedFiles = [];
-        foreach ($docproyecto as $item) {
-            $uploadedFile = Documents::where('project_id', $project->id)
-                ->where('document_id', $item->document_id)
-                ->first();
-            //return $uploadedFile;
-            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-            //return $documentExists;
-            $uploadedFiles[$item->document_id] = $documentExists;
-        }
+    $documentos = Documents::where('project_id', $id)
+        ->whereIn('document_id', $documentIds)
+        ->get();
 
-        //return $uploadedFiles;
-        //return Storage::disk('local');
-        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
-        //return $data;
-        // Verificar si todos los documentos están cargados
-        $todosCargados = true;
-        foreach ($docproyecto as $item) {
-            if (!isset($uploadedFiles[$item->document_id])) {
-                $todosCargados = false;
-                break;
-            }
-        }
+    $claves = $docproyecto->pluck('document_id');
 
-        return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados'));
+    $history = ProjectStatusF::where('project_id', $project['id'])
+        ->orderBy('created_at')
+        ->get();
+
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles = [];
+    foreach ($docproyecto as $item) {
+        $uploadedFile = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+        $uploadedFiles[$item->document_id] = $documentExists;
     }
+
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles2 = [];
+    foreach ($documentos as $item) {
+        $uploadedFile2 = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+        $uploadedFiles2[$item->document_id] = $documentExists;
+    }
+
+    // Verificar si todos los documentos están cargados
+    $todosCargados = true;
+    foreach ($docproyecto as $item) {
+        if (!isset($uploadedFiles[$item->document_id])) {
+            $todosCargados = false;
+            break;
+        }
+    }
+
+    $existenDocumentos = $documentos->isNotEmpty();
+
+    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
+}
 
     public function showDoc($id)
     {
@@ -288,6 +306,56 @@ class ProjectController extends Controller
 
         return view('projects.showDocumento', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'documents'));
     }
+
+
+    public function showDocTec($id)
+    {
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
+
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->where('category_id', 2)
+            ->where('stage_id', 1)
+            ->get();
+
+        $claves = $docproyecto->pluck('document_id');
+
+        $history = ProjectStatusF::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
+
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        $hayDocumentoFaltante = !$todosCargados; // Verifica si hay algún documento faltante
+
+
+        return view('projects.showDocTec', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'hayDocumentoFaltante'));
+    }
+
+
+
 
     public function showProyMiembros($id)
 {
@@ -339,11 +407,65 @@ class ProjectController extends Controller
     }
 }
 
+public function showTecnico($id)
+{
+    //return "Cambiar de estado";
+    try {
+        $state = new ProjectStatusF();
+        $state->project_id = $id;
+        $state->stage_id = '11';
+        $state->user_id = Auth::user()->id;
+        $state->record = 'DOCUMENTACION TECNICA ENVIADA!';
+        $state->save();
+
+        //return "controlamos si inserta bien";
+
+        // Enviar correo electrónico
+
+        $projecto = Project::where('id', $id)->get();
+        $sat = $projecto[0]->sat_id;
+        // $useremail = User::where('sat_ruc', $sat)->get()->first();
+        $satnombre = Sat::where('NucCod', $sat)->get()->first();
+
+        $useremail = 'preseleccionfonavis@muvh.gov.py';
+        $subject = 'DOCUMENTACION TECNICA ENVIADA';
+
+        // Crear un array para almacenar las direcciones de correo electrónico
+        $toEmails = [];
+
+        if ($useremail) {
+            $toEmails[] = $useremail; // Mail de FONAVIS
+        }
+
+        // Agregar otras direcciones de correo duro
+        //$toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
+        //$toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+
+        // Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $distrito], function ($message) use ($toEmails, $subject) {
+            Mail::send('admin.project-status.emailSATFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+            $message->to($toEmails);
+            $message->subject($subject);
+            $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+        });
+
+        //return response()->json(['message' => 'Documentacion técnica enviada exitosamente!!!']);
+         return [
+             'message' => 'success'
+         ];
+        return response()->json(['message' => 'success']);
+
+    } catch (\Exception $e) {
+
+        throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+    }
+}
+
 
 
 
     function downloadFile($project, $document_id, $file_name)
     {
+       // return "Bajar archivos";
         //Esto es para descargar del disco remoto
         return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
 
@@ -629,6 +751,73 @@ class ProjectController extends Controller
         }
     }
             return redirect("/projectsDoc/$project_id")->with('message', 'Archivos subidos');
+    }
+
+    public function uploadTecnico(Request $request)
+    {
+
+        // Validación
+        $this->validate($request, [
+            'archivo' => 'required|max:30000'
+        ], [
+            'archivo.required' => 'Debe seleccionar un archivo.',
+            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+        ]);
+
+        // Obtener ids
+        $project_id = $request->project_id;
+        $document_id = $request->document_id;
+
+        // Ruta de carpetas
+        $folder = "uploads/$project_id/$document_id";
+
+        // Validar documento existente
+        $exists = Documents::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->first();
+
+        if ($exists) {
+            return redirect("/projectsDocTec/$project_id")->withErrors('El documento ya existe');
+        }
+
+        // Obtener archivo
+        $file = $request->file('archivo');
+
+        // Generar nombre archivo
+        $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
+
+        try {
+            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+
+            if (!$remoteDisk->exists($folder)) {
+                $remoteDisk->makeDirectory($folder);
+            }
+
+            $remoteDisk->putFileAs($folder, $file, $filename);
+
+            // $localDisk = Storage::disk('local'); // Acceder al disco local
+
+            // if (!$localDisk->exists($folder)) {
+            //     $localDisk->makeDirectory($folder);
+            // }
+
+            // $localDisk->putFileAs($folder, $file, $filename);
+        } catch (\Exception $e) {
+            return back()->withErrors('Error subiendo archivo');
+        }
+
+        // Guardar en BD
+        $document = new Documents;
+
+        $document->project_id = $request->project_id;
+        $document->document_id = $request->document_id;
+        $document->file_path = $filename;
+        $document->title = $request->title;
+
+        $document->save();
+
+        return redirect("/projectsDocTec/$project_id")
+            ->with('message', 'Archivo subido');
     }
 
 

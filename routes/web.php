@@ -288,8 +288,11 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 // Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
+Route::post('levantarTecnico', [App\Http\Controllers\ProjectController::class, 'uploadTecnico']);
 Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
 Route::get('projectsMiembros/{id}', [App\Http\Controllers\ProjectController::class, 'showProyMiembros']);
+Route::get('projectsTecnico/{id}', [App\Http\Controllers\ProjectController::class, 'showTecnico']);
+Route::get('projectsDocTec/{id}', [App\Http\Controllers\ProjectController::class, 'showDocTec']);
 
 
 
@@ -348,6 +351,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');
             Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
+            Route::get('/{project}/showFONAVISSOCIAL',                  'ProjectsController@showFONAVISSOCIAL')->name('FONAVISSOCIAL');
             Route::get('/{project}/showDGSO',                           'ProjectsController@showDGSO')->name('DGSO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');

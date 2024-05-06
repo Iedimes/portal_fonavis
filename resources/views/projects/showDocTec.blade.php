@@ -16,23 +16,7 @@
                             <i class="fas fa-download"></i> IMPRIMIR PDF
                         </a>
                     @endif
-                    {{-- @else
-    <button type="button" class="btn btn-success float-right" onclick="allchecked()">
-        <i class="fa fa-plus-circle"></i> Enviar al MUVH
-        </button>
-    @endif --}}
-                    {{-- <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">
-        <i class="fas fa-download"></i> IMPRIMIR PDF
-        </a> --}}
 
-                    {{-- <button type="button" class="btn btn-success float-right" onclick="allchecked()">
-            <i class="fa fa-plus-circle"></i> Enviar al MUVH
-            </button> --}}
-
-                    <!-- Botón -->
-                    {{-- <button type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
-            <i class="fa fa-plus-circle"></i> Enviar al MUVH
-        </button> --}}
 
         @if (($project->getEstado))
 
@@ -44,38 +28,21 @@
         @endif
 
         @if ($project->getEstado && $project->getEstado->stage_id == 4)
-            <a href="{{ url('projectsDoc/'.$project->id) }}" class="btn btn-success float-right">
+            <a href="{{ url('projectsDocTec/'.$project->id) }}" class="btn btn-success float-right">
                 <i class="fa fa-plus-circle"></i> Enviar Documento solicitado
             </a>
         @endif
 
-        {{-- @if ($project->getEstado && $project->getEstado->stage_id == 7)
-            <a href="{{ url('projectsMiembros/'.$project->id) }}" class="btn btn-success float-right">
-                <i class="fa fa-plus-circle"></i> Enviar Grupo Familiar
-            </a>
-        @endif --}}
+        @if ($project->getEstado && $project->getEstado->stage_id == 11)
 
-                    {{-- <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()" {{ $todosCargados ? '' : 'disabled' }}>
-            <i class="fa fa-plus-circle"></i> Enviar al MUVH
-        </button> --}}
-                    {{-- @if (isset($project->getEstado) && $project->getEstado->stage_id == 1)
-            <button type="button" class="btn btn-success float-right" onclick="allchecked()">
-                <i class="fa fa-plus-circle"></i> Enviar al MUVH
-            </button>
         @else
-            <!-- Código o lógica adicional cuando la condición no se cumple -->
+
+        <button id="enviarDocumentosBtn" class="btn btn-success float-right" onclick="allchecked()">
+            <i class="fa fa-plus-circle"></i> Enviar Documentos
+        </button>
+
         @endif
 
-
-
-        {{-- @if (session('bandera'))
-    @php
-        $bandera = session('bandera');
-    @endphp
-    <button type="button" class="btn btn-success float-right" {{ $bandera ? '' : 'disabled' }}>
-        <i class="fa fa-plus-circle"></i> Enviar al MUVH
-    </button>
-@endif --}}
 
                 </h4>
             </div>
@@ -106,17 +73,7 @@
                 <address>
                     <strong>SAT:</strong> {{ $project->sat_id ? $project->getSat->NucNomSat : '' }}<br>
                     <strong>Localidad:</strong> {{ $project->localidad }}
-                    {{-- <strong>Localidad:</strong> @if ($project->localidad == 123)
-    Villa Florida
-    @elseif($project->localidad==230)
-    Santa Rosa del Mbutuy
-    @elseif($project->localidad==145)
-    Itakyry
-    @elseif($project->localidad==49)
-    Colonia Independencia
-    @elseif($project->localidad==179)
-    Asuncion
-    @endif --}}
+
                     <br>
                     <strong>Tipologia:</strong> {{ $project->typology_id ? $project->getTypology->name : '' }}<br>
                 </address>
@@ -137,23 +94,13 @@
                             href="#custom-tabs-one-applicant" role="tab" aria-controls="custom-tabs-one-applicant"
                             aria-selected="false">Postulantes</a>
                     </li>
-                    @if ($existenDocumentos)
-                    <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-two-home-tab" data-toggle="pill"
-                            href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home"
-                            aria-selected="false">DocumentosTecnicos</a>
-                    </li>
-                    @endif
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
                             href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile"
                             aria-selected="false">Historial</a>
                     </li>
-
                 </ul>
             </div>
-
-
             <div class="card-body">
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-home" role="tabpanel"
@@ -165,7 +112,6 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Documento</th>
-                                            <th>{{-- N° FOLIO  --}}</th>
                                             <th></th>
                                             <th></th>
                                             <th></th>
@@ -173,8 +119,7 @@
                                             <th></th>
                                             <th>Adjuntar Documento</th>
                                             <th>Accion</th>
-                                            {{-- <th>Check</th> --}}
-                                        </tr>
+                                            </tr>
                                     </thead>
                                     <tbody>
                                         @php
@@ -194,15 +139,15 @@
                                                 <td>
                                                     @if ($uploadedFiles[$item->document_id])
                                                         Documento adjuntado
-                                                        <a
-                                                        href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+
                                                             {{-- href="{{ url('get/' . $project->id . '/' . $item->document_id . '/' . $uploadedFiles[$item->document_id]) }}"> --}}
+                                                            <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
                                                             <button class="btn btn-info">
                                                                 <i class="fa fa-search"></i>
                                                             </button>
                                                         </a>
                                                     @else
-                                                        <form action="/levantar" method="POST" enctype="multipart/form-data">
+                                                        <form action="/levantarTecnico" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <input type="hidden" name="project_id"
                                                                 value="{{ $project->id }}">
@@ -222,108 +167,7 @@
                                                     @if ($project->getEstado)
                                                     @else
                                                         @if ($uploadedFiles[$item->document_id])
-                                                            {{-- <form
-                                                                action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
 
-                                                                <button type="submit" class="btn btn-danger">
-                                                                    <i class="fa fa-trash"></i>
-                                                                </button>
-                                                            </form> --}}
-                                                            <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
-                                                                @csrf
-                                                                @method('DELETE')
-
-                                                                <button type="submit" class="btn btn-danger">
-                                                                    <i class="fa fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    @endif
-                                                </td>
-                                                {{-- <td>
-                    <a class="btn btn-sm btn-success" href="/ver/{{$project->id}}/{{$item->document->id}}" target="_blank" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
-                        <i class="fa fa-eye"></i>
-                    </a>
-
-                    </td> --}}
-                                                </tr>
-                                        @endforeach
-
-                                        @if (session('message'))
-                                            <div class="alert alert-success" id="success-message">
-                                                {{ session('message') }}
-                                            </div>
-                                        @endif
-
-
-                                        @if ($errors->any())
-                                            <div class="alert alert-danger" id="error-message">
-                                                <ul>
-                                                    @foreach ($errors->all() as $error)
-                                                        <li>{{ $error }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                    <div class="tab-pane fade" id="custom-tabs-two-home" role="tabpanel" aria-labelledby="custom-tabs-two-home-tab">
-                        <div class="row">
-                            <div class="col-12 table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Documento</th>
-                                            <th>Adjuntar Documento</th>
-                                            <th>Acción</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php
-                                            $todosCargados = true;
-                                        @endphp
-
-                                        @foreach ($documentos as $key => $item)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $item->title }}</td>
-                                                <td>
-                                                    @if ($uploadedFiles2[$item->document_id])
-                                                        Documento adjuntado
-                                                        <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles2[$item->document_id]]) }}">
-                                                            <button class="btn btn-info">
-                                                                <i class="fa fa-search"></i>
-                                                            </button>
-                                                        </a>
-                                                    @else
-                                                        <form action="/levantar" method="POST" enctype="multipart/form-data">
-                                                            @csrf
-                                                            <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                                            <input type="file" name="archivo">
-                                                            <input type="hidden" name="title" value="{{ $item->document->name }}">
-                                                            <input type="hidden" name="document_id" value="{{ $item->document->id }}">
-                                                            <button type="submit">Subir</button>
-                                                        </form>
-                                                        @php
-                                                            $todosCargados = false;
-                                                        @endphp
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if ($project->getEstado)
-                                                    @else
-                                                        @if ($uploadedFiles[$item->document_id])
                                                             <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
                                                                 @csrf
                                                                 @method('DELETE')
@@ -344,6 +188,7 @@
                                             </div>
                                         @endif
 
+
                                         @if ($errors->any())
                                             <div class="alert alert-danger" id="error-message">
                                                 <ul>
@@ -356,7 +201,10 @@
                                     </tbody>
                                 </table>
                             </div>
+
                         </div>
+
+
                     </div>
                     <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel"
                         aria-labelledby="custom-tabs-one-profile-tab">
@@ -447,15 +295,12 @@
                     </div>
 
                 </div>
-
             </div>
 
         </div>
 
 
     </div>
-
-
 
 
     <div class="modal modal-info fade" id="modal-enviar">
@@ -501,29 +346,13 @@
             var si = 0;
             var no = 0;
 
-            if (applicants >= 4) {
-                // var adjuntosCompletos = true;
-
-                // Verificar si todos los elementos tienen adjuntos
-                // Agrega tu lógica de verificación aquí
-                // Puedes usar un bucle o cualquier otra forma de verificar los adjuntos
-                // Si algún elemento no tiene adjunto, establece adjuntosCompletos en false
-                // Ejemplo de lógica de verificación:
-                // console.log(keys)
-                // for (var i = 0; i < def.length; i++) {
-                //     console.log(def[i].adjunto)
-                //     if (!def[i].adjunto) {
-                //         adjuntosCompletos = false;
-                //         break;
-                //     }
-                // }
 
                 let todosCargados = true; // Variable en JavaScript
 
                 // Verificar si todos los documentos están cargados
                 const rows = document.querySelectorAll('tr');
                 rows.forEach(row => {
-                    const uploadForm = row.querySelector('form[action="/levantar"]');
+                    const uploadForm = row.querySelector('form[action="/levantarTecnico"]');
                     if (uploadForm) {
                         todosCargados = false;
                     }
@@ -535,8 +364,9 @@
                     //alert('Todos los documentos están adjuntos y cargados. Puede enviar al MUVH.');
 
                     // Realizar la llamada AJAX solo si todos los documentos están adjuntos
+                    var projectId = {{ $project->id }};
                     $.ajax({
-                        url: '{{ URL::to('/projects/send') }}/' + sites,
+                        url: '/projectsTecnico/' + projectId,
                         type: "GET",
                         dataType: "json",
                         success: async function(data) {
@@ -547,7 +377,7 @@
                                     autohide: true,
                                     delay: 5000,
                                     title: 'Importante!',
-                                    body: 'El proyecto ha cambiado de estado'
+                                    body: 'Los documentos han sido enviados'
                                 });
                                 await delay(3000);
                                 location.reload();
@@ -561,9 +391,7 @@
                     // Mostrar mensaje de error o realizar cualquier acción adicional
                     alert('Debe adjuntar y cargar todos los documentos para enviar al MUVH.');
                 }
-            } else {
-                alert('Debe tener al menos 4 (cuatro) postulantes para enviar el proyecto al MUVH.');
-            }
+
         }
 
         // Obtén las referencias a los elementos de mensaje

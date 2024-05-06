@@ -76,6 +76,20 @@ return [
             'allow_self_signed' => true
         ],
 
+        'mail4' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL4_HOST'),
+            'port' => env('MAIL4_PORT'),
+            'username' => env('MAIL4_USERNAME'),
+            'password' => env('MAIL4_PASSWORD'),
+            'encryption' => env('MAIL4_ENCRYPTION'),
+            'timeout' => null,
+            'auth_mode' => null,
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

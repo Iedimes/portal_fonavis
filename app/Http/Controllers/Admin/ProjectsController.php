@@ -224,6 +224,23 @@ class ProjectsController extends Controller
         return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
     }
 
+    public function showFONAVISSOCIAL(Project $project)
+    {
+        // $this->authorize('admin.project.show', $project);
+        $id=$project->id;
+        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 10)->get();
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+
+
+
+
+        //return $history;
+
+        return view('admin.project.FONAVIS.showSocial', compact('project', 'postulantes', 'proyectoEstado'));
+    }
+
     public function showDGSO(Project $project)
     {
         //$this->authorize('admin.project.show', $project);
