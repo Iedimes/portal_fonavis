@@ -209,20 +209,24 @@ class ProjectsController extends Controller
     }
 
     public function showFONAVIS(Project $project)
-    {
-        // $this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 3)->get();
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+{
+    // $this->authorize('admin.project.show', $project);
+    $id = $project->id;
+    $stageId = $project->getestado->stage_id;
 
-
-
-
-        //return $history;
-
-        return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
+    if ($stageId == 3 || $stageId == 13 || $stageId == 18) {
+        $proyectoEstado = ProjectStatus::where('project_id', $id)
+            ->where('stage_id', $stageId)
+            ->get();
+    } else {
+        $proyectoEstado = collect();
     }
+
+    $project_type = Land_project::where('land_id', $project->land_id)->first();
+    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+    return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
+}
 
     public function showFONAVISSOCIAL(Project $project)
     {
@@ -271,6 +275,155 @@ class ProjectsController extends Controller
         return view('admin.project.DGSO.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
     }
 
+    public function showFONAVISTECNICO(Project $project)
+    {
+       //$this->authorize('admin.project.show', $project);
+       $id=$project->id;
+       $project_type= Land_project::where('land_id',$project->land_id)->first();
+       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+       ->whereIn('category_id',[2])
+       ->get();
+       $history = ProjectStatus::where('project_id',$project['id'])
+                   ->orderBy('created_at')
+                   ->get();
+
+                   // Verificar si se ha cargado un archivo para cada elemento
+       $uploadedFiles = [];
+       foreach ($docproyecto as $item) {
+           $uploadedFile = Documents::where('project_id', $project->id)
+               ->where('document_id', $item->document_id)
+               ->first();
+           //return $uploadedFile;
+           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+           //return $documentExists;
+           $uploadedFiles[$item->document_id] = $documentExists;
+       }
+
+       //return $history;
+
+       return view('admin.project.FONAVIS.showFonavisTecnico', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
+    public function showFONAVISTECNICODOS(Project $project)
+    {
+       //$this->authorize('admin.project.show', $project);
+       $id=$project->id;
+       $project_type= Land_project::where('land_id',$project->land_id)->first();
+       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+       ->whereIn('category_id',[3])
+       ->get();
+       $history = ProjectStatus::where('project_id',$project['id'])
+                   ->orderBy('created_at')
+                   ->get();
+
+                   // Verificar si se ha cargado un archivo para cada elemento
+       $uploadedFiles = [];
+       foreach ($docproyecto as $item) {
+           $uploadedFile = Documents::where('project_id', $project->id)
+               ->where('document_id', $item->document_id)
+               ->first();
+           //return $uploadedFile;
+           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+           //return $documentExists;
+           $uploadedFiles[$item->document_id] = $documentExists;
+       }
+
+       //return $history;
+
+       return view('admin.project.FONAVIS.showFonavisTecnicoDos', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
+    public function showDIGH(Project $project)
+    {
+       //$this->authorize('admin.project.show', $project);
+       $id=$project->id;
+       $project_type= Land_project::where('land_id',$project->land_id)->first();
+       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+       ->where('category_id',2)
+       ->get();
+       $history = ProjectStatus::where('project_id',$project['id'])
+                   ->orderBy('created_at')
+                   ->get();
+
+                   // Verificar si se ha cargado un archivo para cada elemento
+       $uploadedFiles = [];
+       foreach ($docproyecto as $item) {
+           $uploadedFile = Documents::where('project_id', $project->id)
+               ->where('document_id', $item->document_id)
+               ->first();
+           //return $uploadedFile;
+           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+           //return $documentExists;
+           $uploadedFiles[$item->document_id] = $documentExists;
+       }
+
+       //return $history;
+
+       return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
+    public function showDSGO(Project $project)
+    {
+       //$this->authorize('admin.project.show', $project);
+       $id=$project->id;
+       $project_type= Land_project::where('land_id',$project->land_id)->first();
+       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+       ->where('category_id',3)
+       ->get();
+       $history = ProjectStatus::where('project_id',$project['id'])
+                   ->orderBy('created_at')
+                   ->get();
+
+                   // Verificar si se ha cargado un archivo para cada elemento
+       $uploadedFiles = [];
+       foreach ($docproyecto as $item) {
+           $uploadedFile = Documents::where('project_id', $project->id)
+               ->where('document_id', $item->document_id)
+               ->first();
+           //return $uploadedFile;
+           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+           //return $documentExists;
+           $uploadedFiles[$item->document_id] = $documentExists;
+       }
+
+       //return $history;
+
+       return view('admin.project.DSGO.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
+
+    public function showFONAVISADJ(Project $project)
+    {
+       //$this->authorize('admin.project.show', $project);
+       $id=$project->id;
+       $project_type= Land_project::where('land_id',$project->land_id)->first();
+       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+       ->where('category_id',3)
+       ->get();
+       $history = ProjectStatus::where('project_id',$project['id'])
+                   ->orderBy('created_at')
+                   ->get();
+
+                   // Verificar si se ha cargado un archivo para cada elemento
+       $uploadedFiles = [];
+       foreach ($docproyecto as $item) {
+           $uploadedFile = Documents::where('project_id', $project->id)
+               ->where('document_id', $item->document_id)
+               ->first();
+           //return $uploadedFile;
+           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+           //return $documentExists;
+           $uploadedFiles[$item->document_id] = $documentExists;
+       }
+
+       //return $history;
+
+       return view('admin.project.FONAVIS.showFonavisAdj', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+    }
 
 
     public function transition(Project $project)

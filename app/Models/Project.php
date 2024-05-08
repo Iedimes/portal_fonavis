@@ -29,8 +29,8 @@ class Project extends Model
         return 'Y-d-m H:i:s.v';
     }*/
 
-    // protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
-    // 'typology_id','expsocial','exptecnico','action','households','certificate_pin','res_nro','finca_nro','fechares','coordenadax','coordenaday', 'ubicacion'];
+    protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
+   'typology_id','expsocial','exptecnico','action','households','certificate_pin','res_nro','finca_nro','fechares','coordenadax','coordenaday', 'ubicacion'];
 
     //protected $with = ['getState', 'getModality', 'getCity', 'getSat'];
     protected $with = ['getState', 'getModality', 'getCity', 'getEstado'];

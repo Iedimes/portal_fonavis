@@ -351,8 +351,13 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');
             Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
+            Route::get('/{project}/showFONAVISADJ',                     'ProjectsController@showFONAVISADJ')->name('FONAVISADJ');
             Route::get('/{project}/showFONAVISSOCIAL',                  'ProjectsController@showFONAVISSOCIAL')->name('FONAVISSOCIAL');
+            Route::get('/{project}/showFONAVISTECNICO',                 'ProjectsController@showFONAVISTECNICO')->name('FONAVISTECNICO');
+            Route::get('/{project}/showFONAVISTECNICODOS',              'ProjectsController@showFONAVISTECNICODOS')->name('FONAVISTECNICODOS');
             Route::get('/{project}/showDGSO',                           'ProjectsController@showDGSO')->name('DGSO');
+            Route::get('/{project}/showDIGH',                           'ProjectsController@showDIGH')->name('DIGH');
+            Route::get('/{project}/showDSGO',                           'ProjectsController@showDSGO')->name('DSGO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');

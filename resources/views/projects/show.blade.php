@@ -132,18 +132,19 @@
                             href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
                             aria-selected="true">Documentos</a>
                     </li>
+                    @if ($existenDocumentos)
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-two-home-tab" data-toggle="pill"
+                            href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home"
+                            aria-selected="false">Documentos VTA y ETH</a>
+                    </li>
+                    @endif
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-applicant-tab" data-toggle="pill"
                             href="#custom-tabs-one-applicant" role="tab" aria-controls="custom-tabs-one-applicant"
                             aria-selected="false">Postulantes</a>
                     </li>
-                    @if ($existenDocumentos)
-                    <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-two-home-tab" data-toggle="pill"
-                            href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home"
-                            aria-selected="false">DocumentosTecnicos</a>
-                    </li>
-                    @endif
+
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
                             href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile"

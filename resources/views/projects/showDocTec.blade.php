@@ -87,7 +87,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
                             href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
-                            aria-selected="true">Documentos</a>
+                            aria-selected="true">Documentos VTA y ETH</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-applicant-tab" data-toggle="pill"

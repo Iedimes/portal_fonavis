@@ -36,7 +36,10 @@
             @elseif (Auth::user()->rol_app->dependency_id == 2)
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/dependencies') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.dependency.title') }}</a></li>
+            @elseif (Auth::user()->rol_app->dependency_id == 3)
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
             @else
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/modalities') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.modality.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/lands') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.land.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/documents') }}"><i class="nav-icon icon-umbrella"></i> {{ trans('admin.document.title') }}</a></li>

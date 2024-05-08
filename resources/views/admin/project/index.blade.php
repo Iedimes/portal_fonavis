@@ -174,6 +174,46 @@
                                                         style="background-color: rgb(83, 5, 5); color: white;">
                                                     DOCUMENTACION TECNICA ENVIADA
                                                 </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 12"
+                                                        class="btn"
+                                                        style="background-color: rgb(5, 65, 83); color: white;">
+                                                    VERIFICACION TECNICO AMBIENTAL
+                                                </button>
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 13"
+                                                        class="btn"
+                                                        style="background-color: rgb(1, 5, 2); color: white;">
+                                                    CON INFORME VTA
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 14"
+                                                        class="btn"
+                                                        style="background-color: rgb(240, 216, 5); color: white;">
+                                                    OBSERVACION DIGH
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 15"
+                                                        class="btn"
+                                                        style="background-color: rgb(250, 15, 15); color: white;">
+                                                    RECHAZADO DIGH
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 16"
+                                                        class="btn"
+                                                        style="background-color: rgb(160, 51, 8); color: white;">
+                                                    EVALUACION TECNICO HABITACIONAL
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 17"
+                                                        class="btn"
+                                                        style="background-color: rgb(8, 160, 21); color: white;">
+                                                    CON CALIFICACION TECNICA HABITACIONAL
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 18"
+                                                        class="btn"
+                                                        style="background-color: rgb(27, 92, 145); color: white;">
+                                                    ADJUDICADO
+                                                </button>
                                             </span>
                                         </td>
 
@@ -205,6 +245,24 @@
                                                 </div>
                                                 @endif
 
+                                                @if (Auth::user()->rol_app->dependency_id == 1)
+                                                    <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 11">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISTECNICO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 1)
+                                                    <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 13">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 1)
+                                                    <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 17">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISADJ'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+                                                @endif
+
                                                 @if (Auth::user()->rol_app->dependency_id == 2)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 5">
@@ -217,6 +275,22 @@
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 8">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGSO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 4)
+
+                                                <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 12">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDIGH'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                </div>
+
+                                                @endif
+
+                                                @if (Auth::user()->rol_app->dependency_id == 5)
+
+                                                <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 16">
+                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDSGO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
 
                                                 @endif
