@@ -61,7 +61,7 @@
 
 </div>
 
-
+@if ( $project->getEstado->stage_id == 17 && Auth::user()->rol_app->dependency_id == 1)
 <div class="card">
     <div class="card-header text-center">
         DOCUMENTOS PRESENTADOS
@@ -102,6 +102,7 @@
             </div>
     </div>
 </div>
-
+@else
+@endif
 
 @endsection

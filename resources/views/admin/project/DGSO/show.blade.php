@@ -62,7 +62,7 @@
 </div>
 
 
-<div class="card">
+{{-- <div class="card">
     <div class="card-header text-center">
         DOCUMENTOS PRESENTADOS
     </div>
@@ -101,7 +101,7 @@
                 </table>
             </div>
     </div>
-</div>
+</div> --}}
 
 
 @endsection

@@ -89,16 +89,6 @@
                             href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
                             aria-selected="true">Documentos VTA y ETH</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-one-applicant-tab" data-toggle="pill"
-                            href="#custom-tabs-one-applicant" role="tab" aria-controls="custom-tabs-one-applicant"
-                            aria-selected="false">Postulantes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
-                            href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile"
-                            aria-selected="false">Historial</a>
-                    </li>
                 </ul>
             </div>
             <div class="card-body">
@@ -135,7 +125,7 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td></td>
+
                                                 <td>
                                                     @if ($uploadedFiles[$item->document_id])
                                                         Documento adjuntado
@@ -206,93 +196,7 @@
 
 
                     </div>
-                    <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel"
-                        aria-labelledby="custom-tabs-one-profile-tab">
-                        <a href="{{ url('projects/' . $project->id . '/postulantes') }}">
 
-                            @if ($project->getEstado)
-                                <a href="{{ url('imprimir/' . $project->id) }}"> <button type="button"
-                                        class="btn btn-info btn-block btn-lg btn-lg">
-                                        <i class="fa fa-file-excel-o"></i> Imprimir Listado
-                                    </button></a>
-                            @endif
-
-
-
-
-                            @if ($project->getEstado || $postulantes->count() >= 50)
-                            @else
-                                <button type="button" class="btn btn-info float-right">
-                                    <i class="fa fa-user"></i> Ir a la Seccion de Postulantes
-                                </button>
-                            @endif
-
-                        </a>
-                        <br>
-                        <br>
-                        <table class="table table-striped">
-                            <thead>
-                                <th>#</th>
-                                <th>Nombre</th>
-                                <th class="text-center">Cedula</th>
-                                <th class="text-center">Edad</th>
-                                <th class="text-center">Ingreso</th>
-                                <th class="text-center">Nivel</th>
-                            </thead>
-                            <tbody>
-                                @if (count($postulantes) > 0)
-                                    @foreach ($postulantes as $key => $post)
-                                        <tr>
-                                            <td>{{ $key + 1 }}</td>
-                                            <td>{{ $post->postulante_id ? $post->getPostulante->first_name : '' }}
-                                                {{ $post->postulante_id ? $post->getPostulante->last_name : '' }}</td>
-                                            @if (is_numeric($post->postulante_id ? $post->getPostulante->cedula : ''))
-                                                <td class="text-center">
-                                                    {{ number_format($post->postulante_id ? $post->getPostulante->cedula : '', 0, '.', '.') }}
-                                                </td>
-                                            @else
-                                                <td class="text-center">
-                                                    {{ $post->postulante_id ? $post->getPostulante->cedula : '' }} </td>
-                                            @endif
-                                            <td class="text-center">
-                                                {{ \Carbon\Carbon::parse($post->postulante_id ? $post->getPostulante->birthdate : '')->age }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, '.', '.') }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-
-                    </div>
-                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
-                        aria-labelledby="custom-tabs-one-profile-tab">
-
-                        <table class="table table-striped">
-                            <thead>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                                <th>Usuario</th>
-                                <th>Observacion</th>
-                            </thead>
-                            <tbody>
-                                @foreach ($history as $item)
-                                    <tr>
-                                        <td>{{ $item->getStage->name }}</td>
-                                        <td>{{ $item->created_at }} </td>
-                                        <td>{{ $item->getUser ? $item->getUser['first_name'] : 'N/A' }}</td>
-                                        <td> {{ $item->record }} </td>
-                                    </tr>
-                                @endforeach
-
-                            </tbody>
-                        </table>
-
-                    </div>
 
                 </div>
             </div>
@@ -300,32 +204,6 @@
         </div>
 
 
-    </div>
-
-
-    <div class="modal modal-info fade" id="modal-enviar">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span></button>
-                    <h4 class="modal-title"><i class="fa  fa-send"></i> Enviar Proyecto al MUVH</h4>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ url('projects/send') }}" method="post">
-                        {{ csrf_field() }}
-                        <p id="demoproy"></p>
-                        <input id="send_id" name="send_id" type="hidden" value="" />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-outline">Enviar</button>
-                </div>
-                </form>
-            </div>
-            <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
     </div>
 
 @stop

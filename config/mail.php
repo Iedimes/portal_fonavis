@@ -45,7 +45,11 @@ return [
             'auth_mode' => null,
             'verify_peer' => false,
             'verify_peer_name' => false,
-            'allow_self_signed' => true
+            'allow_self_signed' => true,
+            'from' => [
+                'address' => env('MAIL_FROM_ADDRESS', 'sistema_fonavis@muvh.gov.py'),
+                'name' => env('MAIL_FROM_NAME', config('app.name')),
+            ],
         ],
 
         'mail2' => [

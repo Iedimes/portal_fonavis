@@ -63,6 +63,10 @@
 
 
 
+@if ( $project->getEstado->stage_id == 9 && Auth::user()->rol_app->dependency_id == 1)
+
+
+
     <!-- Código adicional cuando la condición no se cumple -->
     <div class="card">
         <div class="card-header text-center">
@@ -106,7 +110,9 @@
             </div>
         </div>
     </div>
+@else
 
+@endif
 
 
 @endsection

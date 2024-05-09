@@ -386,7 +386,7 @@ class ProjectController extends Controller
 
         // Agregar otras direcciones de correo duro
         //$toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-        //$toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+        $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
 
         // Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $distrito], function ($message) use ($toEmails, $subject) {
             Mail::send('admin.project-status.emailSISASGOFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
@@ -958,7 +958,7 @@ public function showTecnico($id)
             $email = 'proyectos_ingresados@muvh.gov.py';
             $subject = 'PROYECTO INGRESADO';
 
-            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project', 'distrito' => $destrito], function ($message) use ($email, $subject) {
+            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $destrito], function ($message) use ($email, $subject) {
                 $message->to($email);
                 $message->subject($subject);
                 $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');

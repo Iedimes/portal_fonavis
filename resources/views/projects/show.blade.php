@@ -286,8 +286,15 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Documento</th>
+                                            <th>{{-- N° FOLIO  --}}</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
                                             <th>Adjuntar Documento</th>
-                                            <th>Acción</th>
+                                            <th>Accion</th>
+                                            {{-- <th>Check</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -299,6 +306,12 @@
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ $item->title }}</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                                 <td>
                                                     @if ($uploadedFiles2[$item->document_id])
                                                         Documento adjuntado

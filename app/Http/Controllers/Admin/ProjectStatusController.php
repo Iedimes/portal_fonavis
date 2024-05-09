@@ -412,6 +412,46 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico'
                 ]);
             }
+        }elseif ($sanitized['stage_id'] == 15) { //Estado RECHAZADO DIGH
+            //return "Estado RECHAZADO DIGH";
+            $projecto = Project::where('id', $request->project_id)->get();
+            $sat = $projecto[0]->sat_id;
+            $useremail = User::where('sat_ruc', $sat)->get()->first();
+            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+
+            // Crear un array para almacenar las direcciones de correo electrónico
+            $toEmails = [];
+
+            if ($useremail) {
+                $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
+            }
+
+            // Agregar otras direcciones de correo duro
+            $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
+
+
+            $subject = 'RECHAZADO POR DIGH '.$projecto[0]->name;
+
+            // Store the ProjectStatus
+            $projectStatus = ProjectStatus::create($sanitized);
+
+            try {
+                Mail::send('admin.project-status.emailDIGHFONAVISSATRECHAZADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+                    $message->to($toEmails);
+                    $message->subject($subject);
+                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
+                });
+
+                return response()->json([
+                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showDIGH')
+                ]);
+            } catch (Exception $e) {
+                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
+                //dd($e->getMessage());
+                return response()->json([
+                    'error' => 'No se pudo enviar el correo electrónico'
+                ]);
+            }
         }elseif ($sanitized['stage_id'] == 16) { //Estado EVALUACION TECNICO HABITACIONAL;
             //return "Estado EVALUACION TECNICO HABITACIONAL";
              $projecto = Project::where('id', $request->project_id)->get();

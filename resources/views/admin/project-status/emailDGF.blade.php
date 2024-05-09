@@ -1,16 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Correo Proyecto enviado a FONAVIS</title>
+    <title>PROYECTO ENVIADO</title>
 </head>
 <body>
-    <p><strong>SAT:</strong> {{$sat}}</p>
-    <p><strong>DETALLE DEL PROYECTO:</strong></p>
-    <p><strong>NOMBRE DEL PROYECTO:</strong> {{ $nombre }}</p>
-    <p><strong>NOMBRE DEL REPRESENTANTE DEL GRUPO:</strong> {{ $lider }}</p>
-    <p><strong>MODALIDAD:</strong> {{ $modalidad }}</p>
-    <p><strong>TIPO TERRENO:</strong> {{ $terreno }} </p>
-    <p><strong>DEPARTAMENTO:</strong> {{ $departamento }}</p>
-    <p><strong>DISTRITO:</strong> {{ $distrito }}</p>
+    <p style="text-align: justify">El SAT <strong>{{$sat}}</strong> ha presentado el proyecto denominado <strong>"{{ $nombre }}"</strong>,
+        en el Distrito de <strong>{{ $distrito }}</strong> Departamento de <strong>{{ $departamento }}</strong> en la Modalidad <strong>{{ $modalidad }}</strong>.</p>
 </body>
 </html>

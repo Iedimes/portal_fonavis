@@ -232,7 +232,7 @@ class ProjectsController extends Controller
     {
         // $this->authorize('admin.project.show', $project);
         $id=$project->id;
-        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 10)->get();
+        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 9)->get();
         $project_type= Land_project::where('land_id',$project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
 

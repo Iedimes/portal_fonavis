@@ -12,7 +12,7 @@
   </head>
   <body>
       <div class="container">
-          <img src="{{url('img/logofull.jpg')}}" class="img-fluid mx-auto d-block" alt="Image"/>
+          <img src="{{url('img/logofull.png')}}" class="img-fluid mx-auto d-block" alt="Image"/>
         @if (isset($project))
         <div class="card">
         <h5 class="card-header text-center">CONSTANCIA DE DOCUMENTO</h5>
