@@ -127,7 +127,8 @@
 
                                                 <td>
 
-                                                    {{ $document->title }}
+                                                    {{-- {{ $document->title }} --}}
+                                                    {{ $document->file_path }}
 
 
                                                 </td>

@@ -337,7 +337,7 @@
                                                 <td>
                                                     @if ($project->getEstado)
                                                     @else
-                                                        @if ($uploadedFiles[$item->document_id])
+                                                        @if (isset($uploadedFiles[$item->document_id]) && $uploadedFiles[$item->document_id])
                                                             <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
                                                                 @csrf
                                                                 @method('DELETE')

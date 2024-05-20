@@ -31,6 +31,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectsController extends Controller
 {
@@ -432,13 +433,29 @@ class ProjectsController extends Controller
         $estado=$project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $email = Auth::user()->email;
-        $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+        // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
-        /*if ($workflowState->id == 26) {
-            $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
-        }else{
-            $mensaje = 'Este cambio de estado quedara registrado en el historial de la solicitud';
-        }*/
+        switch ($estado) {
+            case 1:
+                // Lógica específica para el estado 1
+                $stages = Stage::whereIn('id',[2])->get();
+                // $opcion = 2;
+                break;
+            case 2:
+                // Lógica específica para el estado 2
+                $stages = Stage::whereIn('id', [3, 4, 6])->get();
+                break;
+            case 3:
+                    // Lógica específica para el estado 3
+                    $stages = Stage::whereIn('id', [7])->get();
+                    break;
+            case 5:
+                 // Lógica específica para el estado 5
+                 $stages = Stage::whereIn('id', [3, 6])->get();
+                 break;
+
+        }
+
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
         return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado'));
@@ -503,6 +520,23 @@ class ProjectsController extends Controller
         }
 
         return redirect('admin/projects');
+    }
+
+    function descargarDocumento($project, $document_id, $file_name)
+    {
+        //dd($project, $document_id, $file_name);
+        //Esto es para descargar del disco remoto
+        return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+
+        //Esto es para descargar del disco local
+        // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+
+        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        /*$file = Storage::disk('remote')->get($file_name);
+        //return Storage::disk('remote')->download($file_name);
+        return (new Response($file, 200))
+            ->header('Content-Type', '*');*/
     }
 
     /**

@@ -249,6 +249,9 @@ Route::get('download/{project}/{document_id}/{file_name}', [App\Http\Controllers
 
 Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
 
+// Descargar documentos del lado del ADM
+Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', 'App\Http\Controllers\Admin\ProjectsController@descargarDocumento')->name('descargarDocumento');
+
 
 Route::resource('projects', ProjectController::class);
 Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);

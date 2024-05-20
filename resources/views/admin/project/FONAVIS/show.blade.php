@@ -182,12 +182,12 @@
                             @foreach ($item->imagen as $imagen)
                                 <tr>
                                     <td>{{ ++$imagenCount }}</td>
-                                    <td>DOCUMENTO ADJUNTO</td>
-                                    {{-- <td>{{ $imagen->file_name }}</td> --}}
+                                    <td>{{ $imagen->file_name }}</td>
+
                                     <td>
                                         <div>
                                             <p class="card-text">
-                                                <strong>VER DOCUMENTO ADJUNTO:</strong>
+                                                <strong>VER </strong>
                                                 <a class="btn btn-sm btn-danger" href="/media/{{$imagen->id}}/{{$imagen->file_name}}" target="_blank" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
                                                     <i class="fa fa-file-pdf-o"></i> PDF
                                                 </a>
