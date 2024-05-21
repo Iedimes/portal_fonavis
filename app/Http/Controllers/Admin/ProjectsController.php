@@ -454,6 +454,35 @@ class ProjectsController extends Controller
                  $stages = Stage::whereIn('id', [3, 6])->get();
                  break;
 
+            case 8:
+                 // Lógica específica para el estado 8
+                 $stages = Stage::whereIn('id', [9])->get();
+                 break;
+            case 9:
+                 // Lógica específica para el estado 9
+                 $stages = Stage::whereIn('id', [10])->get();
+                 break;
+            case 11:
+                 // Lógica específica para el estado 11
+                 $stages = Stage::whereIn('id', [12])->get();
+                 break;
+            case 12:
+                 // Lógica específica para el estado 12
+                 $stages = Stage::whereIn('id', [13,14,15])->get();
+                 break;
+            case 13:
+                    // Lógica específica para el estado 13
+                    $stages = Stage::whereIn('id', [16])->get();
+                    break;
+            case 16:
+                     // Lógica específica para el estado 16
+                     $stages = Stage::whereIn('id', [17])->get();
+                     break;
+            case 17:
+                     // Lógica específica para el estado 17
+                     $stages = Stage::whereIn('id', [18])->get();
+                     break;
+
         }
 
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
@@ -527,6 +556,23 @@ class ProjectsController extends Controller
         //dd($project, $document_id, $file_name);
         //Esto es para descargar del disco remoto
         return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+
+        //Esto es para descargar del disco local
+        // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+
+        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
+        /*$file = Storage::disk('remote')->get($file_name);
+        //return Storage::disk('remote')->download($file_name);
+        return (new Response($file, 200))
+            ->header('Content-Type', '*');*/
+    }
+
+    function downloadFile($project, $document_id, $file_name)
+    {
+       // return "Bajar archivos";
+        //Esto es para descargar del disco remoto
+        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);

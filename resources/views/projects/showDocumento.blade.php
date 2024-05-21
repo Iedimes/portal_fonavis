@@ -85,6 +85,7 @@
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
+                                            @if ($project->getEstado->stage_id == 4)
                                             <th>Accion</th>
                                             {{-- <th>Archivo</th>
                                             <th>Eliminar</th> --}}
@@ -93,6 +94,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
+
                                                 <form action="/levantarDocumento" method="POST" enctype="multipart/form-data">
                                                     @csrf
                                                     <input type="hidden" name="project_id" value="{{ $project->id }}">
@@ -103,9 +105,12 @@
                                                         </div>
                                                     </div>
 
+
+
                                                     <button type="button" id="agregar-archivo" onclick="agregarArchivo()">Agregar archivo</button>
                                                     <button type="submit">Subir</button>
                                                 </form>
+                                                @endif
                                             </td>
                                             <td></td>
                                             <td></td>
