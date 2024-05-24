@@ -251,7 +251,31 @@
 
                     </td> --}}
                                                 </tr>
+
                                         @endforeach
+                                        @if ($project->getLand->id == 1)
+                                        <tr>
+                                            <td>
+
+                                                    <a href="{{ url('projectsDocNoExcluyentes/'.$project->id) }}">
+                                                        Documentos No Excluyentes
+                                                    </a>
+
+                                            </td>
+                                            <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+
+
+
+                                        </tr>
+                                        @endif
 
                                         @if (session('message'))
                                             <div class="alert alert-success" id="success-message">
@@ -372,6 +396,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel"
                         aria-labelledby="custom-tabs-one-profile-tab">
                         <a href="{{ url('projects/' . $project->id . '/postulantes') }}">

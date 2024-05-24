@@ -293,10 +293,12 @@ Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro'
 Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
 Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
 Route::post('levantarTecnico', [App\Http\Controllers\ProjectController::class, 'uploadTecnico']);
+Route::post('levantarNoExcluyente', [App\Http\Controllers\ProjectController::class, 'uploadNoExcluyente']);
 Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
 Route::get('projectsMiembros/{id}', [App\Http\Controllers\ProjectController::class, 'showProyMiembros']);
 Route::get('projectsTecnico/{id}', [App\Http\Controllers\ProjectController::class, 'showTecnico']);
 Route::get('projectsDocTec/{id}', [App\Http\Controllers\ProjectController::class, 'showDocTec']);
+Route::get('projectsDocNoExcluyentes/{id}', [App\Http\Controllers\ProjectController::class, 'showDocNoExcluyentes']);
 
 
 

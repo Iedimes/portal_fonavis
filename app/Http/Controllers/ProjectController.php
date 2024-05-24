@@ -354,6 +354,52 @@ class ProjectController extends Controller
         return view('projects.showDocTec', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'hayDocumentoFaltante'));
     }
 
+    public function showDocNoExcluyentes($id)
+    {
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
+
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->whereIn('category_id', [4])
+            ->where('stage_id', 1)
+            ->get();
+
+        $claves = $docproyecto->pluck('document_id');
+
+        $history = ProjectStatusF::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
+
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        $hayDocumentoFaltante = !$todosCargados; // Verifica si hay algún documento faltante
+
+
+        return view('projects.showDocNoExcluyentes', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'hayDocumentoFaltante'));
+    }
+
 
 
 
@@ -817,6 +863,73 @@ public function showTecnico($id)
         $document->save();
 
         return redirect("/projectsDocTec/$project_id")
+            ->with('message', 'Archivo subido');
+    }
+
+    public function uploadNoExcluyente(Request $request)
+    {
+
+        // Validación
+        $this->validate($request, [
+            'archivo' => 'required|max:30000'
+        ], [
+            'archivo.required' => 'Debe seleccionar un archivo.',
+            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+        ]);
+
+        // Obtener ids
+        $project_id = $request->project_id;
+        $document_id = $request->document_id;
+
+        // Ruta de carpetas
+        $folder = "uploads/$project_id/$document_id";
+
+        // Validar documento existente
+        $exists = Documents::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->first();
+
+        if ($exists) {
+            return redirect("/projectsDocNoExcluyentes/$project_id")->withErrors('El documento ya existe');
+        }
+
+        // Obtener archivo
+        $file = $request->file('archivo');
+
+        // Generar nombre archivo
+        $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
+
+        try {
+            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+
+            if (!$remoteDisk->exists($folder)) {
+                $remoteDisk->makeDirectory($folder);
+            }
+
+            $remoteDisk->putFileAs($folder, $file, $filename);
+
+            // $localDisk = Storage::disk('local'); // Acceder al disco local
+
+            // if (!$localDisk->exists($folder)) {
+            //     $localDisk->makeDirectory($folder);
+            // }
+
+            // $localDisk->putFileAs($folder, $file, $filename);
+        } catch (\Exception $e) {
+            return back()->withErrors('Error subiendo archivo');
+        }
+
+        // Guardar en BD
+        $document = new Documents;
+
+        $document->project_id = $request->project_id;
+        $document->document_id = $request->document_id;
+        $document->file_path = $filename;
+        $document->title = $request->title;
+
+        $document->save();
+
+        return redirect("/projectsDocNoExcluyentes/$project_id")
             ->with('message', 'Archivo subido');
     }
 
