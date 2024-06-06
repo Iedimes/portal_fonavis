@@ -67,39 +67,70 @@
         DOCUMENTOS PRESENTADOS
     </div>
     <div class="card-body">
-            <div class="card-block">
-                <table class="table table-hover table-listing">
+        <div class="card-block">
+            <table class="table table-hover table-listing">
                 <thead>
                     <tr>
-                    <th>#</th>
-                    <th>Documento</th>
-                    <th>Ver</th>
+                        {{-- <th>#</th> --}}
+                        <th>Documento</th>
+                        <th>Ver</th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach ($docproyecto as $key => $item)
-                <tr>
-                    <td>{{ $key+1 }}</td>
-                    <td>{{ $item->document->name}}</td>
-                    <td>@if ($uploadedFiles[$item->document_id])
 
-                        <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
-                            <button class="btn btn-info">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </a>
-@endif</td>
+                    @foreach ($docproyecto as $key => $item)
+                        <tr>
+                            {{-- <td>{{ $key+1 }}</td> --}}
+                            <td>{{ $item->document->name }}</td>
+                            <td>
+                                @if ($uploadedFiles[$item->document_id])
+                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+                                        <button class="btn btn-info">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </a>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    @if($project->land_id == 1)
+                    <!-- Mostrar documentos no excluyentes existentes -->
+                    <tr>
+                        <th colspan="3">Documentos No Excluyentes Cargados</th>
+                    </tr>
+                    @foreach ($docproyectoNoExcluyentes as $key => $item)
+                        @if ($uploadedFiles1[$item->document_id])
+                            <tr>
+                                {{-- <td>{{ $key+1 }}</td> --}}
+                                <td>{{ $item->document->name }}</td>
+                                <td>
+                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles1[$item->document_id]]) }}">
+                                        <button class="btn btn-info">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endif
+                    @endforeach
 
-
-                    <td>
-
-                    </td>
-
-                </tr>
-                @endforeach
+                    <!-- Mostrar documentos no excluyentes faltantes -->
+                    <tr>
+                        <th colspan="3">Documentos No Excluyentes Faltantes</th>
+                    </tr>
+                    @foreach ($docproyectoNoExcluyentes as $key => $item)
+                        @if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id])
+                            <tr>
+                                {{-- <td>{{ count($docproyecto) + $key + 1 }}</td> --}}
+                                <td>{{ $item->document->name }}</td>
+                                <td>Documento faltante</td>
+                            </tr>
+                        @endif
+                    @endforeach
+                    @endif
                 </tbody>
-                </table>
-            </div>
+            </table>
+        </div>
     </div>
 </div>
 

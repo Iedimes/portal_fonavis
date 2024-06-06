@@ -317,7 +317,7 @@ class ProjectController extends Controller
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
         $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-            ->whereIn('category_id', [2,3])
+            ->whereIn('category_id', [2])
             ->where('stage_id', 1)
             ->get();
 

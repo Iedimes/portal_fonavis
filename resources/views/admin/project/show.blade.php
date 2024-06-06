@@ -93,7 +93,7 @@
                             </td>
                         </tr>
                     @endforeach
-
+                    @if($project->land_id == 1)
                     <!-- Mostrar documentos no excluyentes existentes -->
                     <tr>
                         <th colspan="3">Documentos No Excluyentes Cargados</th>
@@ -127,6 +127,7 @@
                             </tr>
                         @endif
                     @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>

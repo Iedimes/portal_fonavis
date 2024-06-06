@@ -139,7 +139,7 @@
         <i class="fa fa-file-excel-o"></i> Imprimir Listado
         </button></a> --}}
 
-        <a href="{{ url('generate-pdf', ['id' => $project->id]) }}">
+        <a href="{{ url('imprimir', ['id' => $project->id]) }}">
             <button type="button" class="btn btn-info btn-block btn-lg">
                 <i class="fa fa-file-excel-o"></i> Imprimir Listado
             </button>
