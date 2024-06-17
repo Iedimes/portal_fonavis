@@ -27,7 +27,7 @@
               <th>Distrito</th>
               <th>Modalidad</th>
               <th>Estado</th>
-              <th style="text-align:center">Acciones</th>
+              <th style="width: 160px;">Acciones</th>
             </tr>
             @foreach($projects as $project)
             <tr>
@@ -60,7 +60,7 @@
                     <div class="dropdown-divider"></div>
                     {{-- <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled'}} " href="{{ url('projects/'.$project->id.'/postulantes') }}">Postulantes</a> --}}
 
-                    <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled' }}" href="{{ url('projects/'.$project->id.'/postulantes') }}">Postulantes</a>
+                    <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled' }}" href="{{ url('projects/'.$project->id.'/postulantes') }}">Grupo Familiar</a>
                     </div>
                 </div>
             </td>
@@ -83,7 +83,7 @@
             </tr>
             @endforeach
           </tbody>
-          <tfoot>
+          {{-- <tfoot>
             <tr>
                 <th>Proyecto</th>
                 <th>Empresa/Sat</th>
@@ -94,7 +94,7 @@
                 <th>Estado</th>
                 <th style="text-align:center">Acciones</th>
             </tr>
-        </tfoot>
+        </tfoot> --}}
     </table>
 </div>
 </div>
