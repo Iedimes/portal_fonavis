@@ -297,7 +297,12 @@ class PostulantesController extends Controller
         //return $x;
 
         $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
-        $ultimoEstado = $proyectoEstado->stage_id;
+
+        if ($proyectoEstado) {
+            $ultimoEstado = $proyectoEstado->stage_id;
+        } else {
+            $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
+        }
 
         //return "Crear Miembro";
 
