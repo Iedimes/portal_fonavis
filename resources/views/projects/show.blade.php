@@ -411,7 +411,8 @@
 
 
 
-                            @if ($project->getEstado || $postulantes->count() >= 50)
+                            {{-- @if ($project->getEstado || $postulantes->count() >= 50) --}}
+                            @if ($project->getEstado)
                             @else
                                 <button type="button" class="btn btn-info float-right">
                                     <i class="fa fa-user"></i> Ir a la Seccion de Postulantes
