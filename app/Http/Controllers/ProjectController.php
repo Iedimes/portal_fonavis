@@ -655,10 +655,11 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:30000'
+            'archivo' => 'required|max:30000|mimes:pdf',
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
-            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+            'archivo.max' => 'El tamaño máximo del archivo es 30MB.',
+            'archivo.mimes' => 'El archivo debe ser de formato PDF.',
         ]);
 
         // Obtener ids

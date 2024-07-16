@@ -35,10 +35,15 @@ class ProjectHasPostulantes extends Model
         // if ($grupo < 7455653)   {return '2'; }
         // if ($grupo < 10964195)  {return '1';}
 
-        if ($grupo <= 2550307)   {return '4'; }
-        if ($grupo <= 4845583)   {return '3'; }
-        if ($grupo <= 8671044)   {return '2'; }
-        if ($grupo <= 12751535)  {return '1';}
+        // if ($grupo <= 2550307)   {return '4'; }
+        // if ($grupo <= 4845583)   {return '3'; }
+        // if ($grupo <= 8671044)   {return '2'; }
+        // if ($grupo <= 12751535)  {return '1';}
+
+        if ($grupo <= 2798309)   {return '4'; }
+        if ($grupo <= 5316789)   {return '3'; }
+        if ($grupo <= 18077086)  {return '2'; }
+        if ($grupo <= 90385435)  {return '1';}
 
     }
 
