@@ -614,6 +614,15 @@ class PostulantesController extends Controller
         //return $request;
     }
 
+    public function storeEditPostulante(StorePostulante $request)
+    {
+        $postulante = Postulante::findOrFail($request->postulante_id);
+        $postulante->fill($request->all());
+        $postulante->save();
+
+        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha editado correctamente el Postulante!');
+    }
+
     public function storemiembro(Request $request)
     {
         //return $request;
@@ -675,6 +684,28 @@ class PostulantesController extends Controller
         return view('postulantes.create',compact('title','project','postulante','apellido','cedula','sexo','project_id',
                                                 'nombre','nac','est','fecha','discapacdad','disc'));
     }
+
+    public function editarPostulante($id,$idpostulante)
+    {
+        $title="Editar Postulante";
+        $project=Project::find($id);
+        $postulante=Postulante::find($idpostulante);
+        $nombre = $postulante->first_name;
+        $apellido = $postulante->last_name;
+        $cedula = $postulante->cedula;
+        $sexo = $postulante->gender;
+        $project_id = Project::find($id);
+        $nac = $postulante->nacionalidad;
+        $est = $postulante->marital_status;
+        $fecha = $postulante->birthdate;
+        $discapacdad = Discapacidad::all();
+        $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
+
+        return view('postulantes.edit',compact('title','project','postulante','apellido','cedula','sexo','project_id',
+                                                'nombre','nac','est','fecha','discapacdad','disc'));
+    }
+
+
 
     public function editmiembro($id,$idpostulante)
     {
@@ -802,6 +833,7 @@ class PostulantesController extends Controller
         }
 
     }
+
 
     public function destroymiembro(Request $request)
     {

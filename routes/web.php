@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PostulantesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -270,6 +271,7 @@ Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\Postulante
 Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class, 'createmiembro']);
 Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class, 'destroy']);
 Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
+Route::post('savepostulanteEdit', [App\Http\Controllers\PostulantesController::class, 'storeEditPostulante']);
 Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, 'storemiembro']);
 Route::get('imprimir/{id}', 'App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
 
@@ -277,6 +279,7 @@ Route::get('imprimir/{id}', 'App\Http\Controllers\PostulantesController@generate
 // Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
 // Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show']);
 Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'show'])->name('projects.postulantes.show');
+Route::get('/postulantes/edit/{id}/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
 /*Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
 Route::post('editpostulante', 'PostulantesController@update');
 Route::post('postulantes/upload', 'PostulantesController@upload');

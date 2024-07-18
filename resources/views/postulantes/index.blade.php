@@ -217,8 +217,10 @@
                                 <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a> --}}
                                 @if (($post->getMembers->count() + 1) ==1)
                                  <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Conyuge</a>
+                                @elseif (($post->getMembers->count() + 1) > 1)
+                                 <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a>
                                 @endif
-
+                                <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('postulantes.edit', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Editar</a>
 
                                 <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a>
                                 @elseif($project->getEstado->stage_id == 7)
