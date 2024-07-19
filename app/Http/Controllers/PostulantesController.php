@@ -65,12 +65,21 @@ class PostulantesController extends Controller
                    // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
                    //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
                    $archivo = SIG006::where('NroExp', $nroExp)
-                   ->where('DEExpEst', 'A')
-                   ->OrWhere('DEExpEst', 'C')
+                   ->whereIn('DEExpEst', ['A', 'C'])
+                   //->where('DEExpEst', 'A')
+                   //->OrWhere('DEExpEst', 'C')
                    ->first();
                    if (!empty($archivo)){
+                        //return "Existe detalle que cumple con los requisitos para permitir que se postule";
+
                        //return redirect()->back()->with('status', 'El expediente tiene estado A!');
-                       $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                       //$certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                       $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                       ->where('CerEst', '!=', 2)
+                       ->where('CerEst', '!=', 7)
+                       ->where('CerEst', '!=', 8)
+                       ->where('CerEst', '!=', 12)
+                       ->get();
                        $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
                        $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                        $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
@@ -78,21 +87,21 @@ class PostulantesController extends Controller
                        ->get();
                        $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
+                       $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                        ->where('SolEtapa','B')
+                        ->first();
+                        if ($todos) {
+                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                        }
+
                        if($existe->count() >= 1){
                            //Session::flash('error', 'Ya existe el postulante!');
                            return redirect()->back()->with('status', 'Ya existe el postulante!');
                        }
 
-                       if ($expedientes->count() >= 1) {
-                           // return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
-                       }else{
-                           $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                           ->where('SolEtapa','B')
-                           ->first();
-                           if ($todos) {
-                               return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                           }
-                       }
+                    //    if ($expedientes->count() >= 1) {
+                    //        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS! - sale por aca 1');
+                    //    }
 
                        if ($certificados->count() >= 1) {
                            return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
@@ -117,30 +126,150 @@ class PostulantesController extends Controller
 
                        }
 
+                       $headers = [
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ];
+
+                    $GetOrder = [
+                        'username' => 'senavitatconsultas',
+                        'password' => 'S3n4vitat'
+                    ];
+                    $client = new client();
+                    $res = $client->post('http://10.1.79.7:8080/mbohape-core/sii/security', [
+                        'headers' => $headers,
+                        'json' => $GetOrder,
+                        'decode_content' => false
+                    ]);
+                    //var_dump((string) $res->getBody());
+                    $contents = $res->getBody()->getContents();
+                    $book = json_decode($contents);
+                    //echo $book->token;
+                    if($book->success == true){
+                        //obtener la cedula
+                        $headerscedula = [
+                            'Authorization' => 'Bearer '.$book->token,
+                            'Accept' => 'application/json',
+                            'decode_content' => false
+                        ];
+                        $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                            'headers' => $headerscedula,
+                        ]);
+                        $datos=$cedula->getBody()->getContents();
+                        $datospersona = json_decode($datos);
+                        if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                            //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        }else{
+                            $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                            $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                            $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                            $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                            $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                            $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                            $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                            //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                            $nroexp = $cedula;
+                            $title="Agregar Postulante";
+                            $project_id = Project::find($id);
+                            //$parentesco = Parentesco::all();
+                            $discapacdad = Discapacidad::all();
+                                //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                            return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                            'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                        }
+
+                        //$nombre = $datos->nombres;
+                        //echo $cedula->getBody()->getContents();
+                    }else{
+                        //Flash::success($book->message);
+                        return redirect()->back();
+                    }
+
+                    }else{
+                    //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
+                    // $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                    ->where('CerEst', '!=', 2)
+                                    ->where('CerEst', '!=', 7)
+                                    ->where('CerEst', '!=', 8)
+                                    ->where('CerEst', '!=', 12)
+                                    ->get();
+                    $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                    ->where('PylCod','!=' ,'P.F.')
+                    ->get();
+                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                    if ($expedientes->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!');
+                    }
+
+                    if($existe->count() >= 1){
+                        //Session::flash('error', 'Ya existe el postulante!');
+                        return redirect()->back()->with('status', 'Ya existe el postulante!');
+                    }
+
+                    $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                        ->where('SolEtapa','B')
+                        ->first();
+                        if ($todos) {
+                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                        }
 
 
-                }else{
-                    //return "Expediente No existe en SIG006";
-               $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                    if ($certificados->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                    }
+
+                    if ($certificadosconyuge->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                    }
+
+                    if ($cartera->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                    }
+
+                    if ($solicitantes) {
+                        //dd(trim($solicitantes->SolPerCod));
+                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                        ->where('PylCod','!=' ,'P.F.')
+                        ->get();
+                        if ($carterasol->count() >= 1) {
+                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                        }
+
+                    }
+            }
+            }else{ // termina Expedientes
+
+                //return "Si el expediente no existe, se deben controlar todas las otras tablas";
+
+
+            //    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                        ->where('CerEst', '!=', 2)
+                                        ->where('CerEst', '!=', 7)
+                                        ->where('CerEst', '!=', 8)
+                                        ->where('CerEst', '!=', 12)
+                                        ->get();
                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                ->where('PylCod','!=' ,'P.F.')
                ->get();
                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+               $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+               ->where('SolEtapa','B')
+               ->first();
+
 
                if($existe->count() >= 1){
                    //Session::flash('error', 'Ya existe el postulante!');
                    return redirect()->back()->with('status', 'Ya existe el postulante!');
                }
-
-               $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                   ->where('SolEtapa','B')
-                   ->first();
-                   if ($todos) {
-                       return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                   }
-
 
                if ($certificados->count() >= 1) {
                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
@@ -164,55 +293,13 @@ class PostulantesController extends Controller
                    }
 
                }
+
+
+               if ($todos) {
+                return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
             }
+
             }
-
-            //return "Si el expediente no existe, se deben controlar todas las otras tablas";
-
-            $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
-               $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-               $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-               $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-               ->where('PylCod','!=' ,'P.F.')
-               ->get();
-               $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
-
-               if($existe->count() >= 1){
-                   //Session::flash('error', 'Ya existe el postulante!');
-                   return redirect()->back()->with('status', 'Ya existe el postulante!');
-               }
-
-               $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                   ->where('SolEtapa','B')
-                   ->first();
-                   if ($todos) {
-                       return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                   }
-
-
-               if ($certificados->count() >= 1) {
-                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-               }
-
-               if ($certificadosconyuge->count() >= 1) {
-                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-               }
-
-               if ($cartera->count() >= 1) {
-                   return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-               }
-
-               if ($solicitantes) {
-                   //dd(trim($solicitantes->SolPerCod));
-                   $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                   ->where('PylCod','!=' ,'P.F.')
-                   ->get();
-                   if ($carterasol->count() >= 1) {
-                       return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                   }
-
-               }
-
             // return "sale por el ya existe, pero se le debe dejar continuar";
             // return "sale por el no existe";
 
@@ -306,168 +393,171 @@ class PostulantesController extends Controller
 
         //return "Crear Miembro";
 
-        if ($request->input('cedula')) {
-            // $expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
 
-            $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
-                                   ->where('TexCod', 118)
-                                   ->orderBy('NroExp', 'desc')
-                                   ->first();
-            if(!empty($expedientes)){
+    if ($request->input('cedula')) {
 
-                $nroExp = $expedientes->NroExp;
-                //return "No esta vacío";
-                $archivo = SIG006::where('NroExp', $nroExp)
-                   ->where('DEExpEst', 'A')
-                   ->OrWhere('DEExpEst', 'C')
-                   ->first();
-                   if(!empty($archivo)){
-                    //return "No esta vacio archivo";
-                    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
-                                    ->where('CerEst', '!=', 2)
-                                    ->where('CerEst', '!=', 7)
-                                    ->where('CerEst', '!=', 8)
-                                    ->where('CerEst', '!=', 12)
-                                    ->get();
-                    $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-                    ->where('PylCod','!=' ,'P.F.')
-                    ->get();
-                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+        //$expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
+        $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
+                               ->where('TexCod', 118)
+                               ->orderBy('NroExp', 'desc')
+                               ->first();
 
 
+        if(!empty($expedientes) ){
 
-                    if($existe->count() >= 1){
-                        //Session::flash('error', 'Ya existe el postulante!');
-                        return redirect()->back()->with('status', 'Ya existe el postulante!');
+               //return "Expediente existe";
+               $nroExp = $expedientes->NroExp;
+               // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
+               //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
+               $archivo = SIG006::where('NroExp', $nroExp)
+               ->whereIn('DEExpEst', ['A', 'C'])
+               //->where('DEExpEst', 'A')
+               //->OrWhere('DEExpEst', 'C')
+               ->first();
+               if (!empty($archivo)){
+                    //return "Existe detalle que cumple con los requisitos para permitir que se postule";
+
+                   //return redirect()->back()->with('status', 'El expediente tiene estado A!');
+                   //$certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                   $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                   ->where('CerEst', '!=', 2)
+                   ->where('CerEst', '!=', 7)
+                   ->where('CerEst', '!=', 8)
+                   ->where('CerEst', '!=', 12)
+                   ->get();
+                   $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                   $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                   $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                   ->where('PylCod','!=' ,'P.F.')
+                   ->get();
+                   $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                   $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                    ->where('SolEtapa','B')
+                    ->first();
+                    if ($todos) {
+                        return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
                     }
 
-                    if ($expedientes->count() >= 1) {
-                        //return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
+                   if($existe->count() >= 1){
+                       //Session::flash('error', 'Ya existe el postulante!');
+                       return redirect()->back()->with('status', 'Ya existe el postulante!');
+                   }
+
+                //    if ($expedientes->count() >= 1) {
+                //        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS! - sale por aca 1');
+                //    }
+
+                   if ($certificados->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                   }
+
+                   if ($certificadosconyuge->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                   }
+
+                   if ($cartera->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                   }
+
+                   if ($solicitantes) {
+                       //dd(trim($solicitantes->SolPerCod));
+                       $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                       ->where('PylCod','!=' ,'P.F.')
+                       ->get();
+                       if ($carterasol->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                       }
+
+                   }
+
+                   $headers = [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ];
+
+                $GetOrder = [
+                    'username' => 'senavitatconsultas',
+                    'password' => 'S3n4vitat'
+                ];
+                $client = new client();
+                $res = $client->post('http://10.1.79.7:8080/mbohape-core/sii/security', [
+                    'headers' => $headers,
+                    'json' => $GetOrder,
+                    'decode_content' => false
+                ]);
+                //var_dump((string) $res->getBody());
+                $contents = $res->getBody()->getContents();
+                $book = json_decode($contents);
+                //echo $book->token;
+                if($book->success == true){
+                    //obtener la cedula
+                    $headerscedula = [
+                        'Authorization' => 'Bearer '.$book->token,
+                        'Accept' => 'application/json',
+                        'decode_content' => false
+                    ];
+                    $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                        'headers' => $headerscedula,
+                    ]);
+                    $datos=$cedula->getBody()->getContents();
+                    $datospersona = json_decode($datos);
+                    if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                        //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
                     }else{
-                        $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                        ->where('SolEtapa','B')
-                        ->first();
-                        if ($todos) {
-                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                        }
+                        $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                        $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                        $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                        $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                        $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                        $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                        $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                        //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                        $nroexp = $cedula;
+                        $title="Agregar Miembro Familiar";
+                        $project_id = Project::find($id);
+                        //$parentesco = Parentesco::all();
+                        $discapacdad = Discapacidad::all();
+                            //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                        return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                        'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
                     }
 
-                    if ($certificados->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-                    }
-
-                    if ($certificadosconyuge->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-                    }
-
-                    if ($cartera->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-                    }
-
-                    if ($solicitantes) {
-                        //dd(trim($solicitantes->SolPerCod));
-                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                        ->where('PylCod','!=' ,'P.F.')
-                        ->get();
-                        if ($carterasol->count() >= 1) {
-                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                        }
-
-                    }
+                    //$nombre = $datos->nombres;
+                    //echo $cedula->getBody()->getContents();
                 }else{
-                    //return "existe el expediente, pero no esta dado de baja";
-
-                    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
-                                    ->where('CerEst', '!=', 2)
-                                    ->where('CerEst', '!=', 7)
-                                    ->where('CerEst', '!=', 8)
-                                    ->where('CerEst', '!=', 12)
-                                    ->get();
-                    $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-                    ->where('PylCod','!=' ,'P.F.')
-                    ->get();
-                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
-
-
-
-                    if($existe->count() >= 1){
-                        //Session::flash('error', 'Ya existe el postulante!');
-                        return redirect()->back()->with('status', 'Ya existe el postulante!');
-                    }
-
-                    if ($expedientes->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
-                    }else{
-                        $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                        ->where('SolEtapa','B')
-                        ->first();
-                        if ($todos) {
-                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                        }
-                    }
-
-
-
-                    if ($certificados->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-                    }
-
-                    if ($certificadosconyuge->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-                    }
-
-                    if ($cartera->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-                    }
-
-                    if ($solicitantes) {
-                        //dd(trim($solicitantes->SolPerCod));
-                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                        ->where('PylCod','!=' ,'P.F.')
-                        ->get();
-                        if ($carterasol->count() >= 1) {
-                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                        }
-
-                    }
+                    //Flash::success($book->message);
+                    return redirect()->back();
                 }
-            }else{
-                //return "No existe expediente";
+
+                }else{
+                //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
+                // $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
                 $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
-                                    ->where('CerEst', '!=', 2)
-                                    ->where('CerEst', '!=', 7)
-                                    ->where('CerEst', '!=', 8)
-                                    ->where('CerEst', '!=', 12)
-                                    ->get();
-                    $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
-                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
-                    ->where('PylCod','!=' ,'P.F.')
-                    ->get();
-                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+                                ->where('CerEst', '!=', 2)
+                                ->where('CerEst', '!=', 7)
+                                ->where('CerEst', '!=', 8)
+                                ->where('CerEst', '!=', 12)
+                                ->get();
+                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                ->where('PylCod','!=' ,'P.F.')
+                ->get();
+                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
+                if ($expedientes->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!');
+                }
 
+                if($existe->count() >= 1){
+                    //Session::flash('error', 'Ya existe el postulante!');
+                    return redirect()->back()->with('status', 'Ya existe el postulante!');
+                }
 
-                    if($existe->count() >= 1){
-                        //Session::flash('error', 'Ya existe el postulante!');
-                        return redirect()->back()->with('status', 'Ya existe el postulante!');
-                    }
-
-                    // if ($expedientes->count() >= 1) {
-                    //     //return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!');
-                    // }else{
-                    //     $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
-                    //     ->where('SolEtapa','B')
-                    //     ->first();
-                    //     if ($todos) {
-                    //         return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
-                    //     }
-                    // }
-                    $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
                     ->where('SolEtapa','B')
                     ->first();
                     if ($todos) {
@@ -475,115 +565,174 @@ class PostulantesController extends Controller
                     }
 
 
-                    if ($certificados->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
-                    }
-
-                    if ($certificadosconyuge->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
-                    }
-
-                    if ($cartera->count() >= 1) {
-                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
-                    }
-
-                    if ($solicitantes) {
-                        //dd(trim($solicitantes->SolPerCod));
-                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
-                        ->where('PylCod','!=' ,'P.F.')
-                        ->get();
-                        if ($carterasol->count() >= 1) {
-                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
-                        }
-
-                    }
-            }
-
-
-            $headers = [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ];
-
-            $GetOrder = [
-                'username' => 'senavitatconsultas',
-                'password' => 'S3n4vitat'
-            ];
-            $client = new client();
-            $res = $client->post('http://10.1.79.7:8080/mbohape-core/sii/security', [
-                'headers' => $headers,
-                'json' => $GetOrder,
-                'decode_content' => false
-            ]);
-            //var_dump((string) $res->getBody());
-            $contents = $res->getBody()->getContents();
-            $book = json_decode($contents);
-            //echo $book->token;
-            if($book->success == true){
-                //obtener la cedula
-                $headerscedula = [
-                    'Authorization' => 'Bearer '.$book->token,
-                    'Accept' => 'application/json',
-                    'decode_content' => false
-                ];
-                $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
-                    'headers' => $headerscedula,
-                ]);
-                $datos=$cedula->getBody()->getContents();
-                $datospersona = json_decode($datos);
-                if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
-                    //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
-                    //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
-                    //return redirect()->back()->with('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
-                    return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
-                }else{
-                    $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
-                    $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
-                    $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
-                    $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
-                    $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
-                    $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
-                    $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
-                    //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
-                    $nroexp = $cedula;
-                    $title="Agregar Miembro Familiar";
-                    $project_id = Project::find($id);
-                    $par = [1, 8];
-                    if ($ultimoEstado==7){
-
-                        $parentesco = Parentesco::whereNotIn('id', $par)
-                                              ->orderBy('name', 'asc')->get();
-                        $discapacdad = Discapacidad::all();
-                        $idpostulante = $x;
-
-                    }else{
-
-                    $parentesco = Parentesco::whereIn('id', $par)
-                                              ->orderBy('name', 'asc')->get();
-                    $discapacdad = Discapacidad::all();
-                    $idpostulante = $x;
-                        //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
-                    }
-
-                    //return "parentesco:".$parentesco;
-                    return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
-                    'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                if ($certificados->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
                 }
 
-                //$nombre = $datos->nombres;
-                //echo $cedula->getBody()->getContents();
-            }else{
-                //Flash::success($book->message);
-                return redirect()->back();
-            }
-        }else{
+                if ($certificadosconyuge->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                }
 
-            return redirect()->back()->with('error', 'Ingrese Cédula');
+                if ($cartera->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                }
+
+                if ($solicitantes) {
+                    //dd(trim($solicitantes->SolPerCod));
+                    $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                    ->where('PylCod','!=' ,'P.F.')
+                    ->get();
+                    if ($carterasol->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                    }
+
+                }
+        }
+        }else{ // termina Expedientes
+
+            //return "Si el expediente no existe, se deben controlar todas las otras tablas";
+
+
+        //    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+            $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                    ->where('CerEst', '!=', 2)
+                                    ->where('CerEst', '!=', 7)
+                                    ->where('CerEst', '!=', 8)
+                                    ->where('CerEst', '!=', 12)
+                                    ->get();
+           $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+           $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+           $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+           ->where('PylCod','!=' ,'P.F.')
+           ->get();
+           $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+           $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+           ->where('SolEtapa','B')
+           ->first();
+
+
+           if($existe->count() >= 1){
+               //Session::flash('error', 'Ya existe el postulante!');
+               return redirect()->back()->with('status', 'Ya existe el postulante!');
+           }
+
+           if ($certificados->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+           }
+
+           if ($certificadosconyuge->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+           }
+
+           if ($cartera->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+           }
+
+           if ($solicitantes) {
+               //dd(trim($solicitantes->SolPerCod));
+               $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+               ->where('PylCod','!=' ,'P.F.')
+               ->get();
+               if ($carterasol->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+               }
+
+           }
+
+
+           if ($todos) {
+            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
         }
 
-        $title="Agregar Postulante";
-        return view('postulantes.create',compact('title'));
+        }
+        // return "sale por el ya existe, pero se le debe dejar continuar";
+        // return "sale por el no existe";
+
+
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ];
+
+        $GetOrder = [
+            'username' => 'senavitatconsultas',
+            'password' => 'S3n4vitat'
+        ];
+        $client = new client();
+        $res = $client->post('http://10.1.79.7:8080/mbohape-core/sii/security', [
+            'headers' => $headers,
+            'json' => $GetOrder,
+            'decode_content' => false
+        ]);
+        //var_dump((string) $res->getBody());
+        $contents = $res->getBody()->getContents();
+        $book = json_decode($contents);
+        //echo $book->token;
+        if($book->success == true){
+            //obtener la cedula
+            $headerscedula = [
+                'Authorization' => 'Bearer '.$book->token,
+                'Accept' => 'application/json',
+                'decode_content' => false
+            ];
+            $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                'headers' => $headerscedula,
+            ]);
+            $datos=$cedula->getBody()->getContents();
+            $datospersona = json_decode($datos);
+            if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+            }else{
+                $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                $nroexp = $cedula;
+                $title="Agregar Miembro Familiar";
+                $project_id = Project::find($id);
+                $par = [1, 8];
+                if ($ultimoEstado==7){
+
+                    $parentesco = Parentesco::whereNotIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
+                    $discapacdad = Discapacidad::all();
+                    $idpostulante = $x;
+
+                }else{
+
+                $parentesco = Parentesco::whereIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
+                $discapacdad = Discapacidad::all();
+                $idpostulante = $x;
+                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                }
+
+                //return "parentesco:".$parentesco;
+                return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+            }
+
+            //$nombre = $datos->nombres;
+            //echo $cedula->getBody()->getContents();
+        }else{
+            //Flash::success($book->message);
+            return redirect()->back();
+        }
+    }else{
+
+        return redirect()->back()->with('error', 'Ingrese Cédula');
     }
+
+    $title="Agregar Miembro Familiar";
+    return view('postulantes.create',compact('title'));
+}
 
 
     public function store(StorePostulante $request)
