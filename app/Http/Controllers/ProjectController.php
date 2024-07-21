@@ -1084,6 +1084,11 @@ public function showTecnico($id)
         // } catch (\Exception $e) {
         //     throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
         // }
+
+        return [
+                     'message' => 'success'
+                 ];
+
     }
 
     public function destroyfile(Request $request)
