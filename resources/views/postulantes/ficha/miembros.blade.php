@@ -102,7 +102,8 @@
                             <ul class="dropdown-menu" role="menu">
                                 @if (!isset($project->getEstado->stage_id) || $project->getEstado->stage_id == 7)
                                     {{-- <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li> --}}
-                                    {{-- <li><a class="feed-idmiembro" data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="">Eliminar</a></li> --}}
+                                    <a class="dropdown-item feed-id" data-postulante-id="{{ $mi->postulante_id }}" href="{{ route('miembros.edit', ['id' => $project->id, 'idpostulante' => $mi->miembro_id]) }}">Editar Miembro</a>
+                                    <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger1" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="#">Eliminar Miembro</a>
                                 @endif
                             </ul>
                           </div>
@@ -146,7 +147,7 @@
     <!-- /.modal-dialog -->
   </div>
 
-  <div class="modal modal-danger fade" id="modal-danger">
+  {{-- <div class="modal modal-danger fade" id="modal-danger1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -154,7 +155,7 @@
             <span aria-hidden="true">×</span></button>
           <h4 class="modal-title"><i class="fa  fa-warning"></i> Eliminar Miembro</h4>
         </div>
-        {{-- <div class="modal-body">
+        <div class="modal-body">
             <form action="{{ action('PostulantesController@destroymiembro') }}" method="post">
                     {{ csrf_field() }}
             <p id="demo"></p>
@@ -165,29 +166,36 @@
           <button type="submit" class="btn btn-outline">Eliminar</button>
         </div>
     </form>
-      </div> --}}
+      </div>
       <!-- /.modal-content -->
     </div>
     <!-- /.modal-dialog -->
-  </div>
+  </div> --}}
   @section('js')
   <script type="text/javascript">
   $(document).ready(function ()
   {
 
-      $('body').on('click', '.feed-id',function(){
-      document.getElementById("delete_id").value = $(this).attr('data-id');
-      document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el documento: "'+$(this).attr('data-title')+'"';
-      console.log($(this).attr('data-id'));
-      console.log($(this).attr('data-title'));
-      });
+    //   $('body').on('click', '.feed-id',function(){
+    //   document.getElementById("delete_id").value = $(this).attr('data-id');
+    //   document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el documento: "'+$(this).attr('data-title')+'"';
+    //   console.log($(this).attr('data-id'));
+    //   console.log($(this).attr('data-title'));
+    //   });
 
-      $('body').on('click', '.feed-idmiembro',function(){
-      document.getElementById("delete_idmiembro").value = $(this).attr('data-id');
-      document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el Miembro: "'+$(this).attr('data-title')+'" <br> Esta acción no se puede deshacer!!!';
-      console.log($(this).attr('data-id'));
-      console.log($(this).attr('data-title'));
-      });
+    //   $('body').on('click', '.feed-idmiembro',function(){
+    //   document.getElementById("delete_idmiembro").value = $(this).attr('data-id');
+    //   document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el Miembro: "'+$(this).attr('data-title')+'" <br> Esta acción no se puede deshacer!!!';
+    //   console.log($(this).attr('data-id'));
+    //   console.log($(this).attr('data-title'));
+    //   });
+
+    $('body').on('click', '.feed-id',function(){
+        document.getElementById("delete_idmiembro").value = $(this).attr('data-id');
+        document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el Miembro: <strong>"'+$(this).attr('data-title')+'" </strong><br> Esta acción no se puede deshacer!!!';
+        console.log($(this).attr('data-id'));
+        console.log($(this).attr('data-title'));
+        });
 
   });
   </script>

@@ -518,11 +518,24 @@ class PostulantesController extends Controller
                         $nroexp = $cedula;
                         $title="Agregar Miembro Familiar";
                         $project_id = Project::find($id);
-                        //$parentesco = Parentesco::all();
+                        $par = [1, 8];
+                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                                                ->orderBy('name', 'asc')->get();
+                            $discapacdad = Discapacidad::all();
+                            $idpostulante = $x;
+
+                        }else{
+
+                        $parentesco = Parentesco::all();
                         $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
                             //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
-                        return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
-                        'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                        }
+
+                        return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                        'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
                     }
 
                     //$nombre = $datos->nombres;
@@ -697,18 +710,26 @@ class PostulantesController extends Controller
                 $nroexp = $cedula;
                 $title="Agregar Miembro Familiar";
                 $project_id = Project::find($id);
-                $par = [1, 8];
-                if ($ultimoEstado==7){
+        return  $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
 
-                    $parentesco = Parentesco::whereNotIn('id', $par)
+                if ($proyectoEstado) {
+                    $ultimoEstado = $proyectoEstado->stage_id;
+                } else {
+                    $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
+                }
+                $par = [1, 8];
+                if ($ultimoEstado==7 || $ultimoEstado=NULL){
+
+                    return "Vacio";
+
+                    return $parentesco = Parentesco::whereIn('id', $par)
                                           ->orderBy('name', 'asc')->get();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
 
                 }else{
 
-                $parentesco = Parentesco::whereIn('id', $par)
-                                          ->orderBy('name', 'asc')->get();
+                $parentesco = Parentesco::all();
                 $discapacdad = Discapacidad::all();
                 $idpostulante = $x;
                     //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
@@ -797,6 +818,14 @@ class PostulantesController extends Controller
         //return $request;
     }
 
+    public function storemiembroeditar(Request $request){
+       // return "Guardar Edicion";
+        $postulante = Postulante::findOrFail($request->postulante_id);
+        $postulante->fill($request->all());
+        $postulante->save();
+        return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha editado correctamente el Miembro!');
+    }
+
     public function show($id,$idpostulante)
     {
         $postulante=Postulante::find($idpostulante);
@@ -871,12 +900,21 @@ class PostulantesController extends Controller
         $fecha = $postulante->birthdate;
         $discapacdad = Discapacidad::all();
         $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
-        $parentesco = Parentesco::all();
+        $estado= ProjectStatus::where('project_id', $id)->first();
+        if (empty($estado)){
+            //return "Vacio";
+            $par = [1,8];
+            $parentesco = Parentesco::whereIn('id', $par)->get();
+        }else{
+            $parentesco = Parentesco::all();
+        }
+
         $parent = PostulanteHasBeneficiary::where('miembro_id',$postulante->id)->first();
         $idpostulante=$parent->postulante_id;
+        $idmiembro=$parent->miembro_id;
 
-        return view('postulantes.ficha.createmiembro',compact('title','project','postulante','apellido','cedula','sexo','project_id',
-                                                'nombre','nac','est','fecha','discapacdad','disc','parentesco','parent','idpostulante'));
+        return view('postulantes.ficha.editmiembro',compact('title','project','postulante','apellido','cedula','sexo','project_id',
+                                                'nombre','nac','est','fecha','discapacdad','disc','parentesco','idpostulante', 'idmiembro'));
     }
 
     public function update(Request $request)
@@ -907,9 +945,9 @@ class PostulantesController extends Controller
 
     public function updatemiembro(Request $request)
     {
-        //
         //return $request;
-        $postulante = Postulante::find($request->input("id"));
+        //return $request->parent_id;
+        $postulante = Postulante::find($request->parent_id);
         $postulante->localidad = $request->input("localidad");
         $postulante->address = $request->input("address");
         $postulante->cedula = $request->input("cedula");
@@ -919,11 +957,12 @@ class PostulantesController extends Controller
         $postulante->mobile = $request->input("mobile");
         $postulante->save();
 
-        $disc = PostulanteHasDiscapacidad::find($request->input("disc_id"));
+        $disc = PostulanteHasDiscapacidad::find($request->disc_id);
         $disc->discapacidad_id=$request->discapacidad_id;
         $disc->save();
 
-        $parent = PostulanteHasBeneficiary::find($request->input("parent_id"));
+
+        $parent = PostulanteHasBeneficiary::where('miembro_id', $request->parent_id)->first();
         $parent->parentesco_id=$request->parentesco_id;
         $parent->save();
 
@@ -986,8 +1025,6 @@ class PostulantesController extends Controller
 
     public function destroymiembro(Request $request)
     {
-
-        return "Eliminar";
         PostulanteHasBeneficiary::where('miembro_id',$request->delete_idmiembro)->delete();
         PostulanteHasDiscapacidad::where('postulante_id',$request->delete_idmiembro)->delete();
         Postulante::find($request->delete_idmiembro)->delete();
