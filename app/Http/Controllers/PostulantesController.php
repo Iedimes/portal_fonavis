@@ -471,6 +471,8 @@ class PostulantesController extends Controller
 
                    }
 
+                   return "sale por aca";
+
                    $headers = [
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
@@ -661,7 +663,7 @@ class PostulantesController extends Controller
         // return "sale por el ya existe, pero se le debe dejar continuar";
         // return "sale por el no existe";
 
-
+        //return "sale por aca2";
 
         $headers = [
             'Content-Type' => 'application/json',
@@ -710,7 +712,7 @@ class PostulantesController extends Controller
                 $nroexp = $cedula;
                 $title="Agregar Miembro Familiar";
                 $project_id = Project::find($id);
-        return  $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
+                $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
 
                 if ($proyectoEstado) {
                     $ultimoEstado = $proyectoEstado->stage_id;
@@ -720,7 +722,7 @@ class PostulantesController extends Controller
                 $par = [1, 8];
                 if ($ultimoEstado==7 || $ultimoEstado=NULL){
 
-                    return "Vacio";
+                   // return "Vacio";
 
                     return $parentesco = Parentesco::whereIn('id', $par)
                                           ->orderBy('name', 'asc')->get();
