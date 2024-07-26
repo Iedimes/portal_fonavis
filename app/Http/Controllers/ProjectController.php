@@ -80,13 +80,13 @@ class ProjectController extends Controller
         $title = "Crear Proyecto";
         $tierra = Land::all();
         $modalidad = Modality::all();
-        //$dep = [18, 21, 999];
+        $dep = [18, 19, 20, 21, 999];
         $loc = [0, 900];
         //$departamentos = Departamento::all();
-        // $departamentos = Departamento::whereNotIn('DptoId', $dep)
-        //                  ->orderBy('DptoNom', 'asc')->get();
-        $departamentos = Departamento::where('DptoId', '<', 18)
-            ->orderBy('DptoNom', 'asc')->get();
+        $departamentos = Departamento::whereNotIn('DptoId', $dep)
+                          ->orderBy('DptoNom', 'asc')->get();
+        // $departamentos = Departamento::where('DptoId', '<', 18)
+        //     ->orderBy('DptoNom', 'asc')->get();
         // $localidad = Distrito::all();
 
         $localidad = Distrito::whereNotIn('CiuId', $loc)
