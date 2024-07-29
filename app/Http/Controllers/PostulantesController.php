@@ -724,14 +724,16 @@ class PostulantesController extends Controller
 
                    // return "Vacio";
 
-                    return $parentesco = Parentesco::whereIn('id', $par)
+                    $parentesco = Parentesco::whereIn('id', $par)
                                           ->orderBy('name', 'asc')->get();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
 
                 }else{
 
-                $parentesco = Parentesco::all();
+                // $parentesco = Parentesco::all();
+                $parentesco = Parentesco::whereIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
                 $discapacdad = Discapacidad::all();
                 $idpostulante = $x;
                     //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
