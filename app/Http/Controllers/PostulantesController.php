@@ -471,7 +471,7 @@ class PostulantesController extends Controller
 
                    }
 
-                   return "sale por aca";
+                   //return "sale por aca";
 
                    $headers = [
                     'Content-Type' => 'application/json',
