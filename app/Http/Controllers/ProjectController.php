@@ -655,10 +655,10 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:30000|mimes:pdf',
+            'archivo' => 'required|max:100000|mimes:pdf',
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
-            'archivo.max' => 'El tamaño máximo del archivo es 30MB.',
+            'archivo.max' => 'El archivo supera el tamaño definido.',
             'archivo.mimes' => 'El archivo debe ser de formato PDF.',
         ]);
 
@@ -728,7 +728,7 @@ public function showTecnico($id)
             'archivos.required' => 'Debe seleccionar al menos un archivo.',
             'archivos.array' => 'Los archivos deben ser proporcionados en formato de array.',
             'archivos.*.file' => 'Uno o más archivos no son válidos.',
-            'archivos.*.max' => 'El tamaño máximo de cada archivo es 30MB.'
+            'archivos.*.max' => 'El archivo supera el tamaño definido.'
         ]);
 
         // Obtener ids
@@ -805,11 +805,13 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:30000'
+            'archivo' => 'required|max:100000|mimes:pdf',
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
-            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+            'archivo.max' => 'El archivo supera el tamaño definido..',
+            'archivo.mimes' => 'El archivo debe ser de formato PDF.',
         ]);
+
 
         // Obtener ids
         $project_id = $request->project_id;
@@ -872,11 +874,13 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:30000'
+           'archivo' => 'required|max:100000|mimes:pdf',
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
-            'archivo.max' => 'El tamaño máximo del archivo es 30MB.'
+            'archivo.max' => 'El archivo supera el tamaño definido.',
+            'archivo.mimes' => 'El archivo debe ser de formato PDF.',
         ]);
+
 
         // Obtener ids
         $project_id = $request->project_id;
