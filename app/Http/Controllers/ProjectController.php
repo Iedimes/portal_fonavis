@@ -513,10 +513,10 @@ public function showTecnico($id)
     {
        // return "Bajar archivos";
         //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        // return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
 
         //Esto es para descargar del disco local
-        // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
 
         //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
         //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
@@ -530,7 +530,7 @@ public function showTecnico($id)
     {
         //dd($project, $document_id, $file_name);
         //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+        return Storage::disk('local')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
@@ -685,21 +685,21 @@ public function showTecnico($id)
         $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
         try {
-            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+            // $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
 
-            if (!$remoteDisk->exists($folder)) {
-                $remoteDisk->makeDirectory($folder);
-            }
-
-            $remoteDisk->putFileAs($folder, $file, $filename);
-
-            // $localDisk = Storage::disk('local'); // Acceder al disco local
-
-            // if (!$localDisk->exists($folder)) {
-            //     $localDisk->makeDirectory($folder);
+            // if (!$remoteDisk->exists($folder)) {
+            //     $remoteDisk->makeDirectory($folder);
             // }
 
-            // $localDisk->putFileAs($folder, $file, $filename);
+            // $remoteDisk->putFileAs($folder, $file, $filename);
+
+            $localDisk = Storage::disk('local'); // Acceder al disco local
+
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
+            }
+
+            $localDisk->putFileAs($folder, $file, $filename);
         } catch (\Exception $e) {
             return back()->withErrors('Error subiendo archivo');
         }
@@ -737,10 +737,20 @@ public function showTecnico($id)
 
         $archivosNombres = [];
 
-        // Obtener el último ID existente en la carpeta
-        $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+        // // Obtener el último ID existente en la carpeta
+        // $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+        // $lastId = 0;
+        // $existingFolders = $remoteDisk->directories("uploads/$project_id/faltantes");
+        // foreach ($existingFolders as $existingFolder) {
+        //     $folderId = (int) basename($existingFolder);
+        //     if ($folderId > $lastId) {
+        //         $lastId = $folderId;
+        //     }
+        // }
+
+        $localDisk = Storage::disk('local'); // Acceder al disco local
         $lastId = 0;
-        $existingFolders = $remoteDisk->directories("uploads/$project_id/faltantes");
+        $existingFolders = $localDisk->directories("uploads/$project_id/faltantes");
         foreach ($existingFolders as $existingFolder) {
             $folderId = (int) basename($existingFolder);
             if ($folderId > $lastId) {
@@ -756,10 +766,10 @@ public function showTecnico($id)
         $folder = "uploads/$project_id/faltantes/$id";
 
         try {
-            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+            $localDisk = Storage::disk('local'); // Acceder al disco remoto
 
-            if (!$remoteDisk->exists($folder)) {
-                $remoteDisk->makeDirectory($folder);
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
             }
 
             // Obtener nombre original del archivo
@@ -767,7 +777,7 @@ public function showTecnico($id)
 
             // Comprobar si existe un archivo con el mismo nombre
             $counter = 1;
-            while ($remoteDisk->exists($folder . '/' . $filename)) {
+            while ($localDisk->exists($folder . '/' . $filename)) {
                 $filename = pathinfo($nombre, PATHINFO_FILENAME) . '_' . $counter . '.' . pathinfo($nombre, PATHINFO_EXTENSION);
                 $counter++;
             }
@@ -776,7 +786,7 @@ public function showTecnico($id)
             //     $filename = time() . '_' . uniqid() . '.' . $archivo->getClientOriginalExtension();
 
             // Subir archivo con el nombre original o uno modificado si ya existe
-                $remoteDisk->putFileAs($folder, $archivo, $filename);
+                $localDisk->putFileAs($folder, $archivo, $filename);
                 $archivosNombres[$id] = $nombre;
 
 
@@ -836,13 +846,13 @@ public function showTecnico($id)
         $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
         try {
-            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+            $localDisk = Storage::disk('local'); // Acceder al disco remoto
 
-            if (!$remoteDisk->exists($folder)) {
-                $remoteDisk->makeDirectory($folder);
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
             }
 
-            $remoteDisk->putFileAs($folder, $file, $filename);
+            $localDisk->putFileAs($folder, $file, $filename);
 
             // $localDisk = Storage::disk('local'); // Acceder al disco local
 
@@ -905,13 +915,13 @@ public function showTecnico($id)
         $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
         try {
-            $remoteDisk = Storage::disk('remote'); // Acceder al disco remoto
+            $localDisk = Storage::disk('local'); // Acceder al disco remoto
 
-            if (!$remoteDisk->exists($folder)) {
-                $remoteDisk->makeDirectory($folder);
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
             }
 
-            $remoteDisk->putFileAs($folder, $file, $filename);
+            $localDisk->putFileAs($folder, $file, $filename);
 
             // $localDisk = Storage::disk('local'); // Acceder al disco local
 
@@ -947,10 +957,10 @@ public function showTecnico($id)
         $document = Documents::where('project_id', $project_id)->where('document_id', $document_id)->firstOrFail();
 
         // Eliminar el archivo físicamente del disco remoto
-        Storage::disk('remote')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+        //Storage::disk('remote')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
 
         // Eliminar el archivo físicamente del disco local
-        //  Storage::disk('local')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+        Storage::disk('local')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
 
         // Eliminar el registro de la base de datos
         $document->delete();
@@ -965,10 +975,10 @@ public function showTecnico($id)
         $document = Documentsmissing::where('project_id', $project_id)->where('document_id', $document_id)->firstOrFail();
 
         // Eliminar el archivo físicamente del disco remoto
-        Storage::disk('remote')->delete("uploads/{$document->project_id}/faltantes/{$document_id}/{$document->file_path}");
+        //Storage::disk('remote')->delete("uploads/{$document->project_id}/faltantes/{$document_id}/{$document->file_path}");
 
         // Eliminar el archivo físicamente del disco local
-        //  Storage::disk('local')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
+        Storage::disk('local')->delete("uploads/{$document->project_id}/{$document->document_id}/{$document->file_path}");
 
         // Eliminar el registro de la base de datos
         $document->delete();
