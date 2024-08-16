@@ -1067,41 +1067,41 @@ public function showTecnico($id)
             $state->user_id = Auth::user()->id;
             $state->record = 'Proyecto Enviado!';
             $state->save();
-        //     try {
-        //     // Enviar correo electrónico
-        //     $project = Project::find($id);
-        //     $sat_id = $project->sat_id;
-        //     $sat_nombre = Sat::where('NucCod', $sat_id)->first();
-        //     $nombre_sat = $sat_nombre->NucNomSat;
-        //     $nombre = $project->name;
-        //     $lider = $project->leader_name;
-        //     $modalidad = Modality::where('id', $project->modalidad_id)->first();
-        //     $modalidad_nombre = $modalidad->name;
-        //     $tipo_terreno = Land::where('id', $project->land_id)->first();
-        //     $terreno = $tipo_terreno->name;
-        //     $departamento = Departamento::where('DptoId', $project->state_id)->first();
-        //     $dto = $departamento->DptoNom;
-        //     $ciudad = Distrito::where('CiuId', $project->city_id)->first();
-        //     $destrito = $ciudad->CiuNom;
-        //     $email = 'proyectos_ingresados@muvh.gov.py';
-        //     $subject = 'PROYECTO INGRESADO';
+            try {
+            // Enviar correo electrónico
+            $project = Project::find($id);
+            $sat_id = $project->sat_id;
+            $sat_nombre = Sat::where('NucCod', $sat_id)->first();
+            $nombre_sat = $sat_nombre->NucNomSat;
+            $nombre = $project->name;
+            $lider = $project->leader_name;
+            $modalidad = Modality::where('id', $project->modalidad_id)->first();
+            $modalidad_nombre = $modalidad->name;
+            $tipo_terreno = Land::where('id', $project->land_id)->first();
+            $terreno = $tipo_terreno->name;
+            $departamento = Departamento::where('DptoId', $project->state_id)->first();
+            $dto = $departamento->DptoNom;
+            $ciudad = Distrito::where('CiuId', $project->city_id)->first();
+            $destrito = $ciudad->CiuNom;
+            $email = 'proyectos_ingresados@muvh.gov.py';
+            $subject = 'PROYECTO INGRESADO';
 
-        //     Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $destrito], function ($message) use ($email, $subject) {
-        //         $message->to($email);
-        //         $message->subject($subject);
-        //         $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
-        //     });
+            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $destrito], function ($message) use ($email, $subject) {
+                    $message->to($email);
+                    $message->subject($subject);
+                    $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+                });
 
-        //     return [
-        //         'message' => 'success'
-        //     ];
-        // } catch (\Exception $e) {
-        //     throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
-        // }
+            return [
+                    'message' => 'success'
+                ];
+            } catch (\Exception $e) {
+                throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+            }
 
-        return [
-                     'message' => 'success'
-                 ];
+        // return [
+        //              'message' => 'success'
+        //          ];
 
     }
 
