@@ -84,6 +84,7 @@ class PostulantesController extends Controller
                        $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                        $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                        ->where('PylCod','!=' ,'P.F.')
+                       //->where('PerCod','!=' ,1211361)
                        ->get();
                        $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
@@ -119,6 +120,7 @@ class PostulantesController extends Controller
                            //dd(trim($solicitantes->SolPerCod));
                            $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                            ->where('PylCod','!=' ,'P.F.')
+                        //    ->where('PerCod','!=' ,1211361)
                            ->get();
                            if ($carterasol->count() >= 1) {
                                return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
@@ -200,6 +202,7 @@ class PostulantesController extends Controller
                     $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                     $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                     ->where('PylCod','!=' ,'P.F.')
+                    // ->where('PerCod','!=' ,1211361)
                     ->get();
                     $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
@@ -236,6 +239,7 @@ class PostulantesController extends Controller
                         //dd(trim($solicitantes->SolPerCod));
                         $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                         ->where('PylCod','!=' ,'P.F.')
+                        // ->where('PerCod','!=' ,1211361)
                         ->get();
                         if ($carterasol->count() >= 1) {
                             return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
@@ -259,6 +263,7 @@ class PostulantesController extends Controller
                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                ->where('PylCod','!=' ,'P.F.')
+            //    ->where('PerCod','!=' ,1211361)
                ->get();
                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
                $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
@@ -287,6 +292,7 @@ class PostulantesController extends Controller
                    //dd(trim($solicitantes->SolPerCod));
                    $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                    ->where('PylCod','!=' ,'P.F.')
+                //    ->where('PerCod','!=' ,1211361)
                    ->get();
                    if ($carterasol->count() >= 1) {
                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
@@ -429,6 +435,7 @@ class PostulantesController extends Controller
                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                    ->where('PylCod','!=' ,'P.F.')
+                //    ->where('PerCod','!=' ,1211361)
                    ->get();
                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
@@ -464,6 +471,7 @@ class PostulantesController extends Controller
                        //dd(trim($solicitantes->SolPerCod));
                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                        ->where('PylCod','!=' ,'P.F.')
+                    //    ->where('PerCod','!=' ,1211361)
                        ->get();
                        if ($carterasol->count() >= 1) {
                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
@@ -561,6 +569,7 @@ class PostulantesController extends Controller
                 $existe = Postulante::where('cedula',$request->input('cedula'))->get();
                 $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                 ->where('PylCod','!=' ,'P.F.')
+                // ->where('PerCod','!=' ,1211361)
                 ->get();
                 $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
 
@@ -597,6 +606,7 @@ class PostulantesController extends Controller
                     //dd(trim($solicitantes->SolPerCod));
                     $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                     ->where('PylCod','!=' ,'P.F.')
+                    // ->where('PerCod','!=' ,1211361)
                     ->get();
                     if ($carterasol->count() >= 1) {
                         return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
@@ -620,6 +630,7 @@ class PostulantesController extends Controller
            $existe = Postulante::where('cedula',$request->input('cedula'))->get();
            $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
            ->where('PylCod','!=' ,'P.F.')
+        //    ->where('PerCod','!=' ,1211361)
            ->get();
            $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
            $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
@@ -648,6 +659,7 @@ class PostulantesController extends Controller
                //dd(trim($solicitantes->SolPerCod));
                $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
                ->where('PylCod','!=' ,'P.F.')
+            //    ->where('PerCod','!=' ,1211361)
                ->get();
                if ($carterasol->count() >= 1) {
                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
