@@ -128,6 +128,8 @@ class PostulantesController extends Controller
 
                        }
 
+                       try {
+
                        $headers = [
                         'Content-Type' => 'application/json',
                         'Accept' => 'application/json'
@@ -188,6 +190,12 @@ class PostulantesController extends Controller
                         //Flash::success($book->message);
                         return redirect()->back();
                     }
+
+                        } catch (\Exception $e) {
+                            // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
+                            return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
+
+                        }
 
                     }else{
                     //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
@@ -309,7 +317,7 @@ class PostulantesController extends Controller
             // return "sale por el ya existe, pero se le debe dejar continuar";
             // return "sale por el no existe";
 
-
+            try{
 
             $headers = [
                 'Content-Type' => 'application/json',
@@ -370,6 +378,11 @@ class PostulantesController extends Controller
             }else{
                 //Flash::success($book->message);
                 return redirect()->back();
+            }
+
+            } catch (\Exception $e) {
+                // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
+                return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
             }
         }else{
 
