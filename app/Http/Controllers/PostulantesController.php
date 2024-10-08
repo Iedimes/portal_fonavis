@@ -17,6 +17,7 @@ use App\Models\SIG005;
 use App\Models\SIG006;
 use App\Models\SHMCER;
 use App\Models\PRMCLI;
+use App\Models\Persona;
 use App\Models\IVMSOL;
 use App\Models\ProjectStatus;
 use App\Models\PostulanteHasDiscapacidad;
@@ -191,11 +192,31 @@ class PostulantesController extends Controller
                         return redirect()->back();
                     }
 
-                        } catch (\Exception $e) {
-                            // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
-                            return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
+                } catch (\Exception $e) {
+                    //return "Conectar al BD Local 2";
+                    $ci = Persona::where('BDICed', $request->input('cedula'))->first();
 
-                        }
+                    if (!$ci) { // Si no se encuentra la persona
+                        //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                        return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+                    } else {
+
+                        $nombre = $ci->BDINom;
+                        $apellido = $ci->BDIAPE;
+                        $cedula = $ci->BDICed;
+                        $sexo = $ci->BDISexo;
+                        $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                        //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                        $nac='';
+                        $est = $ci->BDIEstCiv;
+                        $nroexp = $cedula;
+                        $title = "Agregar Postulante";
+                        $project_id = Project::find($id);
+                        $discapacdad = Discapacidad::all();
+
+                        return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
+                    }
+                }
 
                     }else{
                     //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
@@ -380,10 +401,32 @@ class PostulantesController extends Controller
                 return redirect()->back();
             }
 
-            } catch (\Exception $e) {
-                // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
-                return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
+        } catch (\Exception $e) {
+            //return "Conectar al BD Local 2";
+            $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+            if (!$ci) { // Si no se encuentra la persona
+                //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+            } else {
+
+                $nombre = $ci->BDINom;
+                $apellido = $ci->BDIAPE;
+                $cedula = $ci->BDICed;
+                $sexo = $ci->BDISexo;
+                $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                $nac='';
+                $est = $ci->BDIEstCiv;
+                $nroexp = $cedula;
+                $title = "Agregar Postulante";
+                $project_id = Project::find($id);
+                $discapacdad = Discapacidad::all();
+
+                return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
             }
+        }
+
         }else{
 
             return redirect()->back()->with('error', 'Ingrese Cédula');
@@ -493,7 +536,7 @@ class PostulantesController extends Controller
                    }
 
                    //return "sale por aca";
-
+                   try{
                    $headers = [
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
@@ -568,6 +611,49 @@ class PostulantesController extends Controller
                     //Flash::success($book->message);
                     return redirect()->back();
                 }
+            } catch (\Exception $e) {
+                //return "Conectar al BD Local 2";
+                $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+                if (!$ci) { // Si no se encuentra la persona
+                    //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                    return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+                } else {
+
+                    $nombre = $ci->BDINom;
+                    $apellido = $ci->BDIAPE;
+                    $cedula = $ci->BDICed;
+                    $sexo = $ci->BDISexo;
+                    $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                    //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                    $nac='';
+                    $est = $ci->BDIEstCiv;
+                    $nroexp = $cedula;
+                    $title="Agregar Miembro Familiar";
+                    $project_id = Project::find($id);
+                    $par = [1, 8];
+                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                                                ->orderBy('name', 'asc')->get();
+                            $discapacdad = Discapacidad::all();
+                            $idpostulante = $x;
+
+                        }else{
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                            ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
+                            //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                        }
+
+
+                        return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                    'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+
+                }
+            }
 
                 }else{
                 //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
@@ -690,7 +776,7 @@ class PostulantesController extends Controller
         // return "sale por el no existe";
 
         //return "sale por aca2";
-
+        try{
         $headers = [
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'
@@ -776,6 +862,50 @@ class PostulantesController extends Controller
             //Flash::success($book->message);
             return redirect()->back();
         }
+
+    } catch (\Exception $e) {
+        //return "Conectar al BD Local 2";
+        $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+        if (!$ci) { // Si no se encuentra la persona
+            //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+            return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+        } else {
+
+            $nombre = $ci->BDINom;
+            $apellido = $ci->BDIAPE;
+            $cedula = $ci->BDICed;
+            $sexo = $ci->BDISexo;
+            $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+            //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+            $nac='';
+            $est = $ci->BDIEstCiv;
+            $nroexp = $cedula;
+            $title="Agregar Miembro Familiar";
+            $project_id = Project::find($id);
+            $par = [1, 8];
+                if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                    $parentesco = Parentesco::whereIn('id', $par)
+                                        ->orderBy('name', 'asc')->get();
+                    $discapacdad = Discapacidad::all();
+                    $idpostulante = $x;
+
+                }else{
+
+                    $parentesco = Parentesco::whereIn('id', $par)
+                    ->orderBy('name', 'asc')->get();
+                $discapacdad = Discapacidad::all();
+                $idpostulante = $x;
+                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                }
+
+
+                return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+            'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+
+        }
+    }
     }else{
 
         return redirect()->back()->with('error', 'Ingrese Cédula');
