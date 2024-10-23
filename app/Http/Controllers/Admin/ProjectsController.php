@@ -1,662 +1,1208 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Project\BulkDestroyProject;
-use App\Http\Requests\Admin\Project\DestroyProject;
-use App\Http\Requests\Admin\Project\IndexProject;
-use App\Http\Requests\Admin\Project\StoreProject;
-use App\Http\Requests\Admin\Project\UpdateProject;
-use App\Http\Requests\Admin\ProjectStatus\StoreProjectStatusE;
+use Illuminate\Http\Request;
 use App\Models\Project;
-use App\Models\Land_project;
-use App\Models\Assignment;
-use App\Models\Stage;
-use App\Models\ProjectStatus;
-use App\Models\Sat;
-use App\Models\Departamento;
+use App\Models\Postulante;
+use GuzzleHttp\Client;
 use App\Models\ProjectHasPostulantes;
-use App\Models\Documents;
-use App\Models\Documentsmissing;
-use App\Models\Medium;
-use Brackets\AdminListing\Facades\AdminListing;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Redirector;
-use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Document;
+// use App\Models\PostulantesDocuments;
+use App\Models\Assignment;
+use App\Models\Land_project;
+use App\Models\Discapacidad;
+use App\Models\Parentesco;
+use App\Models\SIG005;
+use App\Models\SIG006;
+use App\Models\SHMCER;
+use App\Models\PRMCLI;
+use App\Models\Persona;
+use App\Models\IVMSOL;
+use App\Models\ProjectStatus;
+use App\Models\PostulanteHasDiscapacidad;
+use App\Models\PostulanteHasBeneficiary;
+use App\Http\Requests\StorePostulante;
+use PDF;
 
-class ProjectsController extends Controller
+class PostulantesController extends Controller
 {
+    //
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param IndexProject $request
-     * @return array|Factory|View
-     */
-    public function index(IndexProject $request)
+    public function __construct()
     {
-        // create and AdminListing instance for a specific model and
+        $this->middleware('auth');
+        $this->photos_path = public_path('/images');
 
-        $usuarioRol = Auth::user()->rol_app->dependency_id;
+    }
 
-        $data = AdminListing::create(Project::class)->processRequestAndGet(
-            // pass the request with params
-            $request,
+    public function index($id)
+    {
+        $title="Lista de Postulantes";
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
 
-            // set columns to query
-            ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+        //return $postulantes;
+        //Mapper::map(-24.3697635, -56.5912129, ['zoom' => 6, 'type' => 'ROADMAP']);
+        return view('postulantes.index',compact('project','title','postulantes'));
+        //return "hola";
+    }
 
-            // set columns to searchIn
-            ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
+    public function create(Request $request, $id){
 
-        );
+        if ($request->input('cedula')) {
 
-        //return $data;
+            //$expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
+            $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
+                                   ->where('TexCod', 118)
+                                   ->orderBy('NroExp', 'desc')
+                                   ->first();
 
-        if ($request->ajax()) {
-            if ($request->has('bulk')) {
-                return [
-                    'bulkItems' => $data->pluck('id')
-                ];
+
+            if(!empty($expedientes) ){
+
+                   //return "Expediente existe";
+                   $nroExp = $expedientes->NroExp;
+                   // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
+                   //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
+                   $archivo = SIG006::where('NroExp', $nroExp)
+                   ->whereIn('DEExpEst', ['C'])
+                   //->where('DEExpEst', 'A')
+                   //->OrWhere('DEExpEst', 'C')
+                   ->first();
+                   if (!empty($archivo)){
+                        //return "Existe detalle que cumple con los requisitos para permitir que se postule";
+
+                       //return redirect()->back()->with('status', 'El expediente tiene estado A!');
+                       //$certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                       $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                       ->where('CerEst', '!=', 2)
+                       ->where('CerEst', '!=', 7)
+                       ->where('CerEst', '!=', 8)
+                       ->where('CerEst', '!=', 12)
+                       ->get();
+                       $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                       $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                       $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                       ->where('PylCod','!=' ,'P.F.')
+                       //->where('PerCod','!=' ,1211361)
+                       ->get();
+                       $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                       $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                        ->where('SolEtapa','B')
+                        ->first();
+                        if ($todos) {
+                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                        }
+
+                       if($existe->count() >= 1){
+                           //Session::flash('error', 'Ya existe el postulante!');
+                           return redirect()->back()->with('status', 'Ya existe el postulante!');
+                       }
+
+                    //    if ($expedientes->count() >= 1) {
+                    //        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS! - sale por aca 1');
+                    //    }
+
+                       if ($certificados->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                       }
+
+                       if ($certificadosconyuge->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                       }
+
+                       if ($cartera->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                       }
+
+                       if ($solicitantes) {
+                           //dd(trim($solicitantes->SolPerCod));
+                           $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                           ->where('PylCod','!=' ,'P.F.')
+                        //    ->where('PerCod','!=' ,1211361)
+                           ->get();
+                           if ($carterasol->count() >= 1) {
+                               return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                           }
+
+                       }
+
+                       try {
+
+                       $headers = [
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ];
+
+                    $GetOrder = [
+                        'username' => 'senavitatconsultas',
+                        'password' => 'S3n4vitat'
+                    ];
+                    $client = new client();
+                    $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                        'headers' => $headers,
+                        'json' => $GetOrder,
+                        'decode_content' => false
+                    ]);
+                    //var_dump((string) $res->getBody());
+                    $contents = $res->getBody()->getContents();
+                    $book = json_decode($contents);
+                    //echo $book->token;
+                    if($book->success == true){
+                        //obtener la cedula
+                        $headerscedula = [
+                            'Authorization' => 'Bearer '.$book->token,
+                            'Accept' => 'application/json',
+                            'decode_content' => false
+                        ];
+                        $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                            'headers' => $headerscedula,
+                        ]);
+                        $datos=$cedula->getBody()->getContents();
+                        $datospersona = json_decode($datos);
+                        if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                            //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        }else{
+                            $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                            $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                            $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                            $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                            $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                            $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                            $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                            //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                            $nroexp = $cedula;
+                            $title="Agregar Postulante";
+                            $project_id = Project::find($id);
+                            //$parentesco = Parentesco::all();
+                            $discapacdad = Discapacidad::all();
+                                //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                            return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                            'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                        }
+
+                        //$nombre = $datos->nombres;
+                        //echo $cedula->getBody()->getContents();
+                    }else{
+                        //Flash::success($book->message);
+                        return redirect()->back();
+                    }
+
+                } catch (\Exception $e) {
+                    //return "Conectar al BD Local 2";
+                    $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+                    if (!$ci) { // Si no se encuentra la persona
+                        //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                        return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+                    } else {
+
+                        $nombre = $ci->BDINom;
+                        $apellido = $ci->BDIAPE;
+                        $cedula = $ci->BDICed;
+                        $sexo = $ci->BDISexo;
+                        $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                        //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                        $nac='';
+                        $est = $ci->BDIEstCiv;
+                        $nroexp = $cedula;
+                        $title = "Agregar Postulante";
+                        $project_id = Project::find($id);
+                        $discapacdad = Discapacidad::all();
+
+                        return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
+                    }
+                }
+
+                    }else{
+                    //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
+                    // $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                    ->where('CerEst', '!=', 2)
+                                    ->where('CerEst', '!=', 7)
+                                    ->where('CerEst', '!=', 8)
+                                    ->where('CerEst', '!=', 12)
+                                    ->get();
+                    $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                    $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                    $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                    ->where('PylCod','!=' ,'P.F.')
+                    // ->where('PerCod','!=' ,1211361)
+                    ->get();
+                    $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                    if ($expedientes->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!');
+                    }
+
+                    if($existe->count() >= 1){
+                        //Session::flash('error', 'Ya existe el postulante!');
+                        return redirect()->back()->with('status', 'Ya existe el postulante!');
+                    }
+
+                    $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                        ->where('SolEtapa','B')
+                        ->first();
+                        if ($todos) {
+                            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                        }
+
+
+                    if ($certificados->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                    }
+
+                    if ($certificadosconyuge->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                    }
+
+                    if ($cartera->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                    }
+
+                    if ($solicitantes) {
+                        //dd(trim($solicitantes->SolPerCod));
+                        $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                        ->where('PylCod','!=' ,'P.F.')
+                        // ->where('PerCod','!=' ,1211361)
+                        ->get();
+                        if ($carterasol->count() >= 1) {
+                            return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                        }
+
+                    }
             }
-            return ['data' => $data];
-        }
+            }else{ // termina Expedientes
 
-        return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol]);
-    }
+                //return "Si el expediente no existe, se deben controlar todas las otras tablas";
 
 
-
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @throws AuthorizationException
-     * @return Factory|View
-     */
-    public function create()
-    {
-        $this->authorize('admin.project.create');
-
-        return view('admin.project.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param StoreProject $request
-     * @return array|RedirectResponse|Redirector
-     */
-    public function store(StoreProject $request)
-    {
-        // Sanitize input
-        $sanitized = $request->getSanitized();
-
-        // Store the Project
-        $project = Project::create($sanitized);
-
-        if ($request->ajax()) {
-            return ['redirect' => url('admin/projects'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
-        }
-
-        return redirect('admin/projects');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param Project $project
-     * @throws AuthorizationException
-     * @return void
-     */
-    public function show(Project $project)
-{
-    $this->authorize('admin.project.show', $project);
-    $id = $project->id;
-    $project_type = Land_project::where('land_id', $project->land_id)->first();
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-    $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 1)
-        ->get();
-
-    $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 4)
-        ->get();
-    $history = ProjectStatus::where('project_id', $project['id'])
-        ->orderBy('created_at')
-        ->get();
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles = [];
-    foreach ($docproyecto as $item) {
-        $uploadedFile = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-        $uploadedFiles[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles1 = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        $uploadedFile1 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
-        $uploadedFiles1[$item->document_id] = $documentExists;
-    }
-
-    // Obtener los documentos no excluyentes faltantes
-    $missingDocuments = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-            $missingDocuments[] = $item->document->name;
-        }
-    }
-
-    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'uploadedFiles1', 'missingDocuments'));
-}
-
-    public function showDGJN(Project $project)
-    {
-        $this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-        ->where('category_id',1)
-        ->get();
-        $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 4)
-        ->get();
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-                    $uploadedFiles = [];
-                    foreach ($docproyecto as $item) {
-                        $uploadedFile = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-                        $uploadedFiles[$item->document_id] = $documentExists;
-                    }
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-                    $uploadedFiles1 = [];
-                    foreach ($docproyectoNoExcluyentes as $item) {
-                        $uploadedFile1 = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
-                        $uploadedFiles1[$item->document_id] = $documentExists;
-                    }
-        // Obtener los documentos no excluyentes faltantes
-    $missingDocuments = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-            $missingDocuments[] = $item->document->name;
-        }
-    }
-
-        //return $history;
-
-        return view('admin.project.DGJN.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'uploadedFiles1', 'missingDocuments'));
-    }
-
-    public function showDGJNFALTANTE(Project $project)
-    {
-        // $this->authorize('admin.project.show', $project);
-        //return "DOCUMENTO FALTANTE";
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $documentos = Documentsmissing::where('project_id',$id)->get();
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-        $uploadedFiles = [];
-        foreach ($documentos as $item) {
-            $uploadedFile = Documentsmissing::where('project_id', $project->id)
-                ->where('document_id', $item->document_id)
-                ->first();
-            //return $uploadedFile;
-            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-            //return $documentExists;
-            $uploadedFiles[$item->document_id] = $documentExists;
-        }
-
-        //return $history;
-
-        return view('admin.project.DGJN.showFaltante', compact('project','history', 'postulantes','uploadedFiles', 'documentos'));
-    }
-
-    public function showFONAVIS(Project $project)
-{
-    // $this->authorize('admin.project.show', $project);
-    $id = $project->id;
-    $stageId = $project->getestado->stage_id;
-
-    if ($stageId == 3 || $stageId == 13 || $stageId == 18) {
-        $proyectoEstado = ProjectStatus::where('project_id', $id)
-            ->where('stage_id', $stageId)
-            ->get();
-    } else {
-        $proyectoEstado = collect();
-    }
-
-    $project_type = Land_project::where('land_id', $project->land_id)->first();
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-
-    return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
-}
-
-    public function showFONAVISSOCIAL(Project $project)
-    {
-        // $this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 9)->get();
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-
-
-
-
-
-        //return $history;
-
-        return view('admin.project.FONAVIS.showSocial', compact('project', 'postulantes', 'proyectoEstado'));
-    }
-
-    public function showDGSO(Project $project)
-    {
-        //$this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-        ->where('category_id',1)
-        ->get();
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-        $uploadedFiles = [];
-        foreach ($docproyecto as $item) {
-            $uploadedFile = Documents::where('project_id', $project->id)
-                ->where('document_id', $item->document_id)
-                ->first();
-            //return $uploadedFile;
-            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-            //return $documentExists;
-            $uploadedFiles[$item->document_id] = $documentExists;
-        }
-
-        //return $history;
-
-        return view('admin.project.DGSO.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
-
-    public function showFONAVISTECNICO(Project $project)
-    {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->whereIn('category_id',[2])
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
-
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
+            //    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                        ->where('CerEst', '!=', 2)
+                                        ->where('CerEst', '!=', 7)
+                                        ->where('CerEst', '!=', 8)
+                                        ->where('CerEst', '!=', 12)
+                                        ->get();
+               $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+               $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+               $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+               ->where('PylCod','!=' ,'P.F.')
+            //    ->where('PerCod','!=' ,1211361)
+               ->get();
+               $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+               $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+               ->where('SolEtapa','B')
                ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
 
-       //return $history;
 
-       return view('admin.project.FONAVIS.showFonavisTecnico', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
+               if($existe->count() >= 1){
+                   //Session::flash('error', 'Ya existe el postulante!');
+                   return redirect()->back()->with('status', 'Ya existe el postulante!');
+               }
 
-    public function showFONAVISTECNICODOS(Project $project)
-    {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->whereIn('category_id',[3])
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
+               if ($certificados->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+               }
+
+               if ($certificadosconyuge->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+               }
+
+               if ($cartera->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+               }
+
+               if ($solicitantes) {
+                   //dd(trim($solicitantes->SolPerCod));
+                   $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                   ->where('PylCod','!=' ,'P.F.')
+                //    ->where('PerCod','!=' ,1211361)
                    ->get();
+                   if ($carterasol->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                   }
 
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
-
-       //return $history;
-
-       return view('admin.project.FONAVIS.showFonavisTecnicoDos', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
-
-    public function showDIGH(Project $project)
-    {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->where('category_id',2)
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
-
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
-
-       //return $history;
-
-       return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
-
-    public function showDSGO(Project $project)
-    {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->where('category_id',3)
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
-
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
-
-       //return $history;
-
-       return view('admin.project.DSGO.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
-
-    public function showFONAVISADJ(Project $project)
-    {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->where('category_id',3)
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
-
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
-
-       //return $history;
-
-       return view('admin.project.FONAVIS.showFonavisAdj', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
-    }
+               }
 
 
-    public function transition(Project $project)
-    {
-        $project->getEstado->getStage->id;
-        $estado=$project->getEstado->getStage->id;
-        $user = Auth::user()->id;
-        $email = Auth::user()->email;
-        // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+               if ($todos) {
+                return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+            }
 
-        switch ($estado) {
-            case 1:
-                // Lógica específica para el estado 1
-                $stages = Stage::whereIn('id',[2])->get();
-                // $opcion = 2;
-                break;
-            case 2:
-                // Lógica específica para el estado 2
-                $stages = Stage::whereIn('id', [3, 4, 6])->get();
-                break;
-            case 3:
-                    // Lógica específica para el estado 3
-                    $stages = Stage::whereIn('id', [7])->get();
-                    break;
-            case 5:
-                 // Lógica específica para el estado 5
-                 $stages = Stage::whereIn('id', [3, 6])->get();
-                 break;
+            }
+            // return "sale por el ya existe, pero se le debe dejar continuar";
+            // return "sale por el no existe";
 
-            case 8:
-                 // Lógica específica para el estado 8
-                 $stages = Stage::whereIn('id', [9])->get();
-                 break;
-            case 9:
-                 // Lógica específica para el estado 9
-                 $stages = Stage::whereIn('id', [10])->get();
-                 break;
-            case 11:
-                 // Lógica específica para el estado 11
-                 $stages = Stage::whereIn('id', [12])->get();
-                 break;
-            case 12:
-                 // Lógica específica para el estado 12
-                 $stages = Stage::whereIn('id', [13,14,15])->get();
-                 break;
-            case 13:
-                    // Lógica específica para el estado 13
-                    $stages = Stage::whereIn('id', [16])->get();
-                    break;
-            case 16:
-                     // Lógica específica para el estado 16
-                     $stages = Stage::whereIn('id', [17])->get();
-                     break;
-            case 17:
-                     // Lógica específica para el estado 17
-                     $stages = Stage::whereIn('id', [18])->get();
-                     break;
+            try{
 
-        }
-
-        $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
-
-        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado'));
-
-    }
-
-    public function transitionEliminar(Project $project)
-    {
-        $project->getEstado->getStage->id;
-        $user = Auth::user()->id;
-        $email = Auth::user()->email;
-        $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
-
-        /*if ($workflowState->id == 26) {
-            $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
-        }else{
-            $mensaje = 'Este cambio de estado quedara registrado en el historial de la solicitud';
-        }*/
-        $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
-
-        return view('admin.project.transitionEliminar', compact('project', 'user','mensaje','stages','email'));
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Project $project
-     * @throws AuthorizationException
-     * @return Factory|View
-     */
-    public function edit(Project $project)
-    {
-        $this->authorize('admin.project.edit', $project);
-
-
-        return view('admin.project.edit', [
-            'project' => $project,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateProject $request
-     * @param Project $project
-     * @return array|RedirectResponse|Redirector
-     */
-    public function update(UpdateProject $request, Project $project)
-    {
-        // Sanitize input
-        $sanitized = $request->getSanitized();
-
-        // Update changed values Project
-        $project->update($sanitized);
-
-        if ($request->ajax()) {
-            return [
-                'redirect' => url('admin/projects'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+            $headers = [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             ];
+
+            $GetOrder = [
+                'username' => 'senavitatconsultas',
+                'password' => 'S3n4vitat'
+            ];
+            $client = new client();
+            $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                'headers' => $headers,
+                'json' => $GetOrder,
+                'decode_content' => false
+            ]);
+            //var_dump((string) $res->getBody());
+            $contents = $res->getBody()->getContents();
+            $book = json_decode($contents);
+            //echo $book->token;
+            if($book->success == true){
+                //obtener la cedula
+                $headerscedula = [
+                    'Authorization' => 'Bearer '.$book->token,
+                    'Accept' => 'application/json',
+                    'decode_content' => false
+                ];
+                $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                    'headers' => $headerscedula,
+                ]);
+                $datos=$cedula->getBody()->getContents();
+                $datospersona = json_decode($datos);
+                if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                    //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                }else{
+                    $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                    $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                    $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                    $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                    $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                    $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                    $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                    //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                    $nroexp = $cedula;
+                    $title="Agregar Postulante";
+                    $project_id = Project::find($id);
+                    //$parentesco = Parentesco::all();
+                    $discapacdad = Discapacidad::all();
+                        //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                    return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                    'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                }
+
+                //$nombre = $datos->nombres;
+                //echo $cedula->getBody()->getContents();
+            }else{
+                //Flash::success($book->message);
+                return redirect()->back();
+            }
+
+        } catch (\Exception $e) {
+            //return "Conectar al BD Local 2";
+            $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+            if (!$ci) { // Si no se encuentra la persona
+                //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+            } else {
+
+                $nombre = $ci->BDINom;
+                $apellido = $ci->BDIAPE;
+                $cedula = $ci->BDICed;
+                $sexo = $ci->BDISexo;
+                $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                $nac='';
+                $est = $ci->BDIEstCiv;
+                $nroexp = $cedula;
+                $title = "Agregar Postulante";
+                $project_id = Project::find($id);
+                $discapacdad = Discapacidad::all();
+
+                return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
+            }
         }
 
-        return redirect('admin/projects');
-    }
+        }else{
 
-    function descargarDocumento($project, $document_id, $file_name)
-    {
-        //dd($project, $document_id, $file_name);
-        //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
-
-        //Esto es para descargar del disco local
-        // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
-
-        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
-        //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
-        /*$file = Storage::disk('remote')->get($file_name);
-        //return Storage::disk('remote')->download($file_name);
-        return (new Response($file, 200))
-            ->header('Content-Type', '*');*/
-    }
-
-    function downloadFile($project, $document_id, $file_name)
-    {
-       // return "Bajar archivos";
-        //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
-
-        //Esto es para descargar del disco local
-        // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
-
-        //return Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
-        //Storage::disk('remote')->download('uploads/1945/1/17082872871374512236.pdf');
-        /*$file = Storage::disk('remote')->get($file_name);
-        //return Storage::disk('remote')->download($file_name);
-        return (new Response($file, 200))
-            ->header('Content-Type', '*');*/
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param DestroyProject $request
-     * @param Project $project
-     * @throws Exception
-     * @return ResponseFactory|RedirectResponse|Response
-     */
-    public function destroy(DestroyProject $request, Project $project)
-    {
-        $project->delete();
-
-        if ($request->ajax()) {
-            return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
+            return redirect()->back()->with('error', 'Ingrese Cédula');
         }
 
-        return redirect()->back();
+        $title="Agregar Postulante";
+        return view('postulantes.create',compact('title'));
     }
 
-    /**
-     * Remove the specified resources from storage.
-     *
-     * @param BulkDestroyProject $request
-     * @throws Exception
-     * @return Response|bool
-     */
-    public function bulkDestroy(BulkDestroyProject $request) : Response
+
+
+    public function createmiembro(Request $request, $id, $x){
+
+        //return $request;
+
+        //return $id;
+        //return $x;
+
+        $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
+
+        if ($proyectoEstado) {
+            $ultimoEstado = $proyectoEstado->stage_id;
+        } else {
+            $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
+        }
+
+        //return "Crear Miembro";
+
+
+    if ($request->input('cedula')) {
+
+        //$expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
+        $expedientes = SIG005::where('NroExpPer', $request->input('cedula'))
+                               ->where('TexCod', 118)
+                               ->orderBy('NroExp', 'desc')
+                               ->first();
+
+
+        if(!empty($expedientes) ){
+
+               //return "Expediente existe";
+               $nroExp = $expedientes->NroExp;
+               // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
+               //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
+               $archivo = SIG006::where('NroExp', $nroExp)
+               ->whereIn('DEExpEst', ['C'])
+               //->where('DEExpEst', 'A')
+               //->OrWhere('DEExpEst', 'C')
+               ->first();
+               if (!empty($archivo)){
+                    //return "Existe detalle que cumple con los requisitos para permitir que se postule";
+
+                   //return redirect()->back()->with('status', 'El expediente tiene estado A!');
+                   //$certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                   $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                   ->where('CerEst', '!=', 2)
+                   ->where('CerEst', '!=', 7)
+                   ->where('CerEst', '!=', 8)
+                   ->where('CerEst', '!=', 12)
+                   ->get();
+                   $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                   $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                   $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                   ->where('PylCod','!=' ,'P.F.')
+                //    ->where('PerCod','!=' ,1211361)
+                   ->get();
+                   $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                   $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                    ->where('SolEtapa','B')
+                    ->first();
+                    if ($todos) {
+                        return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                    }
+
+                   if($existe->count() >= 1){
+                       //Session::flash('error', 'Ya existe el postulante!');
+                       return redirect()->back()->with('status', 'Ya existe el postulante!');
+                   }
+
+                //    if ($expedientes->count() >= 1) {
+                //        return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS! - sale por aca 1');
+                //    }
+
+                   if ($certificados->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                   }
+
+                   if ($certificadosconyuge->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                   }
+
+                   if ($cartera->count() >= 1) {
+                       return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                   }
+
+                   if ($solicitantes) {
+                       //dd(trim($solicitantes->SolPerCod));
+                       $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                       ->where('PylCod','!=' ,'P.F.')
+                    //    ->where('PerCod','!=' ,1211361)
+                       ->get();
+                       if ($carterasol->count() >= 1) {
+                           return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                       }
+
+                   }
+
+                   //return "sale por aca";
+                   try{
+                   $headers = [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ];
+
+                $GetOrder = [
+                    'username' => 'senavitatconsultas',
+                    'password' => 'S3n4vitat'
+                ];
+                $client = new client();
+                $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                    'headers' => $headers,
+                    'json' => $GetOrder,
+                    'decode_content' => false
+                ]);
+                //var_dump((string) $res->getBody());
+                $contents = $res->getBody()->getContents();
+                $book = json_decode($contents);
+                //echo $book->token;
+                if($book->success == true){
+                    //obtener la cedula
+                    $headerscedula = [
+                        'Authorization' => 'Bearer '.$book->token,
+                        'Accept' => 'application/json',
+                        'decode_content' => false
+                    ];
+                    $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                        'headers' => $headerscedula,
+                    ]);
+                    $datos=$cedula->getBody()->getContents();
+                    $datospersona = json_decode($datos);
+                    if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                        //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    }else{
+                        $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                        $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                        $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                        $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                        $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                        $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                        $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                        //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                        $nroexp = $cedula;
+                        $title="Agregar Miembro Familiar";
+                        $project_id = Project::find($id);
+                        $par = [1, 8];
+                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                                                ->orderBy('name', 'asc')->get();
+                            $discapacdad = Discapacidad::all();
+                            $idpostulante = $x;
+
+                        }else{
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                            ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
+                            //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                        }
+
+                        return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                        'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                    }
+
+                    //$nombre = $datos->nombres;
+                    //echo $cedula->getBody()->getContents();
+                }else{
+                    //Flash::success($book->message);
+                    return redirect()->back();
+                }
+            } catch (\Exception $e) {
+                //return "Conectar al BD Local 2";
+                $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+                if (!$ci) { // Si no se encuentra la persona
+                    //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+                    return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+                } else {
+
+                    $nombre = $ci->BDINom;
+                    $apellido = $ci->BDIAPE;
+                    $cedula = $ci->BDICed;
+                    $sexo = $ci->BDISexo;
+                    $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+                    //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                    $nac='';
+                    $est = $ci->BDIEstCiv;
+                    $nroexp = $cedula;
+                    $title="Agregar Miembro Familiar";
+                    $project_id = Project::find($id);
+                    $par = [1, 8];
+                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                                                ->orderBy('name', 'asc')->get();
+                            $discapacdad = Discapacidad::all();
+                            $idpostulante = $x;
+
+                        }else{
+
+                            $parentesco = Parentesco::whereIn('id', $par)
+                            ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
+                            //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                        }
+
+
+                        return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                    'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+
+                }
+            }
+
+                }else{
+                //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
+                // $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+                $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                ->where('CerEst', '!=', 2)
+                                ->where('CerEst', '!=', 7)
+                                ->where('CerEst', '!=', 8)
+                                ->where('CerEst', '!=', 12)
+                                ->get();
+                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+                $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+                ->where('PylCod','!=' ,'P.F.')
+                // ->where('PerCod','!=' ,1211361)
+                ->get();
+                $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+
+                if ($expedientes->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya existe expediente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!');
+                }
+
+                if($existe->count() >= 1){
+                    //Session::flash('error', 'Ya existe el postulante!');
+                    return redirect()->back()->with('status', 'Ya existe el postulante!');
+                }
+
+                $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+                    ->where('SolEtapa','B')
+                    ->first();
+                    if ($todos) {
+                        return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+                    }
+
+
+                if ($certificados->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+                }
+
+                if ($certificadosconyuge->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+                }
+
+                if ($cartera->count() >= 1) {
+                    return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+                }
+
+                if ($solicitantes) {
+                    //dd(trim($solicitantes->SolPerCod));
+                    $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+                    ->where('PylCod','!=' ,'P.F.')
+                    // ->where('PerCod','!=' ,1211361)
+                    ->get();
+                    if ($carterasol->count() >= 1) {
+                        return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+                    }
+
+                }
+        }
+        }else{ // termina Expedientes
+
+            //return "Si el expediente no existe, se deben controlar todas las otras tablas";
+
+
+        //    $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))->get();
+            $certificados = SHMCER::where('CerPosCod',$request->input('cedula'))
+                                    ->where('CerEst', '!=', 2)
+                                    ->where('CerEst', '!=', 7)
+                                    ->where('CerEst', '!=', 8)
+                                    ->where('CerEst', '!=', 12)
+                                    ->get();
+           $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+           $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+           $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
+           ->where('PylCod','!=' ,'P.F.')
+        //    ->where('PerCod','!=' ,1211361)
+           ->get();
+           $solicitantes = IVMSOL::where('SolPerCge',$request->input('cedula'))->first();
+           $todos = IVMSOL::where('SolPerCod',$request->input('cedula'))
+           ->where('SolEtapa','B')
+           ->first();
+
+
+           if($existe->count() >= 1){
+               //Session::flash('error', 'Ya existe el postulante!');
+               return redirect()->back()->with('status', 'Ya existe el postulante!');
+           }
+
+           if ($certificados->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Titular!');
+           }
+
+           if ($certificadosconyuge->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con certificado de Subsidio como Conyuge!');
+           }
+
+           if ($cartera->count() >= 1) {
+               return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución!');
+           }
+
+           if ($solicitantes) {
+               //dd(trim($solicitantes->SolPerCod));
+               $carterasol = PRMCLI::where('PerCod',trim($solicitantes->SolPerCod))
+               ->where('PylCod','!=' ,'P.F.')
+            //    ->where('PerCod','!=' ,1211361)
+               ->get();
+               if ($carterasol->count() >= 1) {
+                   return redirect()->back()->with('status', 'Ya cuenta con Beneficios en la Institución como Conyuge!');
+               }
+
+           }
+
+
+           if ($todos) {
+            return redirect()->back()->with('status', 'Ya es Beneficiario Final!');
+        }
+
+        }
+        // return "sale por el ya existe, pero se le debe dejar continuar";
+        // return "sale por el no existe";
+
+        //return "sale por aca2";
+        try{
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ];
+
+        $GetOrder = [
+            'username' => 'senavitatconsultas',
+            'password' => 'S3n4vitat'
+        ];
+        $client = new client();
+        $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+            'headers' => $headers,
+            'json' => $GetOrder,
+            'decode_content' => false
+        ]);
+        //var_dump((string) $res->getBody());
+        $contents = $res->getBody()->getContents();
+        $book = json_decode($contents);
+        //echo $book->token;
+        if($book->success == true){
+            //obtener la cedula
+            $headerscedula = [
+                'Authorization' => 'Bearer '.$book->token,
+                'Accept' => 'application/json',
+                'decode_content' => false
+            ];
+            $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                'headers' => $headerscedula,
+            ]);
+            $datos=$cedula->getBody()->getContents();
+            $datospersona = json_decode($datos);
+            if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+            }else{
+                $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                $nroexp = $cedula;
+                $title="Agregar Miembro Familiar";
+                $project_id = Project::find($id);
+                $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
+
+                if ($proyectoEstado) {
+                    $ultimoEstado = $proyectoEstado->stage_id;
+                } else {
+                    $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
+                }
+                $par = [1, 8];
+                if ($ultimoEstado==7 || $ultimoEstado=NULL){
+
+                   // return "Vacio";
+
+                    $parentesco = Parentesco::whereIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
+                    $discapacdad = Discapacidad::all();
+                    $idpostulante = $x;
+
+                }else{
+
+                // $parentesco = Parentesco::all();
+                $parentesco = Parentesco::whereIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
+                $discapacdad = Discapacidad::all();
+                $idpostulante = $x;
+                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                }
+
+                //return "parentesco:".$parentesco;
+                return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+            }
+
+            //$nombre = $datos->nombres;
+            //echo $cedula->getBody()->getContents();
+        }else{
+            //Flash::success($book->message);
+            return redirect()->back();
+        }
+
+    } catch (\Exception $e) {
+        //return "Conectar al BD Local 2";
+        $ci = Persona::where('BDICed', $request->input('cedula'))->first();
+
+        if (!$ci) { // Si no se encuentra la persona
+            //return redirect()->back()->with('error', 'La persona no existe en la base de datos local');
+            return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
+        } else {
+
+            $nombre = $ci->BDINom;
+            $apellido = $ci->BDIAPE;
+            $cedula = $ci->BDICed;
+            $sexo = $ci->BDISexo;
+            $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
+            //$fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+            $nac='';
+            $est = $ci->BDIEstCiv;
+            $nroexp = $cedula;
+            $title="Agregar Miembro Familiar";
+            $project_id = Project::find($id);
+            $par = [1, 8];
+                if ($ultimoEstado==7 || $ultimoEstado==NULL){
+
+                    $parentesco = Parentesco::whereIn('id', $par)
+                                        ->orderBy('name', 'asc')->get();
+                    $discapacdad = Discapacidad::all();
+                    $idpostulante = $x;
+
+                }else{
+
+                    $parentesco = Parentesco::whereIn('id', $par)
+                    ->orderBy('name', 'asc')->get();
+                $discapacdad = Discapacidad::all();
+                $idpostulante = $x;
+                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                }
+
+
+                return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+            'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+
+        }
+    }
+    }else{
+
+        return redirect()->back()->with('error', 'Ingrese Cédula');
+    }
+
+    $title="Agregar Miembro Familiar";
+    return view('postulantes.create',compact('title'));
+}
+
+
+    public function store(StorePostulante $request)
     {
-        DB::transaction(static function () use ($request) {
-            collect($request->data['ids'])
-                ->chunk(1000)
-                ->each(static function ($bulkChunk) {
-                    Project::whereIn('id', $bulkChunk)->delete();
 
-                    // TODO your code goes here
-                });
-        });
 
-        return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
+        //return $request;
+
+        $input = $request->except(['_token','project_id','discapacidad_id']);
+        $postulante = Postulante ::create($input);
+
+        $proypostulante = new ProjectHasPostulantes();
+        $proypostulante->project_id=$request->project_id;
+        $proypostulante->postulante_id=$postulante->id;
+        $proypostulante->save();
+
+
+
+        $postulantediscapacidad = new PostulanteHasDiscapacidad();
+        $postulantediscapacidad->discapacidad_id=$request->discapacidad_id;
+        $postulantediscapacidad->postulante_id=$postulante->id;
+        $postulantediscapacidad->save();
+        //ProjectHasPostulantes::
+
+        //return $request->all();
+        //Postulante ::create($request->all());
+        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha agregado un nuevo Postulante!');
+        //return $request;
     }
+
+    public function storeEditPostulante(StorePostulante $request)
+    {
+        $postulante = Postulante::findOrFail($request->postulante_id);
+        $postulante->fill($request->all());
+        $postulante->save();
+
+        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha editado correctamente el Postulante!');
+    }
+
+    public function storemiembro(Request $request)
+    {
+        //return $request;
+        $input = $request->except(['_token','project_id','discapacidad_id','postulante_id']);
+        $postulante = Postulante ::create($input);
+
+        $miembro = new PostulanteHasBeneficiary();
+        $miembro->postulante_id=$request->postulante_id;
+        $miembro->miembro_id=$postulante->id;
+        $miembro->parentesco_id=$request->parentesco_id;
+        $miembro->save();
+
+        $postulantediscapacidad = new PostulanteHasDiscapacidad();
+        $postulantediscapacidad->discapacidad_id=$request->discapacidad_id;
+        $postulantediscapacidad->postulante_id=$postulante->id;
+        $postulantediscapacidad->save();
+        //ProjectHasPostulantes::
+
+        //return $request->all();
+        //Postulante ::create($request->all());
+        //return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha agregado un nuevo Miembro!');
+        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha agregado un nuevo Miembro!');
+        //return $request;
+    }
+
+    public function storemiembroeditar(Request $request){
+       // return "Guardar Edicion";
+        $postulante = Postulante::findOrFail($request->postulante_id);
+        $postulante->fill($request->all());
+        $postulante->save();
+        return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha editado correctamente el Miembro!');
+    }
+
+    public function show($id,$idpostulante)
+    {
+        $postulante=Postulante::find($idpostulante);
+        $project = Project::find($id);
+        $title="Resumen Postulante ";
+        //dd($project);
+        $tipoproy = Land_project::where('land_id',$project->land_id)->first();
+        // $documentos = PostulantesDocuments::where('postulante_id',$idpostulante)->get();
+        // $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
+        // ->whereNotIn('document_id', $documentos->pluck('document_id'))
+        // ->where('category_id',2)
+        // ->get();
+        $miembros = PostulanteHasBeneficiary::where('postulante_id',$postulante->id)->get();
+        //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
+        return view('postulantes.show',compact('title','project','miembros','postulante'));
+    }
+
+    public function edit($id,$idpostulante)
+    {
+        $title="Editar Postulante";
+        $project=Project::find($id);
+        $postulante=Postulante::find($idpostulante);
+        $nombre = $postulante->first_name;
+        $apellido = $postulante->last_name;
+        $cedula = $postulante->cedula;
+        $sexo = $postulante->gender;
+        $project_id = Project::find($id);
+        $nac = $postulante->nacionalidad;
+        $est = $postulante->marital_status;
+        $fecha = $postulante->birthdate;
+        $discapacdad = Discapacidad::all();
+        $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
+
+        return view('postulantes.create',compact('title','project','postulante','apellido','cedula','sexo','project_id',
+                                                'nombre','nac','est','fecha','discapacdad','disc'));
+    }
+
+    public function editarPostulante($id,$idpostulante)
+    {
+        $title="Editar Postulante";
+        $project=Project::find($id);
+        $postulante=Postulante::find($idpostulante);
+        $nombre = $postulante->first_name;
+        $apellido = $postulante->last_name;
+        $cedula = $postulante->cedula;
+        $sexo = $postulante->gender;
+        $project_id = Project::find($id);
+        $nac = $postulante->nacionalidad;
+        $est = $postulante->marital_status;
+        $fecha = $postulante->birthdate;
+        $discapacdad = Discapacidad::all();
+        $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
+
+        return view('postulantes.edit',compact('title','project','postulante','apellido','cedula','sexo','project_id',
+                                                'nombre','nac','est','fecha','discapacdad','disc'));
+    }
+
+
+
+    public function editmiembro($id,$idpostulante)
+    {
+        $title="Editar Miembro";
+        $project=Project::find($id);
+        $postulante=Postulante::find($idpostulante);
+        $nombre = $postulante->first_name;
+        $apellido = $postulante->last_name;
+        $cedula = $postulante->cedula;
+        $sexo = $postulante->gender;
+        $project_id = Project::find($id);
+        $nac = $postulante->nacionalidad;
+        $est = $postulante->marital_status;
+        $fecha = $postulante->birthdate;
+        $discapacdad = Discapacidad::all();
+        $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
+        $estado= ProjectStatus::where('project_id', $id)->first();
+        if (empty($estado)){
+            //return "Vacio";
+            $par = [1,8];
+            $parentesco = Parentesco::whereIn('id', $par)->get();
+        }else{
+            $parentesco = Parentesco::all();
+        }
+
+        $parent = PostulanteHasBeneficiary::where('miembro_id',$postulante->id)->first();
+        $idpostulante=$parent->postulante_id;
+        $idmiembro=$parent->miembro_id;
+
+        return view('postulantes.ficha.editmiembro',compact('title','project','postulante','apellido','cedula','sexo','project_id',
+                                                'nombre','nac','est','fecha','discapacdad','disc','parentesco','idpostulante', 'idmiembro'));
+    }
+
+    public function update(Request $request)
+    {
+        //
+        //return $request;
+        $postulante = Postulante::find($request->input("id"));
+        $postulante->localidad = $request->input("localidad");
+        $postulante->address = $request->input("address");
+        $postulante->cedula = $request->input("cedula");
+        $postulante->phone = $request->input("phone");
+        $postulante->asentamiento = $request->input("asentamiento");
+        $postulante->ingreso = $request->input("ingreso");
+        $postulante->mobile = $request->input("mobile");
+        $postulante->save();
+
+        $disc = PostulanteHasDiscapacidad::find($request->input("disc_id"));
+        $disc->discapacidad_id=$request->discapacidad_id;
+        $disc->save();
+
+
+
+
+
+
+        return redirect('projects/'.$request->input("project_id").'/postulantes')->with('success', 'El postulante fue actualizado!');
+    }
+
+    public function updatemiembro(Request $request)
+    {
+        //return $request;
+        //return $request->parent_id;
+        $postulante = Postulante::find($request->parent_id);
+        $postulante->localidad = $request->input("localidad");
+        $postulante->address = $request->input("address");
+        $postulante->cedula = $request->input("cedula");
+        $postulante->phone = $request->input("phone");
+        $postulante->asentamiento = $request->input("asentamiento");
+        $postulante->ingreso = $request->input("ingreso");
+        $postulante->mobile = $request->input("mobile");
+        $postulante->save();
+
+        $disc = PostulanteHasDiscapacidad::find($request->disc_id);
+        $disc->discapacidad_id=$request->discapacidad_id;
+        $disc->save();
+
+
+        $parent = PostulanteHasBeneficiary::where('miembro_id', $request->parent_id)->first();
+        $parent->parentesco_id=$request->parentesco_id;
+        $parent->save();
+
+        return redirect('projects/'.$request->input("project_id").'/postulantes/'.$request->input("postulante_id"))->with('success', 'El miembro fue actualizado!');
+    }
+
+    public function generatePDF($id)
+    {
+        $project=Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
+        $contar = count($postulantes);
+        $pdf = PDF::loadView('postulantesPDF', compact('project','postulantes', 'contar'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('Listadopostulantes.pdf');
+    }
+
+
+
+    public function upload(Request $request)
+    {
+
+        $input['file_path'] = time().'.'.$request->image->getClientOriginalExtension();
+        $request->image->move(public_path('images/'.$request->project_id.'/project/general'), $input['file_path']);
+
+        $title = Document::find($request->title);
+        //return $title->name;
+        $input['title'] = $title->name;
+        $input['postulante_id'] = $request->postulante_id;
+        $input['document_id'] = $request->title;
+        PostulantesDocuments::create($input);
+
+        //return $input;
+
+    	return back()
+            ->with('success', 'Se ha agregado un Archivo!');
+    }
+
+    public function destroy(Request $request)
+    {
+
+
+        $postulante = ProjectHasPostulantes::where('postulante_id',$request->delete_id)->first();
+
+
+        if ($postulante->getMembers->count() > 0) {
+            // return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+            return back()->with('status', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+        }else{
+
+        ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
+        PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
+        Postulante::find($request->delete_id)->delete();
+
+        // return back()->with('error', 'Se ha eliminado el Postulante!');
+        return back()->with('status', 'Se ha eliminado el Postulante!');
+        }
+
+    }
+
+
+    public function destroymiembro(Request $request)
+    {
+        PostulanteHasBeneficiary::where('miembro_id',$request->delete_idmiembro)->delete();
+        PostulanteHasDiscapacidad::where('postulante_id',$request->delete_idmiembro)->delete();
+        Postulante::find($request->delete_idmiembro)->delete();
+        return back()->with('error', 'Se ha eliminado el Miembro!');
+    }
+
+    public function destroyfile(Request $request)
+    {
+
+        $file = PostulantesDocuments::find($request->delete_id);
+
+        $file_path = $this->photos_path . '/' . $file->project_id . '/project/general/' . $file->file_path;
+        if (file_exists($file_path)) {
+            unlink($file_path);
+        }
+
+        PostulantesDocuments::find($request->delete_id)->delete();
+        return back()->with('error', 'Se ha eliminado el archivo!');
+    }
+
 }
