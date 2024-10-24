@@ -17,7 +17,6 @@ use App\Models\SIG005;
 use App\Models\SIG006;
 use App\Models\SHMCER;
 use App\Models\PRMCLI;
-use App\Models\Persona;
 use App\Models\IVMSOL;
 use App\Models\ProjectStatus;
 use App\Models\PostulanteHasDiscapacidad;
@@ -130,35 +129,73 @@ class PostulantesController extends Controller
                        }
 
                        try {
-                        // Obtener la cédula desde la solicitud
-                        $cedulaInput = $request->input('cedula');
 
-                        // Buscar la persona en la base de datos local
-                        $ci = Persona::where('BDICed', $cedulaInput)->first();
+                       $headers = [
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ];
 
-                        if (!$ci) { // Si no se encuentra la persona
-                            return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
-                        } else {
-                            // Extraer los datos de la persona encontrada
-                            $nombre = $ci->BDINom;
-                            $apellido = $ci->BDIAPE;
-                            $cedula = $ci->BDICed;
-                            $sexo = $ci->BDISexo;
-                            $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
-                            $nac = ''; // Ajustar según cómo quieras manejar la nacionalidad
-                            $est = $ci->BDIEstCiv;
+                    $GetOrder = [
+                        'username' => 'senavitatconsultas',
+                        'password' => 'S3n4vitat'
+                    ];
+                    $client = new client();
+                    $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                        'headers' => $headers,
+                        'json' => $GetOrder,
+                        'decode_content' => false
+                    ]);
+                    //var_dump((string) $res->getBody());
+                    $contents = $res->getBody()->getContents();
+                    $book = json_decode($contents);
+                    //echo $book->token;
+                    if($book->success == true){
+                        //obtener la cedula
+                        $headerscedula = [
+                            'Authorization' => 'Bearer '.$book->token,
+                            'Accept' => 'application/json',
+                            'decode_content' => false
+                        ];
+                        $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                            'headers' => $headerscedula,
+                        ]);
+                        $datos=$cedula->getBody()->getContents();
+                        $datospersona = json_decode($datos);
+                        if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                            //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                            return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        }else{
+                            $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                            $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                            $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                            $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                            $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                            $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                            $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                            //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
                             $nroexp = $cedula;
-                            $title = "Agregar Postulante";
+                            $title="Agregar Postulante";
                             $project_id = Project::find($id);
+                            //$parentesco = Parentesco::all();
                             $discapacdad = Discapacidad::all();
-
-                            return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
+                                //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                            return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                            'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
                         }
-                    } catch (\Exception $e) {
-                        // Manejar cualquier excepción que ocurra
-                        return redirect()->back()->with('status', 'Error al consultar la base de datos local: ' . $e->getMessage());
+
+                        //$nombre = $datos->nombres;
+                        //echo $cedula->getBody()->getContents();
+                    }else{
+                        //Flash::success($book->message);
+                        return redirect()->back();
                     }
 
+                        } catch (\Exception $e) {
+                            // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
+                            return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
+
+                        }
 
                     }else{
                     //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
@@ -280,37 +317,73 @@ class PostulantesController extends Controller
             // return "sale por el ya existe, pero se le debe dejar continuar";
             // return "sale por el no existe";
 
-         try {
-    // Obtener la cédula desde la solicitud
-    $cedulaInput = $request->input('cedula');
+            try{
 
-    // Buscar la persona en la base de datos local
-    $ci = Persona::where('BDICed', $cedulaInput)->first();
+            $headers = [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ];
 
-    if (!$ci) { // Si no se encuentra la persona
-        return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
-    } else {
-        // Extraer los datos de la persona encontrada
-        $nombre = $ci->BDINom;
-        $apellido = $ci->BDIAPE;
-        $cedula = $ci->BDICed;
-        $sexo = $ci->BDISexo;
-        $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
-        $nac = ''; // Ajustar según cómo quieras manejar la nacionalidad
-        $est = $ci->BDIEstCiv;
-        $nroexp = $cedula;
-        $title = "Agregar Postulante";
-        $project_id = Project::find($id);
-        $discapacdad = Discapacidad::all();
+            $GetOrder = [
+                'username' => 'senavitatconsultas',
+                'password' => 'S3n4vitat'
+            ];
+            $client = new client();
+            $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                'headers' => $headers,
+                'json' => $GetOrder,
+                'decode_content' => false
+            ]);
+            //var_dump((string) $res->getBody());
+            $contents = $res->getBody()->getContents();
+            $book = json_decode($contents);
+            //echo $book->token;
+            if($book->success == true){
+                //obtener la cedula
+                $headerscedula = [
+                    'Authorization' => 'Bearer '.$book->token,
+                    'Accept' => 'application/json',
+                    'decode_content' => false
+                ];
+                $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                    'headers' => $headerscedula,
+                ]);
+                $datos=$cedula->getBody()->getContents();
+                $datospersona = json_decode($datos);
+                if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                    //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                }else{
+                    $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                    $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                    $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                    $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                    $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                    $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                    $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                    //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
+                    $nroexp = $cedula;
+                    $title="Agregar Postulante";
+                    $project_id = Project::find($id);
+                    //$parentesco = Parentesco::all();
+                    $discapacdad = Discapacidad::all();
+                        //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                    return view('postulantes.create',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                    'nac','est','title','project_id','discapacdad'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
+                }
 
-        return view('postulantes.create', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'est', 'title', 'project_id', 'discapacdad', 'nac'));
-    }
-        } catch (\Exception $e) {
-            // Manejar cualquier excepción que ocurra
-            return redirect()->back()->with('status', 'Error al consultar la base de datos local: ' . $e->getMessage());
-        }
+                //$nombre = $datos->nombres;
+                //echo $cedula->getBody()->getContents();
+            }else{
+                //Flash::success($book->message);
+                return redirect()->back();
+            }
 
-
+            } catch (\Exception $e) {
+                // return redirect()->back()->with('status', 'Error al conectar con la API: ' . $e->getMessage());
+                return redirect()->back()->with('status', 'Hubo un problema al conectarse con el servicio de Identificaciones. Por favor, inténtelo nuevamente más tarde.');
+            }
         }else{
 
             return redirect()->back()->with('error', 'Ingrese Cédula');
@@ -420,50 +493,81 @@ class PostulantesController extends Controller
                    }
 
                    //return "sale por aca";
-                   try {
-                    // Obtener la cédula desde la solicitud
-                    $cedulaInput = $request->input('cedula');
 
-                    // Buscar la persona en la base de datos local
-                    $ci = Persona::where('BDICed', $cedulaInput)->first();
+                   $headers = [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ];
 
-                    if (!$ci) { // Si no se encuentra la persona
-                        return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
-                    } else {
-                        // Extraer los datos de la persona encontrada
-                        $nombre = $ci->BDINom;
-                        $apellido = $ci->BDIAPE;
-                        $cedula = $ci->BDICed;
-                        $sexo = $ci->BDISexo;
-                        $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
-                        $nac = ''; // Ajustar según cómo manejar la nacionalidad
-                        $est = $ci->BDIEstCiv;
+                $GetOrder = [
+                    'username' => 'senavitatconsultas',
+                    'password' => 'S3n4vitat'
+                ];
+                $client = new client();
+                $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+                    'headers' => $headers,
+                    'json' => $GetOrder,
+                    'decode_content' => false
+                ]);
+                //var_dump((string) $res->getBody());
+                $contents = $res->getBody()->getContents();
+                $book = json_decode($contents);
+                //echo $book->token;
+                if($book->success == true){
+                    //obtener la cedula
+                    $headerscedula = [
+                        'Authorization' => 'Bearer '.$book->token,
+                        'Accept' => 'application/json',
+                        'decode_content' => false
+                    ];
+                    $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                        'headers' => $headerscedula,
+                    ]);
+                    $datos=$cedula->getBody()->getContents();
+                    $datospersona = json_decode($datos);
+                    if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                        //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                        return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                    }else{
+                        $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                        $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                        $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                        $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                        $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                        $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                        $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                        //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
                         $nroexp = $cedula;
-                        $title = "Agregar Miembro Familiar";
+                        $title="Agregar Miembro Familiar";
                         $project_id = Project::find($id);
-                        $par = [1, 8]; // Parentesco permitido
+                        $par = [1, 8];
+                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
 
-                        // Verificar el estado para determinar el tipo de parentesco
-                        if ($ultimoEstado == 7 || $ultimoEstado == NULL) {
                             $parentesco = Parentesco::whereIn('id', $par)
-                                ->orderBy('name', 'asc')->get();
+                                                ->orderBy('name', 'asc')->get();
                             $discapacdad = Discapacidad::all();
-                            $idpostulante = $x; // Ajusta según tu lógica
-                        } else {
+                            $idpostulante = $x;
+
+                        }else{
+
                             $parentesco = Parentesco::whereIn('id', $par)
-                                ->orderBy('name', 'asc')->get();
-                            $discapacdad = Discapacidad::all();
-                            $idpostulante = $x; // Ajusta según tu lógica
+                            ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
+                            //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
                         }
 
-                        // Retornar la vista con los datos obtenidos
-                        return view('postulantes.ficha.createmiembro', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'nac', 'est', 'title', 'project_id', 'discapacdad', 'parentesco', 'idpostulante'));
+                        return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                        'nac','est','title','project_id','discapacdad','parentesco' , 'idpostulante'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
                     }
-                } catch (\Exception $e) {
-                    // Manejar cualquier excepción que ocurra
-                    return redirect()->back()->with('status', 'Error al consultar la base de datos local: ' . $e->getMessage());
-                }
 
+                    //$nombre = $datos->nombres;
+                    //echo $cedula->getBody()->getContents();
+                }else{
+                    //Flash::success($book->message);
+                    return redirect()->back();
+                }
 
                 }else{
                 //return "Expediente No existe en SIG006 por que esta vacio o no cumple con las condiciones";
@@ -586,50 +690,92 @@ class PostulantesController extends Controller
         // return "sale por el no existe";
 
         //return "sale por aca2";
-        try {
-            // Obtener la cédula desde la solicitud
-            $cedulaInput = $request->input('cedula');
 
-            // Buscar la persona en la base de datos local
-            $ci = Persona::where('BDICed', $cedulaInput)->first();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ];
 
-            if (!$ci) { // Si no se encuentra la persona
-                return redirect()->back()->with('status', 'La persona no existe en la base de datos local');
-            } else {
-                // Extraer los datos de la persona encontrada
-                $nombre = $ci->BDINom;
-                $apellido = $ci->BDIAPE;
-                $cedula = $ci->BDICed;
-                $sexo = $ci->BDISexo;
-                $fecha = date('Y-m-d H:i:s.v', strtotime($ci->BDIFecNac)); // Formato sin milisegundos
-                $nac = ''; // Ajustar según cómo manejar la nacionalidad
-                $est = $ci->BDIEstCiv;
+        $GetOrder = [
+            'username' => 'senavitatconsultas',
+            'password' => 'S3n4vitat'
+        ];
+        $client = new client();
+        $res = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+            'headers' => $headers,
+            'json' => $GetOrder,
+            'decode_content' => false
+        ]);
+        //var_dump((string) $res->getBody());
+        $contents = $res->getBody()->getContents();
+        $book = json_decode($contents);
+        //echo $book->token;
+        if($book->success == true){
+            //obtener la cedula
+            $headerscedula = [
+                'Authorization' => 'Bearer '.$book->token,
+                'Accept' => 'application/json',
+                'decode_content' => false
+            ];
+            $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+                'headers' => $headerscedula,
+            ]);
+            $datos=$cedula->getBody()->getContents();
+            $datospersona = json_decode($datos);
+            if(isset($datospersona->obtenerPersonaPorNroCedulaResponse->return->error)){
+                //Flash::error($datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                //Session::flash('error', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+                return redirect()->back()->with('status', $datospersona->obtenerPersonaPorNroCedulaResponse->return->error);
+            }else{
+                $nombre = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nombres;
+                $apellido = $datospersona->obtenerPersonaPorNroCedulaResponse->return->apellido;
+                $cedula = $datospersona->obtenerPersonaPorNroCedulaResponse->return->cedula;
+                $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
+                $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
+                $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
+                $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
                 $nroexp = $cedula;
-                $title = "Agregar Miembro Familiar";
+                $title="Agregar Miembro Familiar";
                 $project_id = Project::find($id);
-                $par = [1, 8]; // Parentesco permitido
+                $proyectoEstado = ProjectStatus::where('project_id', $id)->latest()->first();
 
-                // Verificar el estado para determinar el tipo de parentesco
-                if ($ultimoEstado == 7 || $ultimoEstado == NULL) {
-                    $parentesco = Parentesco::whereIn('id', $par)
-                        ->orderBy('name', 'asc')->get();
-                    $discapacdad = Discapacidad::all();
-                    $idpostulante = $x; // Ajusta según tu lógica
+                if ($proyectoEstado) {
+                    $ultimoEstado = $proyectoEstado->stage_id;
                 } else {
+                    $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
+                }
+                $par = [1, 8];
+                if ($ultimoEstado==7 || $ultimoEstado=NULL){
+
+                   // return "Vacio";
+
                     $parentesco = Parentesco::whereIn('id', $par)
-                        ->orderBy('name', 'asc')->get();
+                                          ->orderBy('name', 'asc')->get();
                     $discapacdad = Discapacidad::all();
-                    $idpostulante = $x; // Ajusta según tu lógica
+                    $idpostulante = $x;
+
+                }else{
+
+                // $parentesco = Parentesco::all();
+                $parentesco = Parentesco::whereIn('id', $par)
+                                          ->orderBy('name', 'asc')->get();
+                $discapacdad = Discapacidad::all();
+                $idpostulante = $x;
+                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
                 }
 
-                // Retornar la vista con los datos obtenidos
-                return view('postulantes.ficha.createmiembro', compact('nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo', 'nac', 'est', 'title', 'project_id', 'discapacdad', 'parentesco', 'idpostulante'));
+                //return "parentesco:".$parentesco;
+                return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
+                'nac','est','title','project_id','discapacdad','idpostulante','parentesco'/*,'escolaridad','discapacidad','enfermedad','entidades'*/));
             }
-        } catch (\Exception $e) {
-            // Manejar cualquier excepción que ocurra
-            return redirect()->back()->with('status', 'Error al consultar la base de datos local: ' . $e->getMessage());
-        }
 
+            //$nombre = $datos->nombres;
+            //echo $cedula->getBody()->getContents();
+        }else{
+            //Flash::success($book->message);
+            return redirect()->back();
+        }
     }else{
 
         return redirect()->back()->with('error', 'Ingrese Cédula');
