@@ -717,7 +717,7 @@ class PostulantesController extends Controller
                 'Accept' => 'application/json',
                 'decode_content' => false
             ];
-            $cedula = $client->get('http://10.1.79.7:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
+            $cedula = $client->get('http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/'.$request->input('cedula'), [
                 'headers' => $headerscedula,
             ]);
             $datos=$cedula->getBody()->getContents();
