@@ -217,3 +217,39 @@ $factory->define(App\Models\ProjectStatus::class, static function (Faker\Generat
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Postulante::class, static function (Faker\Generator $faker) {
+    return [
+        'first_name' => $faker->firstName,
+        'last_name' => $faker->lastName,
+        'cedula' => $faker->sentence,
+        'marital_status' => $faker->sentence,
+        'nacionalidad' => $faker->sentence,
+        'gender' => $faker->sentence,
+        'birthdate' => $faker->sentence,
+        'localidad' => $faker->sentence,
+        'asentamiento' => $faker->sentence,
+        'ingreso' => $faker->sentence,
+        'address' => $faker->sentence,
+        'grupo' => $faker->sentence,
+        'phone' => $faker->sentence,
+        'mobile' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        'nexp' => $faker->sentence,
+        
+        
+    ];
+});
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Comentario::class, static function (Faker\Generator $faker) {
+    return [
+        'postulante_id' => $faker->sentence,
+        'cedula' => $faker->sentence,
+        'comentario' => $faker->text(),
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

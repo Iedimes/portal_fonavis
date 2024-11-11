@@ -331,5 +331,53 @@ return [
         ],
     ],
 
+    'postulante' => [
+        'title' => 'Postulantes',
+
+        'actions' => [
+            'index' => 'Postulantes',
+            'create' => 'New Postulante',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'first_name' => 'First name',
+            'last_name' => 'Last name',
+            'cedula' => 'Cedula',
+            'marital_status' => 'Marital status',
+            'nacionalidad' => 'Nacionalidad',
+            'gender' => 'Gender',
+            'birthdate' => 'Birthdate',
+            'localidad' => 'Localidad',
+            'asentamiento' => 'Asentamiento',
+            'ingreso' => 'Ingreso',
+            'address' => 'Address',
+            'grupo' => 'Grupo',
+            'phone' => 'Phone',
+            'mobile' => 'Mobile',
+            'nexp' => 'Nexp',
+            
+        ],
+    ],
+
+    'comentario' => [
+        'title' => 'Comentarios',
+
+        'actions' => [
+            'index' => 'Comentarios',
+            'create' => 'New Comentario',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'postulante_id' => 'Postulante',
+            'cedula' => 'Cedula',
+            'comentario' => 'Comentario',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

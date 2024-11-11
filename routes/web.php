@@ -474,3 +474,38 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
         });
     });
 });
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('postulantes')->name('postulantes/')->group(static function() {
+            Route::get('/',                                             'PostulantesController@index')->name('index');
+            Route::get('/create',                                       'PostulantesController@create')->name('create');
+            Route::post('/',                                            'PostulantesController@store')->name('store');
+            Route::get('/{postulante}/edit',                            'PostulantesController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'PostulantesController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{postulante}',                                'PostulantesController@update')->name('update');
+            Route::delete('/{postulante}',                              'PostulantesController@destroy')->name('destroy');
+            Route::get('/{id}/comentario',                              'PostulantesController@comentario')->name('comentario');
+        });
+    });
+});
+
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('comentarios')->name('comentarios/')->group(static function() {
+            Route::get('/',                                             'ComentariosController@index')->name('index');
+            // Route::get('/create',                                       'ComentariosController@create')->name('create');
+            Route::get('{postulante_id}/create/{cedula}', 'ComentariosController@create')->name('comentarios.create');
+            Route::post('/',                                            'ComentariosController@store')->name('store');
+            Route::get('/{comentario}/edit',                            'ComentariosController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ComentariosController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{comentario}',                                'ComentariosController@update')->name('update');
+            Route::delete('/{comentario}',                              'ComentariosController@destroy')->name('destroy');
+        });
+    });
+});

@@ -18,3 +18,5 @@ import './user';
 import './project';
 import './document-check';
 import './project-status';
+import './postulante';
+import './comentario';

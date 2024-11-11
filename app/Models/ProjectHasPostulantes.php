@@ -58,5 +58,12 @@ class ProjectHasPostulantes extends Model
 
     }
 
+    protected $with = ['Project'];
+
+    public function Project() {
+        return $this->hasOne('App\Models\Project','id', 'project_id');
+    }
+
+
 
 }
