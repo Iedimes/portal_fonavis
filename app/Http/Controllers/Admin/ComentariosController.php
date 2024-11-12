@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Comentario\StoreComentario;
 use App\Http\Requests\Admin\Comentario\UpdateComentario;
 use App\Models\Comentario;
 use App\Models\Postulante;
+use App\Models\ProjectHasPostulantes;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -75,31 +76,39 @@ class ComentariosController extends Controller
      * @return array|RedirectResponse|Redirector
      */
     public function store(StoreComentario $request)
-{
-    // Sanitize input
-    $sanitized = $request->getSanitized();
+    {
+        // Sanitizar la entrada
+        $sanitized = $request->getSanitized();
 
-    // Almacenar el Comentario
-    $comentario = Comentario::create($sanitized);
+        // Almacenar el Comentario
+        $comentario = Comentario::create($sanitized);
 
-    // Obtener el postulante_id desde el request
-    $postulanteId = $request->input('postulante_id');
+        // Obtener el postulante_id desde el request
+        $postulanteId = $request->input('postulante_id');
 
-    // Si el postulante_id está presente, proceder a eliminarlo
-    if ($postulanteId) {
-        $postulante = Postulante::find($postulanteId);
+        // Si el postulante_id está presente, proceder a eliminar el Postulante y su relación en ProjectHasPostulantes
+        if ($postulanteId) {
+            // Buscar el postulante
+            $postulante = Postulante::find($postulanteId);
 
-        if ($postulante) {
-            $postulante->delete(); // Esto realizará un soft delete
+            if ($postulante) {
+                // Eliminar el registro de ProjectHasPostulantes relacionado
+                ProjectHasPostulantes::where('postulante_id', $postulanteId)->delete(); // Esto realizará un soft delete
+
+                // Realizar el soft delete del postulante
+                $postulante->delete();
+            }
         }
-    }
 
-    if ($request->ajax()) {
-        return ['redirect' => url('admin/postulantes'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
-    }
+        if ($request->ajax()) {
+            return [
+                'redirect' => url('admin/postulantes'),
+                'message' => trans('brackets/admin-ui::admin.operation.succeeded')
+            ];
+        }
 
-    return redirect('admin/postulantes');
-}
+        return redirect('admin/postulantes');
+    }
 
     /**
      * Display the specified resource.
