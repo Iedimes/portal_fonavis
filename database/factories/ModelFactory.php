@@ -253,3 +253,14 @@ $factory->define(App\Models\Comentario::class, static function (Faker\Generator 
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Motivo::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->sentence,
+        'motivo' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

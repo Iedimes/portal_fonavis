@@ -20,3 +20,4 @@ import './document-check';
 import './project-status';
 import './postulante';
 import './comentario';
+import './motivo';

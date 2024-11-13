@@ -509,3 +509,20 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
         });
     });
 });
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('motivos')->name('motivos/')->group(static function() {
+            Route::get('/',                                             'MotivosController@index')->name('index');
+            // Route::get('/create',                                       'MotivosController@create')->name('create');
+            Route::get('{project_id}/create',                           'MotivosController@create')->name('motivos.create');
+            Route::post('/',                                            'MotivosController@store')->name('store');
+            Route::get('/{motivo}/edit',                                'MotivosController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'MotivosController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{motivo}',                                    'MotivosController@update')->name('update');
+            Route::delete('/{motivo}',                                  'MotivosController@destroy')->name('destroy');
+        });
+    });
+});

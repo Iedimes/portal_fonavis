@@ -379,5 +379,22 @@ return [
         ],
     ],
 
+    'motivo' => [
+        'title' => 'Motivos',
+
+        'actions' => [
+            'index' => 'Motivos',
+            'create' => 'New Motivo',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'project_id' => 'Project',
+            'motivo' => 'Motivo',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

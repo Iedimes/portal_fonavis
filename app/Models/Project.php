@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Project extends Model
+class Project extends Model implements Auditable
 {
     //
     //public $timestamps = false;
@@ -28,6 +30,10 @@ class Project extends Model
     {
         return 'Y-d-m H:i:s.v';
     }*/
+
+    use SoftDeletes; // Agregar SoftDeletes para eliminar registros suavemente
+    use \OwenIt\Auditing\Auditable; // Agregar auditoría
+
 
     protected $fillable = ['name', 'phone', 'sat_id','state_id','city_id','land_id','modalidad_id','localidad','leader_name',
    'typology_id','expsocial','exptecnico','action','households','certificate_pin','res_nro','finca_nro','fechares','coordenadax','coordenaday', 'ubicacion'];
@@ -79,6 +85,12 @@ class Project extends Model
             }
         });
     }
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at', // Asegúrate de que `deleted_at` esté incluido para el soft delete
+    ];
 
     protected $appends = ['resource_url'];
 

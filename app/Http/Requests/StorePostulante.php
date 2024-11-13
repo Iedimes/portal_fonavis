@@ -24,7 +24,7 @@ class StorePostulante extends FormRequest
     public function rules()
     {
         return [
-            //
+            'cedula' => 'required|string|unique:postulantes'
         ];
     }
 }

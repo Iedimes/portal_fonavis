@@ -224,6 +224,20 @@
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 1">
                                                     <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/show'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div>
+                                                {{-- <form class="col" v-if="!item.get_estado" @submit.prevent="deleteItem(item.resource_url)">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </button>
+                                                </form> --}}
+                                                <div class="col-auto"  v-if="!item.get_estado">
+                                                <a class="btn btn-sm btn-danger"
+                                                         :href="'/admin/motivos/' + item.id + '/create/'"
+                                                         title="{{ trans('ELIMINAR PROYECTO') }}"
+                                                         role="button">
+                                                          <i class="fa fa-trash-o"></i>
+                                                      </a>
+                                                </div>
+
                                                  @elseif (Auth::user()->rol_app->dependency_id == 2)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 2">

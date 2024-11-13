@@ -186,14 +186,6 @@ class PostulantesController extends Controller
         return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
     }
 
-    public function comentario($id)
-    {
-        //return "Comentario";
-        $postulante = Postulante::where('id', $id)->first();
-        return view('admin.postulante.comentario', [
-            'postulante' => $postulante,
-        ]);
-    }
 
     public function guardar(StorePostulante $request)
     {
