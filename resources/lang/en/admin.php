@@ -396,5 +396,22 @@ return [
         ],
     ],
 
+    'admin-users-dependency' => [
+        'title' => 'Admin Users Dependencies',
+
+        'actions' => [
+            'index' => 'Admin Users Dependencies',
+            'create' => 'New Admin Users Dependency',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'admin_user_id' => 'Admin user',
+            'dependency_id' => 'Dependency',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

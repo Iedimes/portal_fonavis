@@ -264,3 +264,14 @@ $factory->define(App\Models\Motivo::class, static function (Faker\Generator $fak
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\AdminUsersDependency::class, static function (Faker\Generator $faker) {
+    return [
+        'admin_user_id' => $faker->randomNumber(5),
+        'dependency_id' => $faker->randomNumber(5),
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});
