@@ -205,7 +205,7 @@ class PostulantesController extends Controller
         return redirect('admin/postulantes');
     }
 
-    public function generatePDF($id)
+    public function imprimir($id)
     {
         $project=Project::find($id);
         $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
