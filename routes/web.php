@@ -488,6 +488,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/{postulante}',                                'PostulantesController@update')->name('update');
             Route::delete('/{postulante}',                              'PostulantesController@destroy')->name('destroy');
             Route::get('/{id}/comentario',                              'PostulantesController@comentario')->name('comentario');
+            Route::get('imprimir/{id}',                                 'PostulantesController@generatePDF')->name('impreso');
         });
     });
 });

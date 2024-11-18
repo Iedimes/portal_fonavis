@@ -237,6 +237,13 @@
                                                           <i class="fa fa-trash-o"></i>
                                                       </a>
                                                 </div>
+                                                <div class="col-auto">
+                                                    <a class="btn btn-sm btn-primary" :href="'/admin/postulantes/' + item.id + '/imprimir'" title="{{ trans('IMPRIMIR POSTULANTES') }}">
+                                                        <i class="fa fa-print"></i>
+                                                    </a>
+                                                </div>
+
+
 
                                                  @elseif (Auth::user()->rol_app->dependency_id == 2)
 

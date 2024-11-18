@@ -9,6 +9,9 @@ use App\Http\Requests\Admin\Postulante\IndexPostulante;
 use App\Http\Requests\Admin\Postulante\StorePostulante;
 use App\Http\Requests\Admin\Postulante\UpdatePostulante;
 use App\Models\Postulante;
+use App\Models\Project;
+use App\Models\ProjectHasPostulantes;
+use PDF;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -201,4 +204,15 @@ class PostulantesController extends Controller
 
         return redirect('admin/postulantes');
     }
+
+    public function generatePDF($id)
+    {
+        $project=Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
+        $contar = count($postulantes);
+        $pdf = PDF::loadView('postulantesPDF', compact('project','postulantes', 'contar'))->setPaper('a4', 'landscape');
+
+        return $pdf->download('Listadopostulantes.pdf');
+    }
+
 }
