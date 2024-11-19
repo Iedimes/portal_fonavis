@@ -14,7 +14,7 @@
                 <div class="card">
                     <div class="card-header">
                         <i class="fa fa-align-justify"></i> {{ trans('admin.project.actions.index') }}
-                        {{--<a class="btn btn-primary btn-spinner btn-sm pull-right m-b-0" href="{{ url('admin/projects/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project.actions.create') }}</a>--}}
+                        {{--<a class="btn btn-primary  btn-sm pull-right m-b-0" href="{{ url('admin/projects/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project.actions.create') }}</a>--}}
                     </div>
                     <div class="card-body" v-cloak>
                         <div class="card-block">
@@ -222,7 +222,7 @@
                                             <div class="row no-gutters">
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 1">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/show'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/show'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 {{-- <form class="col" v-if="!item.get_estado" @submit.prevent="deleteItem(item.resource_url)">
                                                     <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}">
@@ -248,7 +248,7 @@
                                                  @elseif (Auth::user()->rol_app->dependency_id == 2)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 2">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
 
                                                 @endif
@@ -256,38 +256,38 @@
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 3">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 @endif
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 9">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISSOCIAL'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showFONAVISSOCIAL'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 @endif
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 11">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISTECNICO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showFONAVISTECNICO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 @endif
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 13">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 @endif
 
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
                                                     <div class="col-auto"  v-if="item.get_estado && item.get_estado.stage_id === 17">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showFONAVISADJ'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showFONAVISADJ'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
                                                 @endif
 
                                                 @if (Auth::user()->rol_app->dependency_id == 2)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 5">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJNFALTANTE'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDGJNFALTANTE'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
 
                                                 @endif
@@ -295,7 +295,7 @@
                                                 @if (Auth::user()->rol_app->dependency_id == 3)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 8">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGSO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDGSO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
 
                                                 @endif
@@ -303,7 +303,7 @@
                                                 @if (Auth::user()->rol_app->dependency_id == 4)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 12">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDIGH'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDIGH'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
 
                                                 @endif
@@ -311,7 +311,7 @@
                                                 @if (Auth::user()->rol_app->dependency_id == 5)
 
                                                 <div class="col-auto" v-if="item.get_estado && item.get_estado.stage_id === 16">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDSGO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDSGO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"> DETALLE DEL PROYECTO</i></a>
                                                 </div>
 
                                                 @endif
@@ -319,10 +319,10 @@
 
 
                                                 {{-- <div class="col-auto" v-else-if="item.get_estado && item.get_estado.stage_id == 2">
-                                                    <a class="btn btn-sm btn-spinner btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
+                                                    <a class="btn btn-sm  btn-warning" :href="item.resource_url + '/showDGJN'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                 </div> --}}
                                                 {{--<div class="col-auto">
-                                                    <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
+                                                    <a class="btn btn-sm  btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
                                                 </div>--}}
                                                 {{--<form class="col" @submit.prevent="deleteItem(item.resource_url)">
                                                     <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}"><i class="fa fa-trash-o"></i></button>
@@ -346,7 +346,7 @@
                                 <i class="icon-magnifier"></i>
                                 <h3>{{ trans('brackets/admin-ui::admin.index.no_items') }}</h3>
                                 <p>{{ trans('brackets/admin-ui::admin.index.try_changing_items') }}</p>
-                                <a class="btn btn-primary btn-spinner" href="{{ url('admin/projects/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project.actions.create') }}</a>
+                                <a class="btn btn-primary " href="{{ url('admin/projects/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project.actions.create') }}</a>
                             </div>
                         </div>
                     </div>
