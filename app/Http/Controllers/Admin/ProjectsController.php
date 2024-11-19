@@ -659,4 +659,17 @@ class ProjectsController extends Controller
 
         return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
     }
+
+    public function project($id)
+    {
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
+
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+
+
+        return view('admin.project.project', compact('project', 'title', 'tipoproy','postulantes'));
+    }
 }

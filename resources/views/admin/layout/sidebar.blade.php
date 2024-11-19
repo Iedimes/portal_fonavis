@@ -18,14 +18,14 @@
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/land-has-project-types') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.land-has-project-type.title') }}</a></li>
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/assignments') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.assignment.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-type-has-typologies') }}"><i class="nav-icon icon-drop"></i> {{ trans('admin.project-type-has-typology.title') }}</a></li> --}}
-           <li class="nav-item"><a class="nav-link" href="{{ url('admin/users') }}"><i class="nav-icon icon-umbrella"></i> {{ trans('admin.user.title') }}</a></li>
-           <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/users') }}"><i class="fa fa-user"></i> {{ trans('admin.user.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
            {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/document-checks') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.document-check.title') }}</a></li>--}}
            {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/project-statuses') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.project-status.title') }}</a></li>--}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/dependencies') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.dependency.title') }}</a></li>
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.admin-users-dependency.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/media') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.medium.title') }}</a></li> --}}
-           <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="nav-icon icon-magnet"></i> {{ trans('admin.postulante.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="fa fa-users"></i> {{ trans('admin.postulante.title') }}</a></li>
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/comentarios') }}"><i class="nav-icon icon-puzzle"></i> {{ trans('admin.comentario.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
@@ -37,9 +37,9 @@
             {{-- Do not delete me :) I'm also used for auto-generation menu items --}}
             {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/configuration') }}"><i class="nav-icon icon-settings"></i> {{ __('Configuration') }}</a></li>--}}
             @elseif (Auth::user()->rol_app->dependency_id == 2 || Auth::user()->rol_app->dependency_id == 3 || Auth::user()->rol_app->dependency_id == 4 || Auth::user()->rol_app->dependency_id == 5)
-                <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
             @else
-            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/modalities') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.modality.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/lands') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.land.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/documents') }}"><i class="nav-icon icon-umbrella"></i> {{ trans('admin.document.title') }}</a></li>
@@ -53,14 +53,14 @@
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/land-has-project-types') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.land-has-project-type.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/assignments') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.assignment.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-type-has-typologies') }}"><i class="nav-icon icon-drop"></i> {{ trans('admin.project-type-has-typology.title') }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url('admin/users') }}"><i class="nav-icon icon-umbrella"></i> {{ trans('admin.user.title') }}</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.project.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/users') }}"><i class="fa fa-user"></i> {{ trans('admin.user.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
             {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/document-checks') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.document-check.title') }}</a></li>--}}
             {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/project-statuses') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.project-status.title') }}</a></li>--}}
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/dependencies') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.dependency.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i class="nav-icon icon-ghost"></i> {{ trans('admin.admin-users-dependency.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/media') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.medium.title') }}</a></li>
-           <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="nav-icon icon-magnet"></i> {{ trans('admin.postulante.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="fa fa-users"></i> {{ trans('admin.postulante.title') }}</a></li>
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/comentarios') }}"><i class="nav-icon icon-puzzle"></i> {{ trans('admin.comentario.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
