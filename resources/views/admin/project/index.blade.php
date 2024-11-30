@@ -231,7 +231,7 @@
                                                     </div>
 
                                                     <div class="p-1">
-                                                        <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button"><i class="fa fa-print"></i></a>
+                                                        {{-- <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button"><i class="fa fa-print"></i></a> --}}
                                                     </div>
                                                 @elseif (Auth::user()->rol_app->dependency_id == 2)
                                                     <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 2">
