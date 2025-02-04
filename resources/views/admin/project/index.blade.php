@@ -225,13 +225,13 @@
                                                         <a class="btn btn-sm btn-warning" :href="item.resource_url + '/show'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                     </div>
                                                     <div class="p-1" v-if="!item.get_estado">
-                                                        {{-- <a class="btn btn-sm btn-danger" :href="'/admin/motivos/' + item.id + '/create/'" title="{{ trans('ELIMINAR PROYECTO') }}" role="button">
+                                                        <a class="btn btn-sm btn-danger" :href="'/admin/motivos/' + item.id + '/create/'" title="{{ trans('ELIMINAR PROYECTO') }}" role="button">
                                                             <i class="fa fa-trash-o"></i>
-                                                        </a> --}}
+                                                        </a> 
                                                     </div>
 
                                                     <div class="p-1">
-                                                        {{-- <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button"><i class="fa fa-print"></i></a> --}}
+                                                        <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button"><i class="fa fa-print"></i></a>
                                                     </div>
                                                 @elseif (Auth::user()->rol_app->dependency_id == 2)
                                                     <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 2">
