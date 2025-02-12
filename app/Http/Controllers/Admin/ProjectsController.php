@@ -589,7 +589,8 @@ class ProjectsController extends Controller
     {
         //dd($project, $document_id, $file_name);
         //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+        // return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+        return Storage::disk('local')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
@@ -606,7 +607,8 @@ class ProjectsController extends Controller
     {
        // return "Bajar archivos";
         //Esto es para descargar del disco remoto
-        return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        // return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
