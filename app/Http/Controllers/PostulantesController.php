@@ -65,7 +65,7 @@ class PostulantesController extends Controller
                    // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
                    //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
                    $archivo = SIG006::where('NroExp', $nroExp)
-                   ->whereIn('DEExpEst', ['C'])
+                   ->whereIn('DEExpEst', ['C','H'])
                    //->where('DEExpEst', 'A')
                    //->OrWhere('DEExpEst', 'C')
                    ->first();
@@ -429,7 +429,7 @@ class PostulantesController extends Controller
                // $archivo = SIG006::where('NroExp',$nroExp)->where('DEExpEst', 'A')->get();
                //return $archivo = SIG006::where('NroExp', $nroExp)->where('DEExpEst', 'A')->exists();
                $archivo = SIG006::where('NroExp', $nroExp)
-               ->whereIn('DEExpEst', ['C'])
+               ->whereIn('DEExpEst', ['C', 'H'])
                //->where('DEExpEst', 'A')
                //->OrWhere('DEExpEst', 'C')
                ->first();
