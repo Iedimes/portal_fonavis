@@ -413,5 +413,21 @@ return [
         ],
     ],
 
+    'dependency' => [
+        'title' => 'Dependencies',
+
+        'actions' => [
+            'index' => 'Dependencies',
+            'create' => 'New Dependency',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'name' => 'Name',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];
