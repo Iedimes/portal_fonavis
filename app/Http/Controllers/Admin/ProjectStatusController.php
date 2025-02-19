@@ -16,6 +16,8 @@ use App\Models\User;
 use App\Models\Sat;
 use App\Models\Distrito;
 use App\Models\Departamento;
+use App\Models\AdminUsersDependency;
+use App\Models\AdminUser;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -94,16 +96,18 @@ class ProjectStatusController extends Controller
 
         $projecto = Project::where('id', $request->project_id)->get();
         $sat = $projecto[0]->sat_id;
-        //$useremail = User::where('sat_ruc', $sat)->get()->first();
-        $useremail = 'osemidei@muvh.gov.py'; //Aqui debe ir el correo de DGJN - Recibe DGJN desde DGFO
+        $dependenciaDGJN = AdminUsersDependency::where('dependency_id', 2)
+                                                 ->pluck('admin_user_id'); // Obtiene solo los valores como una colección simple
+
+        $usuarios = AdminUser::whereIn('id', $dependenciaDGJN)->get();
+
+        
+        // $useremail = 'osemidei@muvh.gov.py'; //Aqui debe ir el correo de DGJN - Recibe DGJN desde DGFO
+        // Extraer los correos en un array
+        $userEmails = $usuarios->pluck('email')->toArray();
         $satnombre = Sat::where('NucCod', $sat)->get()->first();
-        $toEmail = $useremail;
+        // $toEmail = $useremail;
 
-
-        //$ciudad = Distrito::where('CiuId', $projecto[0]->city_id)->first();
-        //$distrito = $ciudad->CiuNom;
-        //$departamento = Departamento::where('DptoId', $projecto[0]->state_id)->first();
-        //$dto = $departamento->DptoNom;
 
 
         if ($sanitized['stage_id'] == 2) {
@@ -113,8 +117,13 @@ class ProjectStatusController extends Controller
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail2')->send('admin.project-status.emailDGJN', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
-                    $message->to($toEmail);
+                Mail::mailer('mail2')->send('admin.project-status.emailDGJN', [
+                    'proyecto' => $projecto[0]->name ,
+                    'id' => $projecto[0]->id,
+                    'sat' => $sat,
+                    'satnombre' => $satnombre
+                ], function ($message) use ($userEmails, $subject) {
+                    $message->to($userEmails); // Enviar a todos los correos extraídos
                     $message->subject($subject);
                     $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
                 });
