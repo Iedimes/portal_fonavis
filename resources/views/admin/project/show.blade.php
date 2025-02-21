@@ -31,7 +31,7 @@
             <div class="col-sm-4 invoice-col">
             <address>
             <strong>SAT:</strong> {{utf8_encode($project->sat_id?$project->getSat->NucNomSat:"")}}<br>
-            <strong>Localidad:</strong> {{utf8_encode($project->localidad)}}<br>
+            <strong>Localidad:</strong> {{$project->localidad}}<br>
             <strong>Tipologia:</strong> {{utf8_encode($project->typology_id?$project->getTypology->name:"")}}<br>
             </address>
             </div>
