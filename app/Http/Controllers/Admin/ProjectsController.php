@@ -543,6 +543,25 @@ class ProjectsController extends Controller
 
     }
 
+    public function notificar(Project $project)
+    {
+        $project->getEstado->getStage->id;
+        $estado=$project->getEstado->getStage->id;
+        $user = Auth::user()->id;
+        $email = Auth::user()->email;
+        // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+
+        $mensaje = 'Esta notificacion quedara registrada en el historial del Proyecto';
+
+        return view('admin.project.notificar', compact('project', 'user','mensaje','email', 'estado'));
+
+    }
+
+
+
+
+
+
     /**
      * Show the form for editing the specified resource.
      *

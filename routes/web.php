@@ -371,6 +371,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDIGH',                           'ProjectsController@showDIGH')->name('DIGH');
             Route::get('/{project}/showDSGO',                           'ProjectsController@showDSGO')->name('DSGO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
+            Route::get('/{project}/notificar',                          'ProjectsController@notificar')->name('notificar');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');
@@ -405,6 +406,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/',                                             'ProjectStatusController@index')->name('index');
             Route::get('/create',                                       'ProjectStatusController@create')->name('create');
             Route::post('/',                                            'ProjectStatusController@store')->name('store');
+            Route::post('/guardar',                                     'ProjectStatusController@storeNotificacion')->name('storeNotificacion');
             Route::get('/{projectStatus}/edit',                         'ProjectStatusController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectStatusController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{projectStatus}',                             'ProjectStatusController@update')->name('update');
@@ -557,6 +559,22 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/bulk-destroy',                                'DependenciesController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{dependency}',                                'DependenciesController@update')->name('update');
             Route::delete('/{dependency}',                              'DependenciesController@destroy')->name('destroy');
+        });
+    });
+});
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('reportes')->name('reportes/')->group(static function() {
+            Route::get('/',                                             'ReporteController@index')->name('index');
+            Route::get('/create',                                       'ReporteController@create')->name('create');
+            Route::post('/',                                            'ReporteController@store')->name('store');
+            Route::get('/{reporte}/edit',                               'ReporteController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ReporteController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{reporte}',                                   'ReporteController@update')->name('update');
+            Route::delete('/{reporte}',                                 'ReporteController@destroy')->name('destroy');
+            Route::get('/resultados',                                   'ReporteController@resultados')->name('resultados');
         });
     });
 });

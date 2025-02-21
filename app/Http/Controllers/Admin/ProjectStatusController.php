@@ -607,6 +607,66 @@ class ProjectStatusController extends Controller
         ]);
     }
 
+    public function storeNotificacion(Request $request)
+    {
+        // Validar los datos (opcional, pero recomendado)
+        $request->validate([
+            'project_id' => 'required|integer|exists:projects,id',
+            'stage_id' => 'required|integer|exists:stages,id',
+            'record' => 'nullable|string',
+        ]);
+    
+        // Crear y guardar el nuevo registro en ProjectStatus
+        $projectStatus = new ProjectStatus();
+        $projectStatus->project_id = $request->input('project_id');
+        $projectStatus->stage_id = $request->input('stage_id');
+        $projectStatus->record = $request->input('record'); // Contenido del correo
+        $projectStatus->user_id = auth()->id(); // Guardar el usuario actual si aplica
+        $projectStatus->save();
+    
+        // Obtener información del proyecto
+        $proyecto = Project::find($request->input('project_id'));
+        $sat = $proyecto->sat_id;
+        $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
+    
+        // Obtener el correo del destinatario (Usuario SAT)
+        $correoSat = User::where('sat_ruc', $sat)->value('email'); 
+    
+        // Obtener el usuario autenticado que envía el correo
+        $remitente = auth()->user();
+        $correoDGJN = AdminUser::where('id', $remitente->id)->value('email'); 
+    
+        // Enviar correo si el estado es 2
+        if ($request->input('stage_id') == 2 && $correoSat) {
+            $subject = 'PROYECTO ' . $proyecto->name . ' - PRESENTACION DE DOCUMENTOS';
+    
+            $contenidoCorreo = "
+                Proyecto: {$proyecto->name} (ID: {$proyecto->id}) <br>
+                Nombre SAT: {$satnombre} (SAT: {$sat}) <br><br>
+                {$projectStatus->record}
+            ";
+    
+            try {
+                Mail::mailer('smtp')->html($contenidoCorreo, function ($message) use ($correoSat, $subject, $correoDGJN) {
+                    $message->to($correoSat); // Primero el destinatario
+                    $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH'); // Luego el remitente
+                    $message->subject($subject);
+                });
+            } catch (Exception $e) {
+                return response()->json([
+                    'error' => 'No se pudo enviar el correo electrónico: ' . $e->getMessage()
+                ]);
+            }
+            
+            
+        }
+    
+        // Redireccionar
+        return response()->json([
+            'redirect' => url('admin/projects/' . $request->input('project_id') . '/showDGJN'),
+            'message' => 'Estado del proyecto actualizado correctamente y correo enviado.'
+        ]);
+    }
 
 
 

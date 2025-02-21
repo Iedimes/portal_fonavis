@@ -22,7 +22,7 @@
             <div class="col-sm-4 invoice-col">
             <address>
             <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
-            <strong>Distrito:</strong> {{utf8_encode($project->city_id)}}<br>
+            <strong>Distrito:</strong> {{utf8_encode($project->getcity->CiuNom)}}<br>
             <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
             <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
             </address>
@@ -47,6 +47,8 @@
                     @endif
 
             @endif
+
+            <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" type="button"  class="btn btn-success">NOTIFICAR A SAT</a>
     </div>
     @if(session('success'))
     <div class="alert alert-success">

@@ -468,7 +468,7 @@
                             <thead>
                                 <th>Estado</th>
                                 <th>Fecha</th>
-                                <th>Usuario</th>
+                                <!-- <th>Usuario</th> -->
                                 <th>Observacion</th>
                             </thead>
                             <tbody>
@@ -476,7 +476,7 @@
                                     <tr>
                                         <td>{{ $item->getStage->name }}</td>
                                         <td>{{ $item->created_at }} </td>
-                                        <td>{{ $item->getUser ? $item->getUser['first_name'] : 'N/A' }}</td>
+                                        <!-- <td>{{ $item->getUser ? $item->getUser['first_name'] : 'N/A' }}</td> -->
                                         <td> {{ $item->record }} </td>
                                     </tr>
                                 @endforeach
