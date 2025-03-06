@@ -23,3 +23,4 @@ import './comentario';
 import './motivo';
 import './admin-users-dependency';
 import './dependency';
+import './reporte';

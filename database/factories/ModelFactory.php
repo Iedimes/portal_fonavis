@@ -299,3 +299,19 @@ $factory->define(App\Models\Reporte::class, static function (Faker\Generator $fa
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Reporte::class, static function (Faker\Generator $faker) {
+    return [
+        'inicio' => $faker->dateTime,
+        'fin' => $faker->dateTime,
+        'sat_id' => $faker->sentence,
+        'state_id' => $faker->sentence,
+        'city_id' => $faker->sentence,
+        'modalidad_id' => $faker->sentence,
+        'stage_id' => $faker->randomNumber(5),
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

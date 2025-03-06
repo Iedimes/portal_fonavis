@@ -277,7 +277,7 @@ Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, '
 Route::post('savemiembroeditar', [App\Http\Controllers\PostulantesController::class, 'updatemiembro']);
 Route::get('imprimir/{id}', 'App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
 
-
+// Route::get('/cities', [App\Http\Controllers\Admin\ReporteController::class, 'getCities']);
 // Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
 // Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show']);
 Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'show'])->name('projects.postulantes.show');
@@ -575,6 +575,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/{reporte}',                                   'ReporteController@update')->name('update');
             Route::delete('/{reporte}',                                 'ReporteController@destroy')->name('destroy');
             Route::get('/resultados',                                   'ReporteController@resultados')->name('resultados');
+            Route::get('/cities',                                       'ReporteController@getCities')->name('ciudades');
         });
     });
 });
