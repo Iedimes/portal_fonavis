@@ -28,6 +28,7 @@
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="fa fa-users"></i> {{ trans('admin.postulante.title') }}</a></li>
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/comentarios') }}"><i class="nav-icon icon-puzzle"></i> {{ trans('admin.comentario.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes') }}"><i class="fa fa-list-alt "></i> {{ trans('admin.reporte.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 
@@ -63,6 +64,7 @@
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/postulantes') }}"><i class="fa fa-users"></i> {{ trans('admin.postulante.title') }}</a></li>
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/comentarios') }}"><i class="nav-icon icon-puzzle"></i> {{ trans('admin.comentario.title') }}</a></li> --}}
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes') }}"><i class="nav-icon icon-graduation"></i> {{ trans('admin.reporte.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 

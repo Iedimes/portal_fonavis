@@ -26,6 +26,10 @@ use App\Models\Distrito;
 use App\Models\Sat;
 use App\Models\Modality;
 use App\Models\Stage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ResultadosExport;
+
+
 
 
 class ReporteController extends Controller
@@ -126,9 +130,99 @@ class ReporteController extends Controller
 
     public function resultados(Request $request)
     {
-        // return $request;
-   // Reglas de validación
-   $rules = [
+        // Reglas de validación
+        $rules = [
+            'inicio' => 'nullable|date',
+            'fin' => 'nullable|date',
+            'proyecto_id' => 'nullable|integer',
+            'sat_id' => 'nullable|integer',
+            'state_id' => 'nullable|integer',
+            'city_id' => 'nullable|integer',
+            'modalidad_id' => 'nullable|integer',
+            'stage_id' => 'nullable|integer',
+        ];
+        
+        $messages = [
+            'inicio.required_with' => 'Debe proporcionar una fecha de inicio cuando se especifica una fecha de fin.',
+            'fin.required_with' => 'Debe proporcionar una fecha de fin cuando se especifica una fecha de inicio.',
+            'fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio.',
+            'integer' => 'El campo :attribute debe ser un número entero.',
+        ];
+    
+        // Validar la solicitud
+        $validatedData = $request->validate($rules, $messages);
+    
+        // Obtener datos validados
+        $inicio = $validatedData['inicio'] ?? null;
+        $fin = $validatedData['fin'] ?? null;
+        $proyecto_id = $validatedData['proyecto_id'] ?? null;
+        $sat_id = $validatedData['sat_id'] ?? null;
+        $state_id = $validatedData['state_id'] ?? null;
+        $city_id = $validatedData['city_id'] ?? null;
+        $modalidad_id = $validatedData['modalidad_id'] ?? null;
+        $stage_id = $validatedData['stage_id'] ?? null;
+    
+        // Definir la fecha de referencia
+        $fechaReferencia = '2024-07-13';
+    
+        // Construir la consulta inicial
+        $query = Project::where(function ($q) use ($fechaReferencia) {
+            $q->where('created_at', '>=', $fechaReferencia)
+              ->orWhere('updated_at', '>=', $fechaReferencia);
+        });
+    
+        if (!empty($inicio) && !empty($fin)) {
+            // Aplicar filtros adicionales a la consulta
+            $query->whereBetween('created_at', [$inicio, $fin])
+                  ->orWhereBetween('updated_at', [$inicio, $fin]);
+        }
+    
+        // Agregar filtros basados en los IDs
+        if ($proyecto_id && $proyecto_id > 0) {
+            $query->where('id', $proyecto_id);
+        }
+    
+        if ($sat_id && $sat_id > 0) {
+            $query->where('sat_id', $sat_id);
+        }
+    
+        if ($state_id && $state_id > 0) {
+            $query->where('state_id', $state_id);
+        }
+    
+        if ($city_id && $city_id > 0) {
+            $query->where('city_id', $city_id);
+        }
+    
+        if ($modalidad_id && $modalidad_id > 0) {
+            $query->where('modalidad_id', $modalidad_id);
+        }
+    // Filtrar por stage_id en el último estado del modelo ProjectStatus
+    if ($stage_id && $stage_id > 0) {
+        $query->whereHas('getEstado', function ($q) use ($stage_id) {
+            $q->where('stage_id', $stage_id)
+              ->where('id', function($subQuery) {
+                  $subQuery->select('id')
+                      ->from('project_status') // Asegúrate de que este es el nombre correcto de la tabla
+                      ->whereColumn('project_status.project_id', 'projects.id') // Asegúrate de que 'projects.id' es la clave foránea
+                      ->orderBy('updated_at', 'desc') // Ordena para obtener el más reciente
+                      ->limit(1);
+              });
+        });
+    }
+    
+        // Obtener los resultados
+       $results = $query->get();
+    
+        // Retornar los resultados a la vista correspondiente
+        return view('admin.reporte.resultados', compact('results'));
+    }
+
+
+    public function exportarExcel(Request $request)
+{
+    // Filtra según los parámetros recibidos en el request (si es necesario)
+    $validatedData = $request->validate([
         'inicio' => 'nullable|date',
         'fin' => 'nullable|date',
         'proyecto_id' => 'nullable|integer',
@@ -137,95 +231,94 @@ class ReporteController extends Controller
         'city_id' => 'nullable|integer',
         'modalidad_id' => 'nullable|integer',
         'stage_id' => 'nullable|integer',
-    ];
-    $messages = [
-        // 'inicio.required' => 'Debe cargar la fecha de inicio.',
-        // 'fin.required' => 'Debe cargar la fecha de fin.',
-        // 'proyecto_id.required' => 'Debe seleccionar un proyecto.',
-        // 'sat_id.required' => 'Debe seleccionar un SAT.',
-        // 'state_id.required' => 'Debe seleccionar un departamento.',
-        // 'city_id.required' => 'Debe seleccionar una ciudad.',
-        // 'modalidad_id.required' => 'Debe seleccionar una modalidad.',
-        // 'stage_id.required' => 'Debe seleccionar un estado.',
-        'inicio.required_with' => 'Debe proporcionar una fecha de inicio cuando se especifica una fecha de fin.',
-        'fin.required_with' => 'Debe proporcionar una fecha de fin cuando se especifica una fecha de inicio.',
-        'fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio.',
-        'integer' => 'El campo :attribute debe ser un número entero.',
+    ]);
 
-    ];
-    // $this->validate($request, $rules, $messages);
+    // Filtra los proyectos según los parámetros
+    $projects = $this->obtenerResultados($request);
 
-     // Validar la solicitud
-     $validatedData = $request->validate($rules, $messages);
-
-     // Obtener datos validados
-     $inicio = $validatedData['inicio'] ?? null;
-     $fin = $validatedData['fin'] ?? null;
-     $proyecto_id = $validatedData['proyecto_id'] ?? null;
-     $sat_id = $validatedData['sat_id'] ?? null;
-     $state_id = $validatedData['state_id'] ?? null;
-     $city_id = $validatedData['city_id'] ?? null;
-     $modalidad_id = $validatedData['modalidad_id'] ?? null;
-     $stage_id = $validatedData['stage_id'] ?? null;
-
-    // // Obtener datos del request
-    // $inicio = $request->inicio;
-    // $fin = $request->fin;
-    // $proyecto_id = $request->proyecto_id;
-    // $sat_id = $request->sat_id;
-    // $state_id = $request->state_id;
-    // $city_id = $request->city_id;
-    // $modalidad_id = $request->modalidad_id;
-    // $stage_id = $request->stage_id;
-
-    // Inicializar la consulta
-   // Definir la fecha de referencia
-    $fechaReferencia = '2024-07-13';
-
-    // Construir la consulta inicial
-    $query = Project::where(function ($q) use ($fechaReferencia) {
-        $q->where('created_at', '>=', $fechaReferencia)
-        ->orWhere('updated_at', '>=', $fechaReferencia);
-    });
-
-    if (!empty($inicio) && !empty($fin)) {
-        // Aplicar filtros adicionales a la consulta
-        $query->whereBetween('created_at', [$inicio, $fin])
-            ->orWhereBetween('updated_at', [$inicio, $fin]);
-    }
-
-    if ($proyecto_id > 0) {
-        $query->where('id', $proyecto_id);
-    }
-
-    if ($sat_id > 0) {
-        $query->where('sat_id', $sat_id);
-    }
-
-    if ($state_id > 0) {
-        $query->where('id', $state_id);
-    }
-
-    if ($city_id > 0) {
-        $query->where('city_id', $city_id);
-    }
-
-    if ($modalidad_id > 0) {
-        $query->where('id', $modalidad_id);
-    }
-
-    if ($stage_id > 0) {
-        $query->where('id', $stage_id);
-    }
-
-
-
-    return $results = $query->get();
-
-    // Retornar los resultados a la vista correspondiente
-    return view('resultados', compact('results'));
-    
+    // Retorna el archivo Excel con los resultados
+    return Excel::download(new ResultadosExport($projects), 'reporte_proyectos.xlsx');
 }
+
+
+
+    private function obtenerResultados(Request $request)
+    {
+        // dd($request);
+        $validatedData = $request->validate([
+            'inicio' => 'nullable|date',
+            'fin' => 'nullable|date',
+            'proyecto_id' => 'nullable|integer',
+            'sat_id' => 'nullable|integer',
+            'state_id' => 'nullable|integer',
+            'city_id' => 'nullable|integer',
+            'modalidad_id' => 'nullable|integer',
+            'stage_id' => 'nullable|integer',
+        ]);
+    
+        // Extraer valores
+        $inicio = $validatedData['inicio'] ?? null;
+        $fin = $validatedData['fin'] ?? null;
+        $proyecto_id = $validatedData['proyecto_id'] ?? null;
+        $sat_id = $validatedData['sat_id'] ?? null;
+        $state_id = $validatedData['state_id'] ?? null;
+        $city_id = $validatedData['city_id'] ?? null;
+        $modalidad_id = $validatedData['modalidad_id'] ?? null;
+        $stage_id = $validatedData['stage_id'] ?? null;
+    
+        // Definir la fecha de referencia
+        $fechaReferencia = '2024-07-13';
+    
+        // Construir la consulta inicial
+        $query = Project::where(function ($q) use ($fechaReferencia) {
+            $q->where('created_at', '>=', $fechaReferencia)
+              ->orWhere('updated_at', '>=', $fechaReferencia);
+        });
+    
+        if (!empty($inicio) && !empty($fin)) {
+            $query->whereBetween('created_at', [$inicio, $fin])
+                  ->orWhereBetween('updated_at', [$inicio, $fin]);
+        }
+    
+        if ($proyecto_id) {
+            $query->where('id', $proyecto_id);
+        }
+    
+        if ($sat_id) {
+            $query->where('sat_id', $sat_id);
+        }
+    
+        if ($state_id) {
+            $query->where('state_id', $state_id);
+        }
+    
+        if ($city_id) {
+            $query->where('city_id', $city_id);
+        }
+    
+        if ($modalidad_id) {
+            $query->where('modalidad_id', $modalidad_id);
+        }
+    
+        if ($stage_id) {
+            $query->whereHas('getEstado', function ($q) use ($stage_id) {
+                $q->where('stage_id', $stage_id)
+                  ->where('id', function ($subQuery) {
+                      $subQuery->select('id')
+                          ->from('project_status')
+                          ->whereColumn('project_status.project_id', 'projects.id')
+                          ->orderBy('updated_at', 'desc')
+                          ->limit(1);
+                  });
+            });
+        }
+    
+        return $query->get();
+    }
+    
+
+
+
 
     /**
      * Display the specified resource.

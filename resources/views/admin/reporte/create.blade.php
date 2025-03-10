@@ -54,7 +54,8 @@
                                 </div>
                             </div>
                             
-                            <div v-if="!form.inicio && !form.fin"  class="form-group row align-items-center" :class="{'has-danger': errors.has('proyecto_id'), 'has-success': fields.proyecto_id && fields.proyecto_id.valid }">
+                            <!-- <div v-if="!form.inicio && !form.fin"  class="form-group row align-items-center" :class="{'has-danger': errors.has('proyecto_id'), 'has-success': fields.proyecto_id && fields.proyecto_id.valid }"> -->
+                            <div class="form-group row align-items-center" :class="{'has-danger': errors.has('proyecto_id'), 'has-success': fields.proyecto_id && fields.proyecto_id.valid }">
                                 <label for="proyecto_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.reporte.columns.proyecto_id') }}</label>
                                     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
                                     <!-- <input type="text" v-model="form.sat_id" v-validate="'required'" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('sat_id'), 'form-control-success': fields.sat_id && fields.sat_id.valid}" id="sat_id" name="sat_id" placeholder="{{ trans('admin.reporte.columns.sat_id') }}"> -->
@@ -166,10 +167,10 @@
                 </div>
                                 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-primary" :disabled="submiting">
-                        <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
-                        {{ trans('brackets/admin-ui::admin.btn.save') }}
-                    </button>
+                <button type="submit" class="btn btn-primary" :disabled="!isValidDateRange()">
+                    <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-eye'"></i>
+                    {{ trans('VER RESULTADOS') }}
+                </button>
                 </div>
                 
             </form>

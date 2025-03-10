@@ -14,54 +14,61 @@
                     </div>
                     <div>
                         <!-- Botón para generar el PDF -->
-                        <a href="{{ url('admin/reportes/imprimir?inicio=' . $filtros['inicio'] . '&fin=' . $filtros['fin'] . '&user_id=' . $filtros['user_id'] . '&state_id=' . $filtros['state_id']) }}"
-   target="_blank"
-   class="btn btn-danger">
-    <i class="fa fa-file-pdf-o"></i> GENERAR INFORME
-</a>
+                        <!-- <a href="{{ url('admin/reportes/imprimir?inicio=' . request()->query('inicio') . '&fin=' . request()->query('fin') . '&user_id=' . request()->query('user_id') . '&state_id=' . request()->query('state_id')) }}"
+                           target="_blank"
+                           class="btn btn-danger">
+                            <i class="fa fa-file-pdf-o"></i> GENERAR INFORME
+                        </a> -->
+                        <a href="{{ url('admin/reportes/exportar-resultados') }}?{{ http_build_query(request()->only(['inicio', 'fin', 'proyecto_id', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'stage_id'])) }}"
+                        class="btn btn-success">
+                            Exportar a Excel
+                        </a>
+
 
 
                     </div>
                 </div>
                 <div class="card-body" v-cloak>
                     <div class="card-block">
-                        <!-- Mostrar filtros aplicados -->
-                        {{-- <h5>Filtros Aplicados</h5>
-                        <ul>
-                            <li><strong>Fecha de Inicio:</strong> {{ $filtros['inicio'] }}</li>
-                            <li><strong>Fecha de Fin:</strong> {{ $filtros['fin'] }}</li>
-                            <li><strong>Usuario:</strong> {{ $filtros['user_id'] == 0 ? 'Todos' : $filtros['user_id'] }}</li>
-                            <li><strong>Estado:</strong> {{ $filtros['state_id'] == 0 ? 'Todos' : $filtros['state_id'] }}</li>
-                        </ul>
-                        <hr> --}}
-
                         <!-- Mostrar resultados -->
-                        @if($dhelps->isEmpty())
+                        @if($results->isEmpty())
                             <p>No se encontraron registros con los criterios especificados.</p>
                         @else
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
                                         <th>N°</th>
-                                        <th>Nombre y Apellido</th>
-                                        <th>Solución</th>
-                                        <th>Fecha</th>
+                                        <th>Nombre del Proyecto</th>
+                                        <th>Descripción</th>
+                                        <th>SAT</th>
+                                        <th>DEPARTAMENTO</th>
+                                        <th>DISTRITO</th>
+                                        <th>MODALIDAD</th>
                                         <th>Estado</th>
+                                        <th>Fecha de Creación</th>
+                                        <th>Última Actualización</th>
+                                        
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($dhelps as $item)
+                                    @foreach ($results as $item)
                                         <tr>
-                                            <td>{{ $item->help_id }}</td>
-                                            <td>{{ $item->user->first_name }} {{ $item->user->last_name }}</td>
-                                            <td>{{ $item->solution }}</td>
-                                            <td>{{ $item->updated_at }}</td>
-                                            <td>{{ $item->state->name }}</td>
+                                            <td>{{ $item->id }}</td>
+                                            <td>{{ $item->name }}</td>
+                                            <td>{{ $item->getEstado->record ?? 'Sin Descripcion' }}</td>
+                                            <td>{{ $item->getsat->NucNomSat }}</td>
+                                            <td>{{ $item->getstate->DptoNom }}</td>
+                                            <td>{{ $item->getcity->CiuNom }}</td>
+                                            <td>{{ $item->getmodality->name }}</td>
+                                            <td>{{ $item->getEstado->getstage->name ?? 'Sin Estado'}}</td>
+                                            <td>{{ $item->created_at }}</td>
+                                            <td><small>Última actualización: {{ $item->updated_at }}</small></td>
+                                        
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <p style="font-weight: bold;">Total de Asistencias: {{ $contar }}</p>
+                            <p style="font-weight: bold;">Total de Proyectos: {{ $results->count() }}</p>
                         @endif
                     </div>
                 </div>

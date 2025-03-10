@@ -72,9 +72,8 @@ class Project extends Model implements Auditable
     }*/
 
     public function getEstado() {
-        return $this->hasOne('App\Models\ProjectStatus', 'project_id', 'id')->latest();
+        return $this->hasOne('App\Models\ProjectStatus', 'project_id', 'id')->latest('updated_at');
     }
-
     protected static function boot()
     {
         parent::boot();

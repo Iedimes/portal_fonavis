@@ -576,6 +576,10 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::delete('/{reporte}',                                 'ReporteController@destroy')->name('destroy');
             Route::get('/resultados',                                   'ReporteController@resultados')->name('resultados');
             Route::get('/cities',                                       'ReporteController@getCities')->name('ciudades');
+            // Route::get('/exportar',                                     'ReporteController@exportar')->name('exportar');
+            // Route::get('/exportar/{inicio?}/{fin?}/{proyecto_id?}/{sat_id?}/{state_id?}/{city_id?}/{modalidad_id?}/{stage_id?}', [ReporteController::class, 'exportar'])->name('exportar');
+            Route::get('/exportar-resultados', 'ReporteController@exportarExcel')->name('exportar.excel');
+
         });
     });
 });

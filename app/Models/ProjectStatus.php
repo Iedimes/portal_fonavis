@@ -22,7 +22,7 @@ class ProjectStatus extends Model implements HasMedia
     protected $table = 'project_status';
 
     protected $fillable = ['project_id','stage_id','user_id','record'];
-    protected $with = ['imagen'];
+    protected $with = ['imagen', 'getStage'];
 
     /*public function getDateFormat()
     {
