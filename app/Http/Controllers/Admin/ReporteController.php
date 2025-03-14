@@ -89,7 +89,7 @@ class ReporteController extends Controller
         $dep = [18, 19, 20, 21, 999];
         $departamento = Departamento::whereNotIn('DptoId', $dep)
                           ->orderBy('DptoNom', 'asc')->get();
-        
+
         $dis = [0, 900, 998];
         $distrito = Distrito::whereNotIn('CiuId', $dis)
             ->orderBy('CiuNom', 'asc')->get();
@@ -135,23 +135,24 @@ class ReporteController extends Controller
             'inicio' => 'nullable|date',
             'fin' => 'nullable|date',
             'proyecto_id' => 'nullable|integer',
-            'sat_id' => 'nullable|integer',
+            'sat_id' => 'nullable|string',
             'state_id' => 'nullable|integer',
             'city_id' => 'nullable|integer',
             'modalidad_id' => 'nullable|integer',
             'stage_id' => 'nullable|integer',
         ];
-        
+
         $messages = [
             'inicio.required_with' => 'Debe proporcionar una fecha de inicio cuando se especifica una fecha de fin.',
             'fin.required_with' => 'Debe proporcionar una fecha de fin cuando se especifica una fecha de inicio.',
             'fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio.',
             'integer' => 'El campo :attribute debe ser un número entero.',
+            'string' => 'El campo :attribute debe ser un alfanumérico entero.',
         ];
-    
+
         // Validar la solicitud
         $validatedData = $request->validate($rules, $messages);
-    
+
         // Obtener datos validados
         $inicio = $validatedData['inicio'] ?? null;
         $fin = $validatedData['fin'] ?? null;
@@ -161,39 +162,39 @@ class ReporteController extends Controller
         $city_id = $validatedData['city_id'] ?? null;
         $modalidad_id = $validatedData['modalidad_id'] ?? null;
         $stage_id = $validatedData['stage_id'] ?? null;
-    
+
         // Definir la fecha de referencia
         $fechaReferencia = '2024-07-13';
-    
+
         // Construir la consulta inicial
         $query = Project::where(function ($q) use ($fechaReferencia) {
             $q->where('created_at', '>=', $fechaReferencia)
               ->orWhere('updated_at', '>=', $fechaReferencia);
         });
-    
+
         if (!empty($inicio) && !empty($fin)) {
             // Aplicar filtros adicionales a la consulta
             $query->whereBetween('created_at', [$inicio, $fin])
                   ->orWhereBetween('updated_at', [$inicio, $fin]);
         }
-    
+
         // Agregar filtros basados en los IDs
         if ($proyecto_id && $proyecto_id > 0) {
             $query->where('id', $proyecto_id);
         }
-    
+
         if ($sat_id && $sat_id > 0) {
             $query->where('sat_id', $sat_id);
         }
-    
+
         if ($state_id && $state_id > 0) {
             $query->where('state_id', $state_id);
         }
-    
+
         if ($city_id && $city_id > 0) {
             $query->where('city_id', $city_id);
         }
-    
+
         if ($modalidad_id && $modalidad_id > 0) {
             $query->where('modalidad_id', $modalidad_id);
         }
@@ -210,10 +211,10 @@ class ReporteController extends Controller
               });
         });
     }
-    
+
         // Obtener los resultados
        $results = $query->get();
-    
+
         // Retornar los resultados a la vista correspondiente
         return view('admin.reporte.resultados', compact('results'));
     }
@@ -226,7 +227,7 @@ class ReporteController extends Controller
         'inicio' => 'nullable|date',
         'fin' => 'nullable|date',
         'proyecto_id' => 'nullable|integer',
-        'sat_id' => 'nullable|integer',
+        'sat_id' => 'nullable|string',
         'state_id' => 'nullable|integer',
         'city_id' => 'nullable|integer',
         'modalidad_id' => 'nullable|integer',
@@ -249,13 +250,13 @@ class ReporteController extends Controller
             'inicio' => 'nullable|date',
             'fin' => 'nullable|date',
             'proyecto_id' => 'nullable|integer',
-            'sat_id' => 'nullable|integer',
+            'sat_id' => 'nullable|string',
             'state_id' => 'nullable|integer',
             'city_id' => 'nullable|integer',
             'modalidad_id' => 'nullable|integer',
             'stage_id' => 'nullable|integer',
         ]);
-    
+
         // Extraer valores
         $inicio = $validatedData['inicio'] ?? null;
         $fin = $validatedData['fin'] ?? null;
@@ -265,41 +266,41 @@ class ReporteController extends Controller
         $city_id = $validatedData['city_id'] ?? null;
         $modalidad_id = $validatedData['modalidad_id'] ?? null;
         $stage_id = $validatedData['stage_id'] ?? null;
-    
+
         // Definir la fecha de referencia
         $fechaReferencia = '2024-07-13';
-    
+
         // Construir la consulta inicial
         $query = Project::where(function ($q) use ($fechaReferencia) {
             $q->where('created_at', '>=', $fechaReferencia)
               ->orWhere('updated_at', '>=', $fechaReferencia);
         });
-    
+
         if (!empty($inicio) && !empty($fin)) {
             $query->whereBetween('created_at', [$inicio, $fin])
                   ->orWhereBetween('updated_at', [$inicio, $fin]);
         }
-    
+
         if ($proyecto_id) {
             $query->where('id', $proyecto_id);
         }
-    
+
         if ($sat_id) {
             $query->where('sat_id', $sat_id);
         }
-    
+
         if ($state_id) {
             $query->where('state_id', $state_id);
         }
-    
+
         if ($city_id) {
             $query->where('city_id', $city_id);
         }
-    
+
         if ($modalidad_id) {
             $query->where('modalidad_id', $modalidad_id);
         }
-    
+
         if ($stage_id) {
             $query->whereHas('getEstado', function ($q) use ($stage_id) {
                 $q->where('stage_id', $stage_id)
@@ -312,10 +313,10 @@ class ReporteController extends Controller
                   });
             });
         }
-    
+
         return $query->get();
     }
-    
+
 
 
 
