@@ -15,22 +15,27 @@
                     <h3 class="box-title">
                         <i class="fa fa-university"></i> Proyecto  {{ $project->name }}
                         @php
-                            $hasMultipleMembers = false;
+                        $hasMultipleMembers = false;
+                    @endphp
+
+                    @foreach($postulantes as $post)
+                        @php
+                            $memberCount = $post->getMembers->count();
                         @endphp
-                        @foreach($postulantes as $key => $post)
+                        @if ($memberCount > 1)
                             @php
-                                $memberCount = $post->getMembers->count() + 1;
-                                if ($memberCount > 1) {
-                                    $hasMultipleMembers = true;
-                                    break; // Romper el bucle si se encuentra un postulante con más de 1 miembro
-                                }
+                                $hasMultipleMembers = true;
                             @endphp
-                        @endforeach
-                        @if ($hasMultipleMembers && ($project->getEstado && $project->getEstado->stage_id == 7))
+                            @break
+                        @endif
+                    @endforeach
+
+                    @if ($hasMultipleMembers)
                         <button id="enviarGrupoFamiliarBtn" class="btn btn-success float-right">
                             <i class="fa fa-plus-circle"></i> Enviar Grupo Familiar
                         </button>
-                        @endif
+                    @endif
+
 
                         @if ($project->getEstado && $project->getEstado->stage_id == 8)
                         <a type="button" href="{{ url('generate-pdf/'.$project->id) }}" class="btn btn-danger float-right"  style="margin-right: 5px;">

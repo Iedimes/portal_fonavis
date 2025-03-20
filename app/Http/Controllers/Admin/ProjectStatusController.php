@@ -101,7 +101,7 @@ class ProjectStatusController extends Controller
 
         $usuarios = AdminUser::whereIn('id', $dependenciaDGJN)->get();
 
-        
+
         // $useremail = 'osemidei@muvh.gov.py'; //Aqui debe ir el correo de DGJN - Recibe DGJN desde DGFO
         // Extraer los correos en un array
         $userEmails = $usuarios->pluck('email')->toArray();
@@ -140,22 +140,22 @@ class ProjectStatusController extends Controller
             }
         }elseif ($sanitized['stage_id'] == 3) {
 
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
+            $projecto = Project::where('id', $request->project_id)->first();
+            $sat = $projecto->sat_id;
 
             //return "Estamos en estado 3, aqui vamos a devolver el correo a Fonavis";
             $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Aqui debe ir el correo de DGFO - Recibe de DNJN
             $toEmail = $useremail1;
-            $subject = 'INFORME DGJN '.$projecto[0]->name;
+            $subject = 'INFORME DGJN '.$projecto->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
-                    $message->from('osemidei@muvh.gov.py', env('APP_NAME'));
+                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
                 });
 
                 return response()->json([
@@ -615,7 +615,7 @@ class ProjectStatusController extends Controller
             'stage_id' => 'required|integer|exists:stages,id',
             'record' => 'nullable|string',
         ]);
-    
+
         // Crear y guardar el nuevo registro en ProjectStatus
         $projectStatus = new ProjectStatus();
         $projectStatus->project_id = $request->input('project_id');
@@ -623,29 +623,29 @@ class ProjectStatusController extends Controller
         $projectStatus->record = $request->input('record'); // Contenido del correo
         $projectStatus->user_id = auth()->id(); // Guardar el usuario actual si aplica
         $projectStatus->save();
-    
+
         // Obtener información del proyecto
         $proyecto = Project::find($request->input('project_id'));
         $sat = $proyecto->sat_id;
         $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
-    
+
         // Obtener el correo del destinatario (Usuario SAT)
-        $correoSat = User::where('sat_ruc', $sat)->value('email'); 
-    
+        $correoSat = User::where('sat_ruc', $sat)->value('email');
+
         // Obtener el usuario autenticado que envía el correo
         $remitente = auth()->user();
-        $correoDGJN = AdminUser::where('id', $remitente->id)->value('email'); 
-    
+        $correoDGJN = AdminUser::where('id', $remitente->id)->value('email');
+
         // Enviar correo si el estado es 2
         if ($request->input('stage_id') == 2 && $correoSat) {
             $subject = 'PROYECTO ' . $proyecto->name . ' - PRESENTACION DE DOCUMENTOS';
-    
+
             $contenidoCorreo = "
                 Proyecto: {$proyecto->name} (ID: {$proyecto->id}) <br>
                 Nombre SAT: {$satnombre} (SAT: {$sat}) <br><br>
                 {$projectStatus->record}
             ";
-    
+
             try {
                 Mail::mailer('smtp')->html($contenidoCorreo, function ($message) use ($correoSat, $subject, $correoDGJN) {
                     $message->to($correoSat); // Primero el destinatario
@@ -657,10 +657,10 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico: ' . $e->getMessage()
                 ]);
             }
-            
-            
+
+
         }
-    
+
         // Redireccionar
         return response()->json([
             'redirect' => url('admin/projects/' . $request->input('project_id') . '/showDGJN'),
