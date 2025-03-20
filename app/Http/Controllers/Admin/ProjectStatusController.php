@@ -183,7 +183,7 @@ class ProjectStatusController extends Controller
 
             // Agregar otras direcciones de correo duro
             $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-            $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+            // $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
 
             $subject = 'INFORME DGJN EN ARCHIVO '.$projecto[0]->name;
 
@@ -191,10 +191,10 @@ class ProjectStatusController extends Controller
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
                     $message->to($toEmails);
                     $message->subject($subject);
-                    $message->from('osemidei@muvh.gov.py', env('APP_NAME'));
+                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
                 });
 
                 return response()->json([
@@ -221,10 +221,10 @@ class ProjectStatusController extends Controller
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail3')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
-                    $message->from('osemidei@muvh.gov.py', env('APP_NAME')); // Mi correo está como si fuera DGJN
+                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME')); // Mi correo está como si fuera DGJN
                 });
 
                 return response()->json([
