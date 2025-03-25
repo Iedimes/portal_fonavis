@@ -22,6 +22,8 @@ use App\Models\ModalityHasLand;
 use App\Models\Project_tipologies;
 use App\Models\ProjectStatusF;
 use App\Models\User;
+use App\Models\AdminUser;
+use App\Models\AdminUsersDependency;
 use Symfony\Component\HttpFoundation\Response;
 use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -415,28 +417,28 @@ class ProjectController extends Controller
 
         // Enviar correo electrónico
 
-        $projecto = Project::where('id', $id)->get();
-        $sat = $projecto[0]->sat_id;
-        // $useremail = User::where('sat_ruc', $sat)->get()->first();
-        $satnombre = Sat::where('NucCod', $sat)->get()->first();
+        $projecto = Project::where('id', $id)->first();
+        $sat = $projecto->sat_id;
+        $satnombre = Sat::where('NucCod', $sat)->first();
 
-        $useremail = 'preseleccionfonavis@muvh.gov.py';
+        $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)
+                                                ->pluck('admin_user_id');
+
+        $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+
+        // Extraer los correos en un array
+        $userEmails = $usuarios->pluck('email')->toArray(); // correos DGSO
+
+        // Agregar el correo fijo
+        $toEmails = ['preseleccionfonavis@muvh.gov.py']; // correo FONAVIS
+
+        // Combinar ambas listas de correos
+        $allEmails = array_merge($userEmails, $toEmails);
+
         $subject = 'GRUPO FAMILIAR ENVIADO';
 
-        // Crear un array para almacenar las direcciones de correo electrónico
-        $toEmails = [];
-
-        if ($useremail) {
-            $toEmails[] = $useremail; // Mail de FONAVIS
-        }
-
-        // Agregar otras direcciones de correo duro
-        //$toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-        $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
-
-        // Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $distrito], function ($message) use ($toEmails, $subject) {
-            Mail::send('admin.project-status.emailSISASGOFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
-            $message->to($toEmails);
+            Mail::send('admin.project-status.emailSISASGOFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($allEmails, $subject) {
+            $message->to($allEmails);
             $message->subject($subject);
             $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
         });
@@ -989,7 +991,6 @@ public function showTecnico($id)
     public function enviarDocumentosFaltantes(Request $request)
     {
         $id = $request->project_id;
-        // Lógica para enviar los documentos faltantes
 
         try {
             $state = new ProjectStatusF();
@@ -999,53 +1000,44 @@ public function showTecnico($id)
             $state->record = 'CON DOCUMENTACION DGJN!';
             $state->save();
 
-            // return "Enviar Documentos Faltantes";
+            $projecto = Project::where('id', $request->project_id)->first();
+            $sat = $projecto->sat_id;
+            $satnombre = Sat::where('NucCod', $sat)->first();
 
-            // Enviar correo electrónico
-            // $project = Project::find($id);
-            // $sat_id = $project->sat_id;
-            // $sat_nombre = Sat::where('NucCod', $sat_id)->first();
-            // $nombre_sat = $sat_nombre->NucNomSat;
-            // $nombre = $project->name;
-            // $lider = $project->leader_name;
-            // $modalidad = Modality::where('id', $project->modalidad_id)->first();
-            // $modalidad_nombre = $modalidad->name;
-            // $tipo_terreno = Land::where('id', $project->land_id)->first();
-            // $terreno = $tipo_terreno->name;
-            // $departamento = Departamento::where('DptoId', $project->state_id)->first();
-            // $dto = $departamento->DptoNom;
-            // $ciudad = Distrito::where('CiuId', $project->city_id)->first();
-            // $destrito = $ciudad->CiuNom;
+            $dependenciaDGJN = AdminUsersDependency::where('dependency_id', 2)
+                                                ->pluck('admin_user_id');
 
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
-            // $useremail = User::where('sat_ruc', $sat)->get()->first();
-            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+            $usuarios = AdminUser::whereIn('id', $dependenciaDGJN)->get();
 
-            // Agregar otras direcciones de correo duro
-            $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-            $toEmails[] = 'osemidei@muvh.gov.py'; // correo para DGJN
+            // Extraer los correos en un array
+            $userEmails = $usuarios->pluck('email')->toArray();
+
+            // Agregar el correo fijo
+            $toEmails = ['preseleccionfonavis@muvh.gov.py'];
+
+            // Combinar ambas listas de correos
+            $allEmails = array_merge($userEmails, $toEmails);
 
             $subject = 'SAT REMITE DOCUMENTACION SOLICITADA';
 
-            Mail::send('admin.project-status.emailSATDGJNFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
-                 $message->to($toEmails);
-                 $message->subject($subject);
-                 $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+            Mail::send('admin.project-status.emailSATDGJNFONAVIS', [
+                'proyecto' => $projecto->name,
+                'id' => $projecto->id,
+                'sat' => $sat,
+                'satnombre' => $satnombre->NucNomSat
+            ], function ($message) use ($allEmails, $subject) {
+                $message->to($allEmails);
+                $message->subject($subject);
+                $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
             });
 
-            // return [
-            //     'message' => 'success'
-            // ];
         } catch (\Exception $e) {
             throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
         }
 
-
-        // Redireccionar a una página de éxito o mostrar un mensaje de éxito
         return redirect("/projectsDoc/$id")->with('message', 'Documentos faltantes enviados exitosamente');
-        // return redirect()->back()->with('message', 'Documentos faltantes enviados exitosamente');
     }
+
 
     /**
      * Remove the specified resource from storage.

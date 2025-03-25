@@ -413,6 +413,7 @@ class PostulantesController extends Controller
         //return "Crear Miembro";
 
 
+
     if ($request->input('cedula')) {
 
         //$expedientes = SIG005::where('NroExpPer',$request->input('cedula'))->where('TexCod',118)->get();
@@ -536,7 +537,7 @@ class PostulantesController extends Controller
                         $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
                         $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
                         $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
-                        $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                        return $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
                         //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
                         $nroexp = $cedula;
                         $title="Agregar Miembro Familiar";
@@ -750,8 +751,9 @@ class PostulantesController extends Controller
 
                    // return "Vacio";
 
-                    $parentesco = Parentesco::whereIn('id', $par)
-                                          ->orderBy('name', 'asc')->get();
+                    // $parentesco = Parentesco::whereIn('id', $par)
+                    //                       ->orderBy('name', 'asc')->get();
+                    $parentesco = Parentesco::all();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
 

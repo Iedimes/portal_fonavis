@@ -94,36 +94,39 @@ class ProjectStatusController extends Controller
         $sanitized = $request->getSanitized();
         $sanitized['stage_id'] = $request->getStageId();
 
-        $projecto = Project::where('id', $request->project_id)->get();
-        $sat = $projecto[0]->sat_id;
-        $dependenciaDGJN = AdminUsersDependency::where('dependency_id', 2)
-                                                 ->pluck('admin_user_id'); // Obtiene solo los valores como una colección simple
-
-        $usuarios = AdminUser::whereIn('id', $dependenciaDGJN)->get();
-
-
-        // $useremail = 'osemidei@muvh.gov.py'; //Aqui debe ir el correo de DGJN - Recibe DGJN desde DGFO
-        // Extraer los correos en un array
-        $userEmails = $usuarios->pluck('email')->toArray();
-        $satnombre = Sat::where('NucCod', $sat)->get()->first();
-        // $toEmail = $useremail;
-
+        $projecto = Project::where('id', $request->project_id)->first();
+        $sat = $projecto->sat_id;
+        $satnombre = Sat::where('NucCod', $sat)->select('NucNomSat')->first();
 
 
         if ($sanitized['stage_id'] == 2) {
-            $subject = 'PROYECTO ' .$projecto[0]->name. ' PARA REVISION PRELIMINAR';
+
+            $dependenciaDGJN = AdminUsersDependency::where('dependency_id', 2)
+                                                 ->pluck('admin_user_id'); // Obtiene solo los valores como una colección simple
+
+            $usuarios = AdminUser::whereIn('id', $dependenciaDGJN)->get();
+
+
+            // $useremail = 'osemidei@muvh.gov.py'; //Aqui debe ir el correo de DGJN - Recibe DGJN desde DGFO
+            // Extraer los correos en un array
+            $userEmails = $usuarios->pluck('email')->toArray();
+            // $toEmail = $useremail;
+            // $projecto->name;
+            // $projecto->id;
+            // $satnombre;
+            $subject = 'PROYECTO ' .$projecto->name. ' PARA REVISION PRELIMINAR';
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
                 Mail::mailer('mail2')->send('admin.project-status.emailDGJN', [
-                    'proyecto' => $projecto[0]->name ,
-                    'id' => $projecto[0]->id,
+                    'proyecto' => $projecto->name ,
+                    'id' => $projecto->id,
                     'sat' => $sat,
-                    'satnombre' => $satnombre
+                    'satnombre' => $satnombre->NucNomSat
                 ], function ($message) use ($userEmails, $subject) {
-                    $message->to($userEmails); // Enviar a todos los correos extraídos
+                    $message->to($userEmails); // Enviar a todos los correos extraídos de DGJN
                     $message->subject($subject);
                     $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
                 });
@@ -140,11 +143,11 @@ class ProjectStatusController extends Controller
             }
         }elseif ($sanitized['stage_id'] == 3) {
 
-            $projecto = Project::where('id', $request->project_id)->first();
-            $sat = $projecto->sat_id;
+            // $projecto = Project::where('id', $request->project_id)->first();
+            // $sat = $projecto->sat_id;
 
-            //return "Estamos en estado 3, aqui vamos a devolver el correo a Fonavis";
-            $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Aqui debe ir el correo de DGFO - Recibe de DNJN
+            //return "Estamos en estado 3 (Aprobado DGJN), aqui vamos a devolver el correo a Fonavis";
+            $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Correo de DGFO(preseleccionfonavis@muvh.gov.py) - Recibe respuesta de DNJN desde sistema_fonavis@muvh.gov.py
             $toEmail = $useremail1;
             $subject = 'INFORME DGJN '.$projecto->name;
 
@@ -152,7 +155,7 @@ class ProjectStatusController extends Controller
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
                     $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
@@ -169,29 +172,29 @@ class ProjectStatusController extends Controller
                 ]);
             }
         }elseif ($sanitized['stage_id'] == 4) { //Estado ARCHIVADO DGJN
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
+            // $projecto = Project::where('id', $request->project_id)->get();
+            // $sat = $projecto[0]->sat_id;
             $useremail = User::where('sat_ruc', $sat)->get()->first();
-            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+            // $satnombre = Sat::where('NucCod', $sat)->get()->first();
 
-            // Crear un array para almacenar las direcciones de correo electrónico
-            $toEmails = [];
+            // // Crear un array para almacenar las direcciones de correo electrónico
+            // $toEmails = [];
 
-            if ($useremail) {
-                $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
-            }
+            // if ($useremail) {
+            //     $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
+            // }
 
             // Agregar otras direcciones de correo duro
             $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
             // $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
 
-            $subject = 'INFORME DGJN EN ARCHIVO '.$projecto[0]->name;
+            $subject = 'INFORME DGJN EN ARCHIVO '.$projecto->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmails, $subject) {
                     $message->to($toEmails);
                     $message->subject($subject);
                     $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
@@ -209,19 +212,19 @@ class ProjectStatusController extends Controller
             }
         }elseif ($sanitized['stage_id'] == 6) { //Estado RECHAZADO DGJN
             //return "Estado RECHAZADO DGJN";
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
+            $projecto = Project::where('id', $request->project_id)->first();
+            $sat = $projecto->sat_id;
 
             //return "Estamos en estado 6, aqui vamos a devolver el correo a Fonavis";
             $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Aqui debe ir el correo de DGFO - Recibe de DNJN
             $toEmail = $useremail1;
-            $subject = 'INFORME PROYECTO RECHAZADO POR DGJN '.$projecto[0]->name;
+            $subject = 'INFORME PROYECTO RECHAZADO POR DGJN '.$projecto->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
                     $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME')); // Mi correo está como si fuera DGJN
@@ -237,68 +240,87 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico'
                 ]);
             }
-        }elseif ($sanitized['stage_id'] == 7) { //Estado EVALUACION SOCIAL
-            //return "Estado EVALUACION SOCIAL";
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
-            $useremail = User::where('sat_ruc', $sat)->get()->first();
-            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+        }elseif ($sanitized['stage_id'] == 7) { // Estado EVALUACION SOCIAL
 
-            // Crear un array para almacenar las direcciones de correo electrónico
-            $toEmails = [];
-
-            if ($useremail) {
-                $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
+            $projecto = Project::where('id', $request->project_id)->first();
+            if (!$projecto) {
+                return response()->json(['error' => 'No se encontró el proyecto']);
             }
 
-            // Agregar otras direcciones de correo duro
-            //$toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-            $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
+            $sat = $projecto->sat_id;
+            $useremail = User::where('sat_ruc', $sat)->select('email')->first();
+            if (!$useremail) {
+                return response()->json(['error' => 'No se encontró email para el usuario SAT']);
+            }
 
-            $subject = 'INFORME DGJN EN ARCHIVO '.$projecto[0]->name;
+            $satnombre = Sat::where('NucCod', $sat)->select('NucNomSat')->first();
+            if (!$satnombre) {
+                return response()->json(['error' => 'No se encontró el nombre del SAT']);
+            }
 
-            // Store the ProjectStatus
+            $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)->pluck('admin_user_id');
+            $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+
+            // Extraer los correos en un array
+            $userEmails = $usuarios->pluck('email')->toArray();
+
+            // Agregar el correo fijo
+            $toEmails = [$useremail->email];
+
+            // Combinar ambas listas de correos
+            $allEmails = array_merge($userEmails, $toEmails);
+
+            if (empty($allEmails)) {
+                return response()->json(['error' => 'No hay correos para enviar el mensaje']);
+            }
+
+            $subject = 'EVALUACION SOCIAL ' . $projecto->name;
+
+            // Guardar estado del proyecto
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('mail2')->send('admin.project-status.emailFONAVISDGSOSAT', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmails, $subject) {
-                    $message->to($toEmails);
-                    $message->subject($subject);
-                    $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
-                });
+                Mail::mailer('mail2')->send(
+                    'admin.project-status.emailFONAVISDGSOSAT',
+                    ['proyecto' => $projecto->name, 'id' => $projecto->id, 'sat' => $sat, 'satnombre' => $satnombre->NucNomSat],
+                    function ($message) use ($allEmails, $subject) {
+                        $message->to($allEmails);
+                        $message->subject($subject);
+                        $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
 
                 return response()->json([
                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVIS')
                 ]);
             } catch (Exception $e) {
-                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                //dd($e->getMessage());
                 return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico'
+                    'error' => 'No se pudo enviar el correo electrónico: ' . $e->getMessage()
                 ]);
             }
+
+
         }elseif ($sanitized['stage_id'] == 9) { //Estado CON DICTAMEN SOCIAL
             // return "Estado CON DICTAMEN SOCIAL";
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
-            //$useremail = User::where('sat_ruc', $sat)->get()->first();
-            $useremail = 'preseleccionfonavis@muvh.gov.py';
-            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+            $projecto = Project::where('id', $request->project_id)->first();
+            $sat = $projecto->sat_id;
+            $useremail = 'preseleccionfonavis@muvh.gov.py'; // correo de FONAVIS
+            $satnombre = Sat::where('NucCod', $sat)->first();
 
 
             $toEmail = $useremail;
 
 
-            $subject = 'INFORME DGSO CON DICTAMEN SOCIAL '.$projecto[0]->name;
+            $subject = 'INFORME DGSO CON DICTAMEN SOCIAL '.$projecto->name;
 
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
             // configure el mail4 con mi correo, despues debemos cambiar por el de DGSO
             try {
-                Mail::mailer('mail4')->send('admin.project-status.emailDGSOAFONAVIS', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+                Mail::mailer('smtp')->send('admin.project-status.emailDGSOAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
-                    $message->from('osemidei@muvh.gov.py', env('APP_NAME')); //// configure el mail4 con mi correo, despues debemos cambiar por el de DGSO
+                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME')); //// correo pertenece a DGSO pero sale desde esta direccion de correo
                 });
 
                 return response()->json([
