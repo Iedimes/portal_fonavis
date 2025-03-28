@@ -537,7 +537,7 @@ class PostulantesController extends Controller
                         $sexo = $datospersona->obtenerPersonaPorNroCedulaResponse->return->sexo;
                         $fecha = date('Y-m-d H:i:s.v', strtotime($datospersona->obtenerPersonaPorNroCedulaResponse->return->fechNacim));
                         $nac = $datospersona->obtenerPersonaPorNroCedulaResponse->return->nacionalidadBean;
-                        return $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
+                        $est = $datospersona->obtenerPersonaPorNroCedulaResponse->return->estadoCivil;
                         //$prof = $datospersona->obtenerPersonaPorNroCedulaResponse->return->profesionBean;
                         $nroexp = $cedula;
                         $title="Agregar Miembro Familiar";
