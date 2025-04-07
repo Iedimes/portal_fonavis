@@ -39,6 +39,7 @@
             {{--<li class="nav-item"><a class="nav-link" href="{{ url('admin/configuration') }}"><i class="nav-icon icon-settings"></i> {{ __('Configuration') }}</a></li>--}}
             @elseif (Auth::user()->rol_app->dependency_id == 2 || Auth::user()->rol_app->dependency_id == 3 || Auth::user()->rol_app->dependency_id == 4 || Auth::user()->rol_app->dependency_id == 5)
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes/create') }}"><i class="fa fa-list-alt "></i> {{ trans('admin.reporte.title') }}</a></li>
             @else
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/modalities') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.modality.title') }}</a></li>

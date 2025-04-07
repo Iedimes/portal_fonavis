@@ -44,35 +44,50 @@ class ProjectsController extends Controller
      */
     public function index(IndexProject $request)
     {
-        // create and AdminListing instance for a specific model and
-
+        // Obtener el rol del usuario
         $usuarioRol = Auth::user()->rol_app->dependency_id;
 
-        $data = AdminListing::create(Project::class)->processRequestAndGet(
-            // pass the request with params
-            $request,
+        // Crear una instancia de AdminListing
+        $listing = AdminListing::create(Project::class);
 
-            // set columns to query
-            ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+        // Verificamos si el usuario tiene rol 2 y aplicamos un filtro adicional
+        if ($usuarioRol == 2) {
+            // Usamos el 4to parámetro de processRequestAndGet para aplicar un filtro
+            $data = $listing->processRequestAndGet(
+                $request,
+                ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+                ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+                function ($query) {
+                    $query->whereHas('getEstado', function ($q) {
+                        $q->where('stage_id', 2);
+                    });
+                }
+            );
+        } else {
+            // Sin filtro adicional
+            $data = $listing->processRequestAndGet(
+                $request,
+                ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+                ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
+            );
+        }
 
-            // set columns to searchIn
-            ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
-
-        );
-
-        //return $data;
-
+        // Comprobamos si es una solicitud AJAX
         if ($request->ajax()) {
             if ($request->has('bulk')) {
                 return [
                     'bulkItems' => $data->pluck('id')
                 ];
             }
+
             return ['data' => $data];
         }
 
+        // Retornar la vista con los datos filtrados
         return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol]);
     }
+
+
 
 
 
