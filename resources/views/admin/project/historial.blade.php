@@ -36,7 +36,7 @@
             </tbody>
         </table>
         <a href="{{ url()->previous() }}" class="btn btn-primary">
-            <i class="fa fa-arrow-left"></i> Volver
+            <i class="fa fa-arrow-left"></i> VOLVER
         </a>
     </div>
 </div>
