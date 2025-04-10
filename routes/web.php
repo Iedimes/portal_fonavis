@@ -372,6 +372,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDSGO',                           'ProjectsController@showDSGO')->name('DSGO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');
             Route::get('/{project}/notificar',                          'ProjectsController@notificar')->name('notificar');
+            Route::get('/{project}/historial',                          'ProjectsController@historial')->name('historial');
             Route::get('/{project}/transitionEliminar',                 'ProjectsController@transitionEliminar')->name('transitionEliminar');
             Route::get('/{project}/edit',                               'ProjectsController@edit')->name('edit');
             Route::post('/bulk-destroy',                                'ProjectsController@bulkDestroy')->name('bulk-destroy');

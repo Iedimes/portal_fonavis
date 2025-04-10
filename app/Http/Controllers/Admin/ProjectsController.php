@@ -14,7 +14,9 @@ use App\Models\Land_project;
 use App\Models\Assignment;
 use App\Models\Stage;
 use App\Models\ProjectStatus;
+use App\Models\ProjectStatusF;
 use App\Models\Sat;
+use App\Models\AdminUser;
 use App\Models\Departamento;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Documents;
@@ -571,6 +573,28 @@ class ProjectsController extends Controller
         return view('admin.project.notificar', compact('project', 'user','mensaje','email', 'estado'));
 
     }
+
+    public function historial($id)
+{
+    $project = Project::findOrFail($id);
+
+    $history = ProjectStatusF::where('project_id', $project->id)
+        ->orderBy('created_at')
+        ->get()
+        ->map(function ($item) {
+            $adminUser = \App\Models\AdminUser::find($item->user_id);
+            // dd($adminUser);
+            $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : 'SAT';
+
+            return $item;
+        });
+
+    $title = "HISTORIAL";
+
+    return view('admin.project.historial', compact('title', 'history', 'project'));
+}
+
+
 
 
 
