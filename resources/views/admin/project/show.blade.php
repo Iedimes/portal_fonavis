@@ -47,6 +47,9 @@
                         <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
                     @endif
             @endif
+            <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a>
+
+            <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a>
     </div>
     @if(session('success'))
     <div class="alert alert-success">
@@ -64,7 +67,7 @@
 
 <div class="card">
     <div class="card-header text-center">
-        DOCUMENTOS PRESENTADOS
+        DOCUMENTOS PRESENTADOS<a href="{{ url('admin/projects') }}" class="btn btn-primary" style="float: right;">VOLVER</a>
     </div>
     <div class="card-body">
         <div class="card-block">
