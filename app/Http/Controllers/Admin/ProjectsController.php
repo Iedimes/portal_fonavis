@@ -505,6 +505,11 @@ class ProjectsController extends Controller
                  $stages = Stage::whereIn('id', [3, 6])->get();
                  break;
 
+            case 6:
+            // Lógica específica para el estado 5
+            $stages = Stage::whereIn('id', [3, 4])->get();
+            break;
+
             case 8:
                  // Lógica específica para el estado 8
                  $stages = Stage::whereIn('id', [9])->get();
