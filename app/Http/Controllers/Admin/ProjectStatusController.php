@@ -126,7 +126,7 @@ class ProjectStatusController extends Controller
                     'proyecto' => $projecto->name ,
                     'id' => $projecto->id,
                     'sat' => $sat,
-                    'satnombre' => $satnombre->NucNomSat
+                    'satnombre'
                 ], function ($message) use ($userEmails, $subject) {
                     $message->to($userEmails); // Enviar a todos los correos extraídos de DGJN
                     $message->subject($subject);
@@ -157,7 +157,7 @@ class ProjectStatusController extends Controller
             $projectStatus = ProjectStatus::create($sanitized);
 
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
+                Mail::send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
                     $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
@@ -225,8 +225,17 @@ class ProjectStatusController extends Controller
             // Store the ProjectStatus
             $projectStatus = ProjectStatus::create($sanitized);
 
+                //             dd([
+                //     'toEmail' => $toEmail,
+                //     'subject' => $subject,
+                //     'proyecto' => $projecto->name,
+                //     'id' => $projecto->id,
+                //     'sat' => $sat,
+                //     'satnombre' => $satnombre->NucNomSat ?? 'NO DEFINIDO',
+                // ]);
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
+
+                Mail::send('admin.project-status.emailDGJNAFONAVISRECHAZADO', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
                     $message->to($toEmail);
                     $message->subject($subject);
                     $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME')); // Mi correo está como si fuera DGJN
