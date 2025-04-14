@@ -69,7 +69,9 @@
         </div>
     </div>
 
-@elseif ($project->getEstado->stage_id == 13 && Auth::user()->rol_app->dependency_id == 1)
+@endif
+
+@if ($project->getEstado->stage_id == 13 && Auth::user()->rol_app->dependency_id == 1)
 
     <!-- Código adicional cuando la condición no se cumple -->
     <div class="card">
@@ -113,7 +115,8 @@
             </div>
         </div>
     </div>
-    @elseif ($project->getEstado->stage_id == 18 && Auth::user()->rol_app->dependency_id == 1)
+    @endif
+    @if ($project->getEstado->stage_id == 18 && Auth::user()->rol_app->dependency_id == 1)
     <!-- Código adicional cuando la condición no se cumple -->
     <div class="card">
         <div class="card-header text-center">
@@ -156,11 +159,12 @@
             </div>
         </div>
     </div>
-@else
-    <!-- Código adicional cuando la condición no se cumple -->
+    @endif
+    @if (in_array($project->getEstado->stage_id, [3, 4, 6]) && Auth::user()->rol_app->dependency_id == 1)
     <div class="card">
         <div class="card-header text-center">
-            INFORME DGJN
+            INFORME DGJN<br>
+            ESTADO: {{ $project->getEstado->getstage->name }}
         </div>
         <div class="card-body">
             <div class="card-block">
@@ -169,7 +173,6 @@
                         <tr>
                             <th>#</th>
                             <th>Documento</th>
-                            {{-- <th>Opciones</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -181,7 +184,6 @@
                                 <tr>
                                     <td>{{ ++$imagenCount }}</td>
                                     <td>{{ $imagen->file_name }}</td>
-
                                     <td>
                                         <div>
                                             <p class="card-text">
@@ -201,6 +203,8 @@
         </div>
     </div>
 @endif
+
+
 
 
 @endsection

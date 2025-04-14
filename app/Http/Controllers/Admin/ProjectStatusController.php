@@ -143,95 +143,41 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico'
                 ]);
             }
-        }elseif ($sanitized['stage_id'] == 3) {
-
-            // $projecto = Project::where('id', $request->project_id)->first();
-            // $sat = $projecto->sat_id;
-
-            //return "Estamos en estado 3 (Aprobado DGJN), aqui vamos a devolver el correo a Fonavis";
-            $useremail1 = 'preseleccionfonavis@muvh.gov.py'; //Correo de DGFO(preseleccionfonavis@muvh.gov.py) - Recibe respuesta de DNJN desde sistema_fonavis@muvh.gov.py
-            $toEmail = $useremail1;
-            $subject = 'INFORME DGJN '.$projecto->name;
-
-            // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
-
-            try {
-                Mail::send('admin.project-status.emailDGJNAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
-                    $message->to($toEmail);
-                    $message->subject($subject);
-                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
-                });
-
-                return response()->json([
-                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGJN')
-                ]);
-            } catch (Exception $e) {
-                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                //dd($e->getMessage());
-                return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico'
-                ]);
-            }
-        }elseif ($sanitized['stage_id'] == 4) { //Estado ARCHIVADO DGJN
-            // $projecto = Project::where('id', $request->project_id)->get();
-            // $sat = $projecto[0]->sat_id;
-            $useremail = User::where('sat_ruc', $sat)->get()->first();
-            // $satnombre = Sat::where('NucCod', $sat)->get()->first();
-
-            // // Crear un array para almacenar las direcciones de correo electrónico
-            // $toEmails = [];
-
-            // if ($useremail) {
-            //     $toEmails[] = $useremail->email; // se recupera de BD el correo SAT vinculado al proyecto
-            // }
-
-            // Agregar otras direcciones de correo duro
-            $toEmails[] = 'preseleccionfonavis@muvh.gov.py'; // correo FONAVIS
-            // $toEmails[] = 'nmorel@muvh.gov.py'; // correo FONAVIS - DGSO DESPUES HAY QUE CAMBIAR POR EL QUE CORRESPONDE
-
-            $subject = 'INFORME DGJN EN ARCHIVO '.$projecto->name;
-
-            // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
-
-            try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGJNAFONAVISARCHIVADO', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmails, $subject) {
-                    $message->to($toEmails);
-                    $message->subject($subject);
-                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
-                });
-
-                return response()->json([
-                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGJN')
-                ]);
-            } catch (Exception $e) {
-                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                //dd($e->getMessage());
-                return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico'
-                ]);
-            }
-        }elseif ($sanitized['stage_id'] == 6) { // Estado RECHAZADO DGJN
+        }elseif ($sanitized['stage_id'] == 3) { // Estado APROBADO DGJN
             DB::beginTransaction();
 
             try {
-                $projecto = Project::where('id', $request->project_id)->firstOrFail();
-                $sat = $projecto->sat_id;
+                // Obtener proyecto
+                $proyecto = Project::findOrFail($request->input('project_id'));
 
-                $toEmail = 'preseleccionfonavis@muvh.gov.py';
-                $subject = 'INFORME PROYECTO RECHAZADO POR DGJN ' . $projecto->name;
+                // Datos SAT
+                $sat = $proyecto->sat_id;
+                $satnombre = Sat::where('NucCod', $sat)->first();
+                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+
+                // Remitente DGJN (usuario logueado)
+                $remitente = auth()->user();
+                $correoDGJN = $remitente->email;
+
+                // Validar si el SAT tiene un nombre y correo
+                if (!$satnombre) {
+                    throw new \Exception("No se pudo obtener información del SAT o su correo.");
+                }
 
                 // Guardar el estado del proyecto
                 $projectStatus = ProjectStatus::create($sanitized);
 
-                // Enviar el correo
+                // Enviar correo a FONAVIS
+                $toEmail = 'preseleccionfonavis@muvh.gov.py';
+                $subject = 'INFORME DGJN ' . $proyecto->name;
+
                 Mail::send(
-                    'admin.project-status.emailDGJNAFONAVISRECHAZADO',
+                    'admin.project-status.emailDGJNAFONAVIS',
                     [
-                        'proyecto' => $projecto->name,
-                        'id' => $projecto->id,
+                        'proyecto' => $proyecto->name,
+                        'id' => $proyecto->id,
                         'sat' => $sat,
+                        'satnombre' => $satnombre->NucNomSat,
                     ],
                     function ($message) use ($toEmail, $subject) {
                         $message->to($toEmail);
@@ -240,7 +186,21 @@ class ProjectStatusController extends Controller
                     }
                 );
 
-                // Verificar si falló el envío
+                // Enviar copia al DGJN que lo aprobó (opcional)
+                $subjectDGJN = "Envío de correo con Estado APROBADO DGJN a FONAVIS del proyecto: {$proyecto->name}";
+                $contenidoDGJN = "
+                    Se notificó correctamente el siguiente proyecto:<br><br>
+                    Proyecto: {$proyecto->name} ({$proyecto->id})<br>
+                    SAT: {$satnombre->NucNomSat}<br><br>
+                    Comentario registrado:<br>" . nl2br(htmlspecialchars($projectStatus->record));
+
+                Mail::mailer('smtp')->html($contenidoDGJN, function ($message) use ($correoDGJN, $subjectDGJN) {
+                    $message->to($correoDGJN);
+                    $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
+                    $message->subject($subjectDGJN);
+                });
+
+                // Verificar errores de envío
                 if (count(Mail::failures()) > 0) {
                     throw new \Exception('Fallo al enviar el correo: ' . implode(', ', Mail::failures()));
                 }
@@ -250,10 +210,165 @@ class ProjectStatusController extends Controller
                 return response()->json([
                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGJN')
                 ]);
+
             } catch (\Exception $e) {
                 DB::rollBack();
 
-                // Registrar el error en el log
+                \Log::error('Error en etapa 3 (APROBADO DGJN): ' . $e->getMessage());
+
+                return response()->json([
+                    'error' => 'Error procesando la solicitud: ' . $e->getMessage()
+                ], 500);
+            }
+        }elseif ($sanitized['stage_id'] == 4) { // Estado ARCHIVADO DGJN
+            DB::beginTransaction();
+
+            try {
+                // Obtener información relacionada
+                $proyecto = Project::findOrFail($request->input('project_id'));
+                $sat = $proyecto->sat_id;
+                $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
+                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+                $remitente = auth()->user();
+                $correoDGJN = AdminUser::where('id', $remitente->id)->value('email');
+
+                if (!$satnombre) {
+                    throw new \Exception("No se encontró el nombre del SAT.");
+                }
+
+                // Crear el estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Armar lista de destinatarios principales
+                // $toEmails = [];
+
+                // if ($correoSat) {
+                //     $toEmails[] = $correoSat;
+                // }
+
+                $toEmails[] = 'preseleccionfonavis@muvh.gov.py';
+                // $toEmails[] = 'nmorel@muvh.gov.py'; // Correo opcional
+
+                $subject = 'INFORME DGJN EN ARCHIVO ' . $proyecto->name;
+
+                // Enviar correo principal
+                Mail::mailer('smtp')->send(
+                    'admin.project-status.emailDGJNAFONAVISARCHIVADO',
+                    [
+                        'proyecto' => $proyecto->name,
+                        'id' => $proyecto->id,
+                        'sat' => $sat,
+                        'satnombre' => $satnombre
+                    ],
+                    function ($message) use ($toEmails, $subject) {
+                        $message->to($toEmails);
+                        $message->subject($subject);
+                        $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
+
+                // Verificar fallos
+                if (count(Mail::failures()) > 0) {
+                    throw new \Exception('Error al enviar el correo a: ' . implode(', ', Mail::failures()));
+                }
+
+                // Enviar copia al remitente DGJN
+                $subjectDGJN = "Envío de correo con Estado ARCHIVADO DGJN a FONAVIS del proyecto: {$proyecto->name}";
+                $contenidoDGJN = "
+                    Se notificó correctamente el siguiente proyecto:<br><br>
+                    Proyecto: {$proyecto->name} ({$proyecto->id})<br>
+                    SAT: {$satnombre}<br><br>
+                    Comentario registrado:<br>" . nl2br(htmlspecialchars($projectStatus->record));
+
+                Mail::mailer('smtp')->html($contenidoDGJN, function ($message) use ($correoDGJN, $subjectDGJN) {
+                    $message->to($correoDGJN);
+                    $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
+                    $message->subject($subjectDGJN);
+                });
+
+                DB::commit();
+
+                return response()->json([
+                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGJN')
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                \Log::error('Error en etapa 4 (ARCHIVADO DGJN): ' . $e->getMessage());
+
+                return response()->json([
+                    'error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()
+                ], 500);
+            }
+        }elseif ($sanitized['stage_id'] == 6) { // Estado RECHAZADO DGJN
+            DB::beginTransaction();
+
+            try {
+                // Obtener proyecto
+                $proyecto = Project::findOrFail($request->input('project_id'));
+
+                // Datos SAT
+                $sat = $proyecto->sat_id;
+                $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
+                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+
+                // Remitente DGJN (usuario logueado)
+                $remitente = auth()->user();
+                $correoDGJN = $remitente->email;
+
+                // Verificar que el SAT tenga un correo
+                // if (!$correoSat) {
+                //     throw new \Exception("No se encontró correo del SAT relacionado.");
+                // }
+
+                // Guardar el estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Enviar correo a FONAVIS
+                Mail::send(
+                    'admin.project-status.emailDGJNAFONAVISRECHAZADO',
+                    [
+                        'proyecto' => $proyecto->name,
+                        'id' => $proyecto->id,
+                        'sat' => $sat,
+                    ],
+                    function ($message) {
+                        $message->to('preseleccionfonavis@muvh.gov.py');
+                        $message->subject('INFORME PROYECTO RECHAZADO POR DGJN');
+                        $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
+
+                // Enviar copia al usuario DGJN que envió
+                $subjectDGJN = "Envío de correo con Estado RECHAZADO DGJN a FONAVIS del proyecto: {$proyecto->name}";
+                $contenidoDGJN = "
+                    Se notificó correctamente el siguiente proyecto:<br><br>
+                    Proyecto: {$proyecto->name} ({$proyecto->id})<br>
+                    SAT: {$satnombre}<br><br>
+                    Comentario registrado:<br>" . nl2br(htmlspecialchars($projectStatus->record));
+
+                Mail::mailer('smtp')->html($contenidoDGJN, function ($message) use ($correoDGJN, $subjectDGJN) {
+                    $message->to($correoDGJN);
+                    $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
+                    $message->subject($subjectDGJN);
+                });
+
+                // Verificar errores de envío
+                if (count(Mail::failures()) > 0) {
+                    throw new \Exception('Fallo al enviar el correo: ' . implode(', ', Mail::failures()));
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGJN')
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                // Registrar el error en los logs
                 \Log::error('Error en etapa 6 (RECHAZADO DGJN): ' . $e->getMessage());
 
                 return response()->json([

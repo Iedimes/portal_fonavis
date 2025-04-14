@@ -261,24 +261,26 @@ class ProjectsController extends Controller
     }
 
     public function showFONAVIS(Project $project)
-{
-    // $this->authorize('admin.project.show', $project);
-    $id = $project->id;
-    $stageId = $project->getestado->stage_id;
+    {
+        // $this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $stageId = $project->getestado->stage_id;
 
-    if ($stageId == 3 || $stageId == 13 || $stageId == 18) {
-        $proyectoEstado = ProjectStatus::where('project_id', $id)
-            ->where('stage_id', $stageId)
-            ->get();
-    } else {
-        $proyectoEstado = collect();
+        // Modificar esta línea para incluir los nuevos estados 4 y 6
+        if ($stageId == 3 || $stageId == 4 || $stageId == 6 || $stageId == 13 || $stageId == 18) {
+           // Aquí se obtiene el estado del proyecto con la relación a la imagen
+           $proyectoEstado = ProjectStatus::with('imagen')->where('project_id', $id)
+               ->where('stage_id', $stageId)
+               ->get();
+        } else {
+            $proyectoEstado = collect();
+        }
+
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+        return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
     }
-
-    $project_type = Land_project::where('land_id', $project->land_id)->first();
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-
-    return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
-}
 
     public function showFONAVISSOCIAL(Project $project)
     {
