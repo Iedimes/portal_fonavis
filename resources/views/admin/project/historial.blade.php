@@ -21,11 +21,17 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($history as $status)
+                @forelse ($history as $key => $status)
                     <tr>
                         <td>{{ $status->getStage->name ?? 'N/A' }}</td>
                         <td>{{ $status->created_at->format('d/m/Y H:i') }}</td>
-                        <td>{{ $status->nombre_usuario }}</td>
+                        <td>
+                            @if ($key === 0)
+                                SAT
+                            @else
+                                {{ $status->nombre_usuario }}
+                            @endif
+                        </td>
                         <td>{{ $status->record }}</td>
                     </tr>
                 @empty
