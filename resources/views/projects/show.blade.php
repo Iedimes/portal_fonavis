@@ -253,12 +253,13 @@
                                                 </tr>
 
                                         @endforeach
+
                                         @if ($project->getLand->id == 1)
                                         <tr>
                                             <td>
 
                                                     <a href="{{ url('projectsDocNoExcluyentes/'.$project->id) }}">
-                                                        Documentos No Excluyentes
+                                                        DOCUMENTOS NO EXCLUYENTES
                                                     </a>
 
                                             </td>
@@ -276,6 +277,23 @@
 
                                         </tr>
                                         @endif
+
+                                        <tr>
+                                            <td colspan="2">
+                                                <a href="{{ url('projectsDocCondominio/'.$project->id) }}">
+                                                    INFORME DE CONDICION DE DOMINIO (POR CADA FINCA Y O MATRICULA)
+                                                </a>
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+
 
                                         @if (session('message'))
                                             <div class="alert alert-success" id="success-message">

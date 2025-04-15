@@ -83,7 +83,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
                             href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
-                            aria-selected="true">DOCUMENTOS NO EXCLUYENTES</a>
+                            aria-selected="true">ADJUNTAR INFORME DE CONDICION DE DOMINIO</a>
                     </li>
                 </ul>
             </div>
@@ -132,7 +132,7 @@
                                                         </a>
                                                         {{-- @elseif (!$project->getEstado) --}}
                                                         @elseif ($project->getEstado)
-                                                        <form action="/levantarNoExcluyente" method="POST" enctype="multipart/form-data">
+                                                        <form action="/levantarCondominio" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <input type="hidden" name="project_id" value="{{ $project->id }}">
                                                             <input type="file" name="archivo">
@@ -222,7 +222,7 @@
                 // Verificar si todos los documentos están cargados
                 const rows = document.querySelectorAll('tr');
                 rows.forEach(row => {
-                    const uploadForm = row.querySelector('form[action="/levantarNoExcluyente"]');
+                    const uploadForm = row.querySelector('form[action="/levantarCondominio"]');
                     if (uploadForm) {
                         todosCargados = false;
                     }

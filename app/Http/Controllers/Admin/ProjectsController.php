@@ -150,6 +150,11 @@ class ProjectsController extends Controller
     $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
         ->where('category_id', 4)
         ->get();
+
+    $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
+       ->where('category_id', 5)
+       ->get();
+
     $history = ProjectStatus::where('project_id', $project['id'])
         ->orderBy('created_at')
         ->get();
@@ -174,6 +179,16 @@ class ProjectsController extends Controller
         $uploadedFiles1[$item->document_id] = $documentExists;
     }
 
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles2 = [];
+    foreach ($docproyectoCondominio as $item) {
+        $uploadedFile2 = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+        $uploadedFiles2[$item->document_id] = $documentExists;
+    }
+
     // Obtener los documentos no excluyentes faltantes
     $missingDocuments = [];
     foreach ($docproyectoNoExcluyentes as $item) {
@@ -182,7 +197,7 @@ class ProjectsController extends Controller
         }
     }
 
-    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'uploadedFiles1', 'missingDocuments'));
+    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'missingDocuments'));
 }
 
     public function showDGJN(Project $project)
@@ -197,6 +212,11 @@ class ProjectsController extends Controller
         $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
         ->where('category_id', 4)
         ->get();
+
+        $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
+        ->where('category_id', 5)
+        ->get();
+
         $history = ProjectStatus::where('project_id',$project['id'])
                     ->orderBy('created_at')
                     ->get();
@@ -218,6 +238,16 @@ class ProjectsController extends Controller
                         $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
                         $uploadedFiles1[$item->document_id] = $documentExists;
                     }
+
+                    // Verificar si se ha cargado un archivo para cada elemento
+                    $uploadedFiles2 = [];
+                    foreach ($docproyectoCondominio as $item) {
+                        $uploadedFile2 = Documents::where('project_id', $project->id)
+                            ->where('document_id', $item->document_id)
+                            ->first();
+                        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+                        $uploadedFiles2[$item->document_id] = $documentExists;
+                    }
         // Obtener los documentos no excluyentes faltantes
     $missingDocuments = [];
     foreach ($docproyectoNoExcluyentes as $item) {
@@ -228,7 +258,7 @@ class ProjectsController extends Controller
 
         //return $history;
 
-        return view('admin.project.DGJN.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'uploadedFiles1', 'missingDocuments'));
+        return view('admin.project.DGJN.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'missingDocuments'));
     }
 
     public function showDGJNFALTANTE(Project $project)

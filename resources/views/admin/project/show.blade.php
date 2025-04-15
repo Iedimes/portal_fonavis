@@ -96,6 +96,24 @@
                             </td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <th colspan="3">INFORME DE CONDICION DE DOMINIO</th>
+                    </tr>
+                    @foreach ($docproyectoCondominio as $key => $item)
+                        @if ($uploadedFiles2[$item->document_id])
+                            <tr>
+                                {{-- <td>{{ $key+1 }}</td> --}}
+                                <td>{{ $item->document->name }}</td>
+                                <td>
+                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles2[$item->document_id]]) }}">
+                                        <button class="btn btn-info">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endif
+                    @endforeach
                     @if($project->land_id == 1)
                     <!-- Mostrar documentos no excluyentes existentes -->
                     <tr>
