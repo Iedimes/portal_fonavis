@@ -131,7 +131,8 @@
                                                             </button>
                                                         </a>
                                                         {{-- @elseif (!$project->getEstado) --}}
-                                                        @elseif ($project->getEstado)
+                                                        {{-- @elseif ($project->getEstado) --}}
+                                                        @else
                                                         <form action="/levantarNoExcluyente" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <input type="hidden" name="project_id" value="{{ $project->id }}">

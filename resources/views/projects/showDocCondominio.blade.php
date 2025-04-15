@@ -131,7 +131,9 @@
                                                             </button>
                                                         </a>
                                                         {{-- @elseif (!$project->getEstado) --}}
-                                                        @elseif ($project->getEstado)
+                                                        {{-- @elseif ($project->getEstado) --}}
+                                                        {{-- @else --}}
+                                                        @elseif (!$project->getEstado || $project->getEstado)
                                                         <form action="/levantarCondominio" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <input type="hidden" name="project_id" value="{{ $project->id }}">
@@ -146,7 +148,8 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($project->getEstado)
+                                                    {{-- @if ($project->getEstado) --}}
+                                                    @if (!$project->getEstado || $project->getEstado)
                                                     @else
                                                         @if ($uploadedFiles[$item->document_id])
 
