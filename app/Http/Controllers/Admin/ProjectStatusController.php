@@ -153,7 +153,7 @@ class ProjectStatusController extends Controller
                 // Datos SAT
                 $sat = $proyecto->sat_id;
                 $satnombre = Sat::where('NucCod', $sat)->first();
-                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+                $correoSat = User::where('sat_ruc', $sat)->value('email');
 
                 // Remitente DGJN (usuario logueado)
                 $remitente = auth()->user();
@@ -179,8 +179,9 @@ class ProjectStatusController extends Controller
                         'sat' => $sat,
                         'satnombre' => $satnombre->NucNomSat,
                     ],
-                    function ($message) use ($toEmail, $subject) {
+                    function ($message) use ($toEmail, $subject, $correoSat) {
                         $message->to($toEmail);
+                        $message->bcc($correoSat); // copia al SAT
                         $message->subject($subject);
                         $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
                     }
@@ -228,7 +229,7 @@ class ProjectStatusController extends Controller
                 $proyecto = Project::findOrFail($request->input('project_id'));
                 $sat = $proyecto->sat_id;
                 $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
-                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+                $correoSat = User::where('sat_ruc', $sat)->value('email');
                 $remitente = auth()->user();
                 $correoDGJN = AdminUser::where('id', $remitente->id)->value('email');
 
@@ -260,8 +261,9 @@ class ProjectStatusController extends Controller
                         'sat' => $sat,
                         'satnombre' => $satnombre
                     ],
-                    function ($message) use ($toEmails, $subject) {
+                    function ($message) use ($toEmails, $subject, $correoSat) {
                         $message->to($toEmails);
+                        $message->bcc($correoSat); // copia al SAT
                         $message->subject($subject);
                         $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
                     }
@@ -311,7 +313,7 @@ class ProjectStatusController extends Controller
                 // Datos SAT
                 $sat = $proyecto->sat_id;
                 $satnombre = Sat::where('NucCod', $sat)->value('NucNomSat');
-                // $correoSat = User::where('sat_ruc', $sat)->value('email');
+                $correoSat = User::where('sat_ruc', $sat)->value('email');
 
                 // Remitente DGJN (usuario logueado)
                 $remitente = auth()->user();
@@ -333,8 +335,9 @@ class ProjectStatusController extends Controller
                         'id' => $proyecto->id,
                         'sat' => $sat,
                     ],
-                    function ($message) {
+                    function ($message) use ($correoSat) {
                         $message->to('preseleccionfonavis@muvh.gov.py');
+                        $message->bcc($correoSat); // copia al SAT
                         $message->subject('INFORME PROYECTO RECHAZADO POR DGJN');
                         $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
                     }
