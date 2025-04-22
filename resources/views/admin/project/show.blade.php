@@ -47,12 +47,12 @@
                     <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
                         SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
                     </div>
-
+                    <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
 
 
                 @else
                     <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-                    <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+                    {{-- <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a> --}}
                 @endif
 
 
