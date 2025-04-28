@@ -148,8 +148,8 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    {{-- @if ($project->getEstado) --}}
-                                                    @if (!$project->getEstado || $project->getEstado)
+                                                    @if ($project->getEstado)
+                                                    {{-- @if (!$project->getEstado || $project->getEstado) --}}
                                                     @else
                                                         @if ($uploadedFiles[$item->document_id])
 
