@@ -617,6 +617,7 @@ class ProjectsController extends Controller
 
     $history = ProjectStatusF::where('project_id', $project->id)
         ->orderBy('created_at')
+        ->with('imagen')
         ->get()
         ->map(function ($item) {
             $adminUser = \App\Models\AdminUser::find($item->user_id);

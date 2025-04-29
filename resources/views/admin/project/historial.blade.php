@@ -18,6 +18,7 @@
                     <th>FECHA</th>
                     <th>USUARIO</th>
                     <th>OBSERVACION</th>
+                    <th>ARCHIVO</th> {{-- NUEVA COLUMNA --}}
                 </tr>
             </thead>
             <tbody>
@@ -33,14 +34,29 @@
                             @endif
                         </td>
                         <td>{{ $status->record }}</td>
+                        <td>
+                            @php
+                                $media = $status->imagen->first(); // Obtenemos el primer archivo relacionado
+                            @endphp
+                            @if ($media)
+                                <a href="/media/{{ $media->id }}/{{ $media->file_name }}" target="_blank">VER DICTAMEN</a>  <!-- Usamos el formato de URL conocido -->
+                            @else
+
+                            @endif
+                        </td>
+
+
+
+
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4">No hay historial disponible.</td>
+                        <td colspan="5">No hay historial disponible.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+
         <a href="{{ url()->previous() }}" class="btn btn-primary">
             <i class="fa fa-arrow-left"></i> VOLVER
         </a>
