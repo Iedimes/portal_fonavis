@@ -592,23 +592,25 @@ public function showTecnico($id)
     public function generatePDF($id)
     {
         $project = Project::find($id);
-        //$postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
         $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
             ->where('category_id', 1)
             ->get();
-        $codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
+
+        $codigoQr = QrCode::size(150)->generate(config('app.url') . '/' . $project->certificate_pin);
+
         $data = [
             'title' => 'Welcome to HDTuto.com',
             'project' => $project,
             'documents' => $docproyecto,
             'valor' => $codigoQr,
         ];
-        //$codigoQr = QrCode::size(150)->generate(env('APP_URL') . '/' . $project->certificate_pin);
+
         $pdf = PDF::loadView('myPDF', $data);
 
         return $pdf->download('FORMULARIO-INGRESO-' . $project->name . '.pdf');
     }
+
 
     public function verification($key)
     {
