@@ -455,7 +455,7 @@ class PostulantesController extends Controller
                    ->where('CerEst', '!=', 8)
                    ->where('CerEst', '!=', 12)
                    ->get();
-                  return $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))
+                   $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))
                    ->where('CerEst', '!=', 2)
                    ->where('CerEst', '!=', 7)
                    ->where('CerEst', '!=', 8)
