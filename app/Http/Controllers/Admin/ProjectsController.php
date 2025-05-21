@@ -370,7 +370,7 @@ class ProjectsController extends Controller
 
         //return $history;
 
-        return view('admin.project.FONAVIS.showVERDOCFONAVIS', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'missingDocuments'));
+        return view('admin.project.FONAVIS.showVerDocFonavis', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'missingDocuments'));
     }
 
 
