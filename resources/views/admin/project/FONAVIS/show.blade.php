@@ -47,6 +47,9 @@
                     @endif
 
             @endif
+            {{-- <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a> --}}
+
+            <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a>
     </div>
     @if(session('success'))
     <div class="alert alert-success">

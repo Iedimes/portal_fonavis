@@ -312,6 +312,68 @@ class ProjectsController extends Controller
         return view('admin.project.FONAVIS.show', compact('project', 'postulantes', 'proyectoEstado'));
     }
 
+    public function showVERDOCFONAVIS(Project $project)
+    {
+        $this->authorize('admin.project.show', $project);
+        $id=$project->id;
+        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
+        ->where('category_id',1)
+        ->get();
+        $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
+        ->where('category_id', 4)
+        ->get();
+
+        $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
+        ->where('category_id', 5)
+        ->get();
+
+        $history = ProjectStatus::where('project_id',$project['id'])
+                    ->orderBy('created_at')
+                    ->get();
+                    $uploadedFiles = [];
+                    foreach ($docproyecto as $item) {
+                        $uploadedFile = Documents::where('project_id', $project->id)
+                            ->where('document_id', $item->document_id)
+                            ->first();
+                        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+                        $uploadedFiles[$item->document_id] = $documentExists;
+                    }
+
+                    // Verificar si se ha cargado un archivo para cada elemento
+                    $uploadedFiles1 = [];
+                    foreach ($docproyectoNoExcluyentes as $item) {
+                        $uploadedFile1 = Documents::where('project_id', $project->id)
+                            ->where('document_id', $item->document_id)
+                            ->first();
+                        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
+                        $uploadedFiles1[$item->document_id] = $documentExists;
+                    }
+
+                    // Verificar si se ha cargado un archivo para cada elemento
+                    $uploadedFiles2 = [];
+                    foreach ($docproyectoCondominio as $item) {
+                        $uploadedFile2 = Documents::where('project_id', $project->id)
+                            ->where('document_id', $item->document_id)
+                            ->first();
+                        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+                        $uploadedFiles2[$item->document_id] = $documentExists;
+                    }
+        // Obtener los documentos no excluyentes faltantes
+    $missingDocuments = [];
+    foreach ($docproyectoNoExcluyentes as $item) {
+        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
+            $missingDocuments[] = $item->document->name;
+        }
+    }
+
+        //return $history;
+
+        return view('admin.project.FONAVIS.showVERDOCFONAVIS', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'missingDocuments'));
+    }
+
+
     public function showFONAVISSOCIAL(Project $project)
     {
         // $this->authorize('admin.project.show', $project);

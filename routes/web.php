@@ -365,6 +365,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');
             Route::get('/{project}/showFONAVIS',                        'ProjectsController@showFONAVIS')->name('FONAVIS');
+            Route::get('/{project}/showVERDOCFONAVIS',                  'ProjectsController@showVERDOCFONAVIS')->name('VERDOCFONAVIS');
             Route::get('/{project}/showFONAVISADJ',                     'ProjectsController@showFONAVISADJ')->name('FONAVISADJ');
             Route::get('/{project}/showFONAVISSOCIAL',                  'ProjectsController@showFONAVISSOCIAL')->name('FONAVISSOCIAL');
             Route::get('/{project}/showFONAVISTECNICO',                 'ProjectsController@showFONAVISTECNICO')->name('FONAVISTECNICO');
