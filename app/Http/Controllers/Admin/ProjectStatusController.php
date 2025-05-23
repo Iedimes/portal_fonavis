@@ -221,7 +221,7 @@ class ProjectStatusController extends Controller
                     'error' => 'Error procesando la solicitud: ' . $e->getMessage()
                 ], 500);
             }
-        }elseif ($sanitized['stage_id'] == 4) { // Estado ARCHIVADO DGJN
+        }elseif ($sanitized['stage_id'] == 4) { // Estado OBSERVADO DGJN
             DB::beginTransaction();
 
             try {

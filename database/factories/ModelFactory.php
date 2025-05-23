@@ -315,3 +315,26 @@ $factory->define(App\Models\Reporte::class, static function (Faker\Generator $fa
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\ProjectHasExpediente::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->sentence,
+        'exp' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\ProjectHasExpediente::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->sentence,
+        'exp' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        'deleted_at' => null,
+        
+        
+    ];
+});

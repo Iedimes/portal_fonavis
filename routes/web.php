@@ -587,3 +587,19 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
         });
     });
 });
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('project-has-expedientes')->name('project-has-expedientes/')->group(static function() {
+            Route::get('/',                                             'ProjectHasExpedientesController@index')->name('index');
+            Route::get('/create',                                       'ProjectHasExpedientesController@create')->name('create');
+            Route::post('/',                                            'ProjectHasExpedientesController@store')->name('store');
+            Route::get('/{projectHasExpediente}/edit',                  'ProjectHasExpedientesController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ProjectHasExpedientesController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{projectHasExpediente}',                      'ProjectHasExpedientesController@update')->name('update');
+            Route::delete('/{projectHasExpediente}',                    'ProjectHasExpedientesController@destroy')->name('destroy');
+        });
+    });
+});

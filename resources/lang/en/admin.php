@@ -451,5 +451,22 @@ return [
         ],
     ],
 
+    'project-has-expediente' => [
+        'title' => 'Project Has Expedientes',
+
+        'actions' => [
+            'index' => 'Project Has Expedientes',
+            'create' => 'New Project Has Expediente',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'project_id' => 'Project',
+            'exp' => 'Exp',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

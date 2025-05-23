@@ -137,7 +137,7 @@
                                                 <button v-else-if="item.get_estado && item.get_estado.stage_id === 4"
                                                         class="btn"
                                                         style="background-color: rgb(169, 197, 7); color: white;">
-                                                    ARCHIVADO DGJN
+                                                    OBSERVADO DGJN
                                                 </button>
                                                 <button v-else-if="item.get_estado && item.get_estado.stage_id === 5"
                                                         class="btn"

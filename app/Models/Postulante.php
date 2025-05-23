@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Postulante extends Model implements Auditable
+class Postulante extends Model implements AuditableContract
 {
-    use \OwenIt\Auditing\Auditable;
+    use AuditableTrait;
     use SoftDeletes;
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -26,15 +28,12 @@ class Postulante extends Model implements Auditable
         'phone',
         'mobile',
         'nexp',
-
     ];
-
 
     protected $dates = [
         'created_at',
         'updated_at',
         'deleted_at',
-
     ];
 
     protected $appends = ['resource_url'];
@@ -44,12 +43,11 @@ class Postulante extends Model implements Auditable
 
     public function getResourceUrlAttribute()
     {
-        return url('/admin/postulantes/'.$this->getKey());
+        return url('/admin/postulantes/' . $this->getKey());
     }
 
-    public function getProjectHasPostulante() {
-        return $this->hasOne('App\Models\ProjectHasPostulantes','postulante_id', 'id');
+    public function getProjectHasPostulante()
+    {
+        return $this->hasOne('App\Models\ProjectHasPostulantes', 'postulante_id', 'id');
     }
-
-
 }

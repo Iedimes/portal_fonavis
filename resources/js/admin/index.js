@@ -24,3 +24,4 @@ import './motivo';
 import './admin-users-dependency';
 import './dependency';
 import './reporte';
+import './project-has-expediente';
