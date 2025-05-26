@@ -14,7 +14,7 @@
                 <div class="card">
                     <div class="card-header">
                         <i class="fa fa-align-justify"></i> {{ trans('admin.project-has-expediente.actions.index') }}
-                        <a class="btn btn-primary btn-spinner btn-sm pull-right m-b-0" href="{{ url('admin/project-has-expedientes/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project-has-expediente.actions.create') }}</a>
+                        {{-- <a class="btn btn-primary btn-spinner btn-sm pull-right m-b-0" href="{{ url('admin/project-has-expedientes/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project-has-expediente.actions.create') }}</a> --}}
                     </div>
                     <div class="card-body" v-cloak>
                         <div class="card-block">
@@ -118,7 +118,7 @@
                                 <i class="icon-magnifier"></i>
                                 <h3>{{ trans('brackets/admin-ui::admin.index.no_items') }}</h3>
                                 <p>{{ trans('brackets/admin-ui::admin.index.try_changing_items') }}</p>
-                                <a class="btn btn-primary btn-spinner" href="{{ url('admin/project-has-expedientes/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project-has-expediente.actions.create') }}</a>
+                                {{-- <a class="btn btn-primary btn-spinner" href="{{ url('admin/project-has-expedientes/create') }}" role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.project-has-expediente.actions.create') }}</a> --}}
                             </div>
                         </div>
                     </div>
