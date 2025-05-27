@@ -703,7 +703,8 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:100000|mimes:pdf',
+            // 'archivo' => 'required|max:100000|mimes:pdf',
+            'archivo' => 'required|max:30720|mimes:pdf'
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
             'archivo.max' => 'El archivo supera el tamaño definido.',
@@ -770,7 +771,9 @@ public function showTecnico($id)
     {
         // Validación
         $this->validate($request, [
-            'archivos' => 'required|array|max:30000',
+            'archivos' => 'required|array|max:30720',
+
+
             'archivos.*' => 'file'
         ], [
             'archivos.required' => 'Debe seleccionar al menos un archivo.',
@@ -863,7 +866,8 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-            'archivo' => 'required|max:100000|mimes:pdf',
+            // 'archivo' => 'required|max:100000|mimes:pdf',
+            'archivo' => 'required|max:30720|mimes:pdf'
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
             'archivo.max' => 'El archivo supera el tamaño definido..',
@@ -932,7 +936,9 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-           'archivo' => 'required|max:100000|mimes:pdf',
+        //    'archivo' => 'required|max:100000|mimes:pdf',
+        'archivo' => 'required|max:30720|mimes:pdf'
+
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
             'archivo.max' => 'El archivo supera el tamaño definido.',
@@ -1002,7 +1008,9 @@ public function showTecnico($id)
 
         // Validación
         $this->validate($request, [
-           'archivo' => 'required|max:100000|mimes:pdf',
+        //    'archivo' => 'required|max:100000|mimes:pdf',
+        'archivo' => 'required|max:30720|mimes:pdf'
+
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
             'archivo.max' => 'El archivo supera el tamaño definido.',
