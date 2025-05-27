@@ -35,10 +35,17 @@ class ProjectStatusF extends Model implements HasMedia
         return $this->hasOne('App\Models\AdminUser','id','user_id');
     }
 
-    function registerMediaCollections(): void
+    // function registerMediaCollections(): void
+    // {
+    //     $this->addMediaCollection('gallery')
+    //         ->maxFilesize(1024 * 1024 * 30)
+    //         ->maxNumberOfFiles(5);
+    // }
+    public function registerMediaCollections(): void
     {
         $this->addMediaCollection('gallery')
-            ->maxFilesize(1024 * 1024 * 30)
+            // ->accepts('image/*')
+            ->maxFilesize(30) // <- CORRECTO: en MB
             ->maxNumberOfFiles(5);
     }
 
