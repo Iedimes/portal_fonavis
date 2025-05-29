@@ -674,29 +674,30 @@ class ProjectsController extends Controller
     }
 
    public function historial($id)
-{
-    $project = Project::findOrFail($id);
+    {
+        $project = Project::findOrFail($id);
 
-    $history = ProjectStatusF::where('project_id', $project->id)
-        ->orderBy('created_at')
-        ->with('imagen')
-        ->get()
-        ->map(function ($item) {
-            if (in_array($item->stage_id, [1,5,8,11,])) {
-                $user = \App\Models\User::find($item->user_id);
-                $item->nombre_usuario = $user ? $user->name : '';
-            } else {
-                $adminUser = \App\Models\AdminUser::find($item->user_id);
-                $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
-            }
+        $history = ProjectStatusF::where('project_id', $project->id)
+            ->orderBy('created_at')
+            ->with('imagen')
+            ->get()
+            ->map(function ($item) {
+                if (in_array($item->stage_id, [1, 5, 8, 11])) {
+                    $user = \App\Models\User::find($item->user_id);
+                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
+                } else {
+                    $adminUser = \App\Models\AdminUser::find($item->user_id);
+                    $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
+                }
 
-            return $item;
-        });
+                return $item;
+            });
 
-    $title = "HISTORIAL";
+        $title = "HISTORIAL";
 
-    return view('admin.project.historial', compact('title', 'history', 'project'));
-}
+        return view('admin.project.historial', compact('title', 'history', 'project'));
+    }
+
 
 
 
