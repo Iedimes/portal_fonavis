@@ -311,6 +311,16 @@
                                                         <a class="btn btn-sm btn-warning" :href="item.resource_url + '/showDSGO'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button"><i class="fa fa-search"></i></a>
                                                     </div>
                                                 @endif
+                                                <div class="p-1">
+                                                    <a class="btn btn-sm" style="background-color: #ec600e; color: #b5bbbb;"
+                                                    :href="item.resource_url + '/historial'"
+                                                    title="VER HISTORIAL" role="button">
+                                                        <i class="fa fa-history"></i>
+                                                    </a>
+                                                </div>
+
+
+                                                {{-- <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a> --}}
                                             </div>
                                         </td>
                                     </tr>
