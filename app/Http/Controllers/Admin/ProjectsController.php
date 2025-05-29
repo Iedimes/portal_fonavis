@@ -673,7 +673,7 @@ class ProjectsController extends Controller
 
     }
 
-    public function historial($id)
+   public function historial($id)
 {
     $project = Project::findOrFail($id);
 
@@ -682,9 +682,13 @@ class ProjectsController extends Controller
         ->with('imagen')
         ->get()
         ->map(function ($item) {
-            $adminUser = \App\Models\AdminUser::find($item->user_id);
-            // dd($adminUser);
-            $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : 'SAT';
+            if (in_array($item->stage_id, [1,5,8,11,])) {
+                $user = \App\Models\User::find($item->user_id);
+                $item->nombre_usuario = $user ? $user->name : '';
+            } else {
+                $adminUser = \App\Models\AdminUser::find($item->user_id);
+                $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
+            }
 
             return $item;
         });
@@ -693,6 +697,7 @@ class ProjectsController extends Controller
 
     return view('admin.project.historial', compact('title', 'history', 'project'));
 }
+
 
 
 
