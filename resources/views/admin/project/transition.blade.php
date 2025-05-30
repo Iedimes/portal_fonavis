@@ -47,7 +47,7 @@
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
-                    @if ($estado==1 || $estado==3 )
+                    @if ($estado==1 || $estado==3 || $estado==9 )
 
                     @else
                     @include('brackets/admin-ui::admin.includes.media-uploader', [

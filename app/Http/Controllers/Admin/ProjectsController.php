@@ -52,27 +52,12 @@ class ProjectsController extends Controller
         // Crear una instancia de AdminListing
         $listing = AdminListing::create(Project::class);
 
-        // Verificamos si el usuario tiene rol 2 y aplicamos un filtro adicional
-        if ($usuarioRol == 2) {
-            // Usamos el 4to parámetro de processRequestAndGet para aplicar un filtro
-            $data = $listing->processRequestAndGet(
-                $request,
-                ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-                ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-                function ($query) {
-                    $query->whereHas('getEstado', function ($q) {
-                        $q->where('stage_id', 2);
-                    });
-                }
-            );
-        } else {
-            // Sin filtro adicional
-            $data = $listing->processRequestAndGet(
-                $request,
-                ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-                ['id', 'name','sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
-            );
-        }
+        // Procesar sin ningún filtro personalizado
+        $data = $listing->processRequestAndGet(
+            $request,
+            ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+            ['id', 'name', 'sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
+        );
 
         // Comprobamos si es una solicitud AJAX
         if ($request->ajax()) {
@@ -85,9 +70,10 @@ class ProjectsController extends Controller
             return ['data' => $data];
         }
 
-        // Retornar la vista con los datos filtrados
+        // Retornar la vista con los datos (sin filtro en el backend)
         return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol]);
-    }
+}
+
 
 
 
@@ -600,7 +586,7 @@ class ProjectsController extends Controller
                  break;
 
             case 6:
-            // Lógica específica para el estado 5
+            // Lógica específica para el estado 6
             $stages = Stage::whereIn('id', [3, 4])->get();
             break;
 

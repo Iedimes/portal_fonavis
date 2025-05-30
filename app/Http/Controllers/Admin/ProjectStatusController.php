@@ -380,47 +380,55 @@ class ProjectStatusController extends Controller
             }
         }elseif ($sanitized['stage_id'] == 7) { // Estado EVALUACION SOCIAL
 
-            $projecto = Project::where('id', $request->project_id)->first();
-            if (!$projecto) {
-                return response()->json(['error' => 'No se encontró el proyecto']);
-            }
-
-            $sat = $projecto->sat_id;
-            $useremail = User::where('sat_ruc', $sat)->select('email')->first();
-            if (!$useremail) {
-                return response()->json(['error' => 'No se encontró email para el usuario SAT']);
-            }
-
-            $satnombre = Sat::where('NucCod', $sat)->select('NucNomSat')->first();
-            if (!$satnombre) {
-                return response()->json(['error' => 'No se encontró el nombre del SAT']);
-            }
-
-            $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)->pluck('admin_user_id');
-            $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
-
-            // Extraer los correos en un array
-            $userEmails = $usuarios->pluck('email')->toArray();
-
-            // Agregar el correo fijo
-            $toEmails = [$useremail->email];
-
-            // Combinar ambas listas de correos
-            $allEmails = array_merge($userEmails, $toEmails);
-
-            if (empty($allEmails)) {
-                return response()->json(['error' => 'No hay correos para enviar el mensaje']);
-            }
-
-            $subject = 'EVALUACION SOCIAL ' . $projecto->name;
-
-            // Guardar estado del proyecto
-            $projectStatus = ProjectStatus::create($sanitized);
+            DB::beginTransaction();
 
             try {
+                $projecto = Project::where('id', $request->project_id)->first();
+                if (!$projecto) {
+                    return response()->json(['error' => 'No se encontró el proyecto']);
+                }
+
+                $sat = $projecto->sat_id;
+                $useremail = User::where('sat_ruc', $sat)->select('email')->first();
+                if (!$useremail) {
+                    return response()->json(['error' => 'No se encontró email para el usuario SAT']);
+                }
+
+                $satnombre = Sat::where('NucCod', $sat)->select('NucNomSat')->first();
+                if (!$satnombre) {
+                    return response()->json(['error' => 'No se encontró el nombre del SAT']);
+                }
+
+                $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)->pluck('admin_user_id');
+                $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+
+                // Extraer los correos en un array
+                $userEmails = $usuarios->pluck('email')->toArray();
+
+                // Agregar el correo fijo
+                $toEmails = [$useremail->email];
+
+                // Combinar ambas listas de correos
+                $allEmails = array_merge($userEmails, $toEmails);
+
+                if (empty($allEmails)) {
+                    return response()->json(['error' => 'No hay correos para enviar el mensaje']);
+                }
+
+                $subject = 'EVALUACION SOCIAL ' . $projecto->name;
+
+                // Guardar estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Enviar correo
                 Mail::mailer('mail2')->send(
                     'admin.project-status.emailFONAVISDGSOSAT',
-                    ['proyecto' => $projecto->name, 'id' => $projecto->id, 'sat' => $sat, 'satnombre' => $satnombre->NucNomSat],
+                    [
+                        'proyecto' => $projecto->name,
+                        'id' => $projecto->id,
+                        'sat' => $sat,
+                        'satnombre' => $satnombre->NucNomSat
+                    ],
                     function ($message) use ($allEmails, $subject) {
                         $message->to($allEmails);
                         $message->subject($subject);
@@ -428,82 +436,141 @@ class ProjectStatusController extends Controller
                     }
                 );
 
+                DB::commit(); // Confirmar todo
+
                 return response()->json([
                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVIS')
                 ]);
+
             } catch (Exception $e) {
+                DB::rollBack(); // Revertir si algo falla
+
                 return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico: ' . $e->getMessage()
+                    'error' => 'Error durante el proceso: ' . $e->getMessage()
                 ]);
             }
+        }elseif ($sanitized['stage_id'] == 9) { // Estado CON DICTAMEN SOCIAL
 
+            DB::beginTransaction();
 
-        }elseif ($sanitized['stage_id'] == 9) { //Estado CON DICTAMEN SOCIAL
-            // return "Estado CON DICTAMEN SOCIAL";
-            $projecto = Project::where('id', $request->project_id)->first();
-            $sat = $projecto->sat_id;
-            $useremail = 'preseleccionfonavis@muvh.gov.py'; // correo de FONAVIS
-            $satnombre = Sat::where('NucCod', $sat)->first();
-
-
-            $toEmail = $useremail;
-
-
-            $subject = 'INFORME DGSO CON DICTAMEN SOCIAL '.$projecto->name;
-
-            // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
-            // configure el mail4 con mi correo, despues debemos cambiar por el de DGSO
             try {
-                Mail::mailer('smtp')->send('admin.project-status.emailDGSOAFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($toEmail, $subject) {
-                    $message->to($toEmail);
-                    $message->subject($subject);
-                    $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME')); //// correo pertenece a DGSO pero sale desde esta direccion de correo
-                });
+                $projecto = Project::where('id', $request->project_id)->first();
+                if (!$projecto) {
+                    return response()->json(['error' => 'No se encontró el proyecto']);
+                }
+
+                $sat = $projecto->sat_id;
+                $useremail = 'preseleccionfonavis@muvh.gov.py'; // Correo de FONAVIS
+
+                $satnombre = Sat::where('NucCod', $sat)->first();
+                if (!$satnombre) {
+                    return response()->json(['error' => 'No se encontró el nombre del SAT']);
+                }
+
+                $toEmail = $useremail;
+
+                $subject = 'INFORME DGSO CON DICTAMEN SOCIAL ' . $projecto->name;
+
+                // Guardar estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Enviar correo
+                Mail::mailer('smtp')->send(
+                    'admin.project-status.emailDGSOAFONAVIS',
+                    [
+                        'proyecto' => $projecto->name,
+                        'id' => $projecto->id,
+                        'sat' => $sat,
+                        'satnombre' => $satnombre->NucNomSat
+                    ],
+                    function ($message) use ($toEmail, $subject) {
+                        $message->to($toEmail);
+                        $message->subject($subject);
+                        $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
+
+                DB::commit(); // Confirmar todo si va bien
 
                 return response()->json([
                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showDGSO')
                 ]);
+
             } catch (Exception $e) {
-                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                //dd($e->getMessage());
+                DB::rollBack(); // Revertir si hay error
+
                 return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico'
+                    'error' => 'Error durante el proceso: ' . $e->getMessage()
                 ]);
             }
-        }elseif ($sanitized['stage_id'] == 10) { //Estado EVALUACION TECNICA
-           // return "Estado Estado EVALUACION TECNICA";
-            $projecto = Project::where('id', $request->project_id)->get();
-            $sat = $projecto[0]->sat_id;
-            $useremail1 = User::where('sat_ruc', $sat)->get()->first();
-            $useremail = $useremail1->email;
-            //$useremail = 'preseleccionfonavis@muvh.gov.py';
-            $satnombre = Sat::where('NucCod', $sat)->get()->first();
+        }elseif ($sanitized['stage_id'] == 10) { // Estado EVALUACION TECNICA
 
-
-            $toEmail = $useremail;
-
-
-            $subject = 'PARA EVALUACION TECNICA '.$projecto[0]->name;
-
-            // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
+            DB::beginTransaction();
 
             try {
-                Mail::mailer('mail2')->send('admin.project-status.emailFONAVISSAT', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
-                    $message->to($toEmail);
-                    $message->subject($subject);
-                    $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
-                });
+                $projecto = Project::where('id', $request->project_id)->first();
+                if (!$projecto) {
+                    return response()->json(['error' => 'No se encontró el proyecto']);
+                }
+
+                $sat = $projecto->sat_id;
+
+                // Obtener email del SAT
+                $email=User::where('sat_ruc', $sat)->first();
+                $useremail1 = User::where('sat_ruc', $sat)->first();
+                if (!$useremail1 || !$useremail1->email) {
+                    return response()->json(['error' => 'No se encontró email para el usuario SAT']);
+                }
+                $useremailSAT = $useremail1->email;
+
+                // Obtener nombre del SAT
+                $satobtenernombre = Sat::where('NucCod', $sat)->first();
+                $satnombre = $satobtenernombre?->NucNomSat;
+                if (!$satnombre) {
+                    return response()->json(['error' => 'No se encontró el nombre del SAT']);
+                }
+
+                // Obtener los usuarios de la dependencia 4 (DIGH)
+                $dependenciaDIGH = AdminUsersDependency::where('dependency_id', 4)
+                                                        ->pluck('admin_user_id');
+                $usuariosDIGH = AdminUser::whereIn('id', $dependenciaDIGH)->get();
+                $emailsDIGH = $usuariosDIGH->pluck('email')->toArray();
+
+                // Combinar correos del SAT y DIGH, evitando duplicados
+                $userEmails = array_unique(array_merge([$useremailSAT], $emailsDIGH));
+
+                $subject = 'PARA EVALUACION TECNICA ' . $projecto->name;
+
+                // Guardar estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Enviar correo
+                Mail::mailer('mail2')->send(
+                    'admin.project-status.emailFONAVISSAT',
+                    [
+                        'proyecto' => $projecto->name,
+                        'id' => $projecto->id,
+                        'sat' => $sat,
+                        'satnombre' => $satnombre
+                    ],
+                    function ($message) use ($userEmails, $subject) {
+                        $message->to($userEmails);
+                        $message->subject($subject);
+                        $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
+
+                DB::commit();
 
                 return response()->json([
                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVISSOCIAL')
                 ]);
+
             } catch (Exception $e) {
-                // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                //dd($e->getMessage());
+                DB::rollBack();
+
                 return response()->json([
-                    'error' => 'No se pudo enviar el correo electrónico'
+                    'error' => 'Error durante el proceso: ' . $e->getMessage()
                 ]);
             }
         }elseif ($sanitized['stage_id'] == 12) { //Estado VERIFICACION TECNICO AMBIENTAL;
