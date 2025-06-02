@@ -256,6 +256,7 @@ Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'App\Http\Cont
 
 
 Route::resource('projects', ProjectController::class);
+Route::get('projects/{id}/eliminados', [App\Http\Controllers\ProjectController::class, 'showEliminados']);
 Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
 
 Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF'])->name('generate-pdf');

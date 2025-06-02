@@ -261,6 +261,71 @@ class ProjectController extends Controller
     return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
 }
 
+public function showEliminados($id)
+{
+    $project = Project::find($id);
+    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+    $title = "Resumen Proyecto " . $project->name;
+
+    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        ->where('category_id', 1)
+        ->where('stage_id', 1)
+        ->get();
+
+    // Documentación técnica
+    $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
+        ->whereIn('category_id', [2,3])
+        ->where('stage_id', 1)
+        ->get();
+
+    $documentIds = $datosAdiciones->pluck('document_id');
+
+    $documentos = Documents::where('project_id', $id)
+        ->whereIn('document_id', $documentIds)
+        ->get();
+
+    $claves = $docproyecto->pluck('document_id');
+
+    $history = ProjectStatusF::where('project_id', $project['id'])
+        ->orderBy('created_at')
+        ->get();
+
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles = [];
+    foreach ($docproyecto as $item) {
+        $uploadedFile = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+        $uploadedFiles[$item->document_id] = $documentExists;
+    }
+
+    // Verificar si se ha cargado un archivo para cada elemento
+    $uploadedFiles2 = [];
+    foreach ($documentos as $item) {
+        $uploadedFile2 = Documents::where('project_id', $project->id)
+            ->where('document_id', $item->document_id)
+            ->first();
+        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+        $uploadedFiles2[$item->document_id] = $documentExists;
+    }
+
+    // Verificar si todos los documentos están cargados
+    $todosCargados = true;
+    foreach ($docproyecto as $item) {
+        if (!isset($uploadedFiles[$item->document_id])) {
+            $todosCargados = false;
+            break;
+        }
+    }
+
+    $existenDocumentos = $documentos->isNotEmpty();
+
+    return view('projects.showEliminados', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
+}
+
     public function showDoc($id)
     {
         $project = Project::find($id);
