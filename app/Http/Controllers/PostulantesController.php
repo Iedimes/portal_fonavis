@@ -278,7 +278,12 @@ class PostulantesController extends Controller
                                         ->where('CerEst', '!=', 12)
                                         ->get();
                $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
-               $existe = Postulante::where('cedula',$request->input('cedula'))->get();
+               $existe = Postulante::where('cedula',$request->input('cedula'))
+                                        ->where('CerEst', '!=', 2)
+                                        ->where('CerEst', '!=', 7)
+                                        ->where('CerEst', '!=', 8)
+                                        ->where('CerEst', '!=', 12)
+                                        ->get();
                $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
                ->where('PylCod','!=' ,'P.F.')
             //    ->where('PerCod','!=' ,1211361)
@@ -662,7 +667,12 @@ class PostulantesController extends Controller
                                     ->where('CerEst', '!=', 8)
                                     ->where('CerEst', '!=', 12)
                                     ->get();
-           $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))->get();
+           $certificadosconyuge = SHMCER::where('CerCoCI',$request->input('cedula'))
+                                            ->where('CerEst', '!=', 2)
+                                            ->where('CerEst', '!=', 7)
+                                            ->where('CerEst', '!=', 8)
+                                            ->where('CerEst', '!=', 12)
+                                            ->get();
            $existe = Postulante::where('cedula',$request->input('cedula'))->get();
            $cartera = PRMCLI::where('PerCod',$request->input('cedula'))
            ->where('PylCod','!=' ,'P.F.')
