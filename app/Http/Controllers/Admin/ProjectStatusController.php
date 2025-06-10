@@ -504,47 +504,39 @@ class ProjectStatusController extends Controller
                 ]);
             }
         }elseif ($sanitized['stage_id'] == 10) { // Estado EVALUACION TECNICA
-
             DB::beginTransaction();
 
             try {
                 $projecto = Project::where('id', $request->project_id)->first();
                 if (!$projecto) {
-                    return response()->json(['error' => 'No se encontró el proyecto']);
+                    return response()->json(['error' => 'No se encontró el proyecto'], 404);
                 }
 
                 $sat = $projecto->sat_id;
 
                 // Obtener email del SAT
-                $email=User::where('sat_ruc', $sat)->first();
-                $useremail1 = User::where('sat_ruc', $sat)->first();
-                if (!$useremail1 || !$useremail1->email) {
-                    return response()->json(['error' => 'No se encontró email para el usuario SAT']);
+                $useremailSAT = User::where('sat_ruc', $sat)->first();
+                if (!$useremailSAT || !$useremailSAT->email) {
+                    return response()->json(['error' => 'No se encontró email para el usuario SAT'], 404);
                 }
-                $useremailSAT = $useremail1->email;
+                $useremailSAT = $useremailSAT->email;
 
                 // Obtener nombre del SAT
                 $satobtenernombre = Sat::where('NucCod', $sat)->first();
                 $satnombre = $satobtenernombre?->NucNomSat;
                 if (!$satnombre) {
-                    return response()->json(['error' => 'No se encontró el nombre del SAT']);
+                    return response()->json(['error' => 'No se encontró el nombre del SAT'], 404);
                 }
 
-                // Obtener los usuarios de la dependencia 4 (DIGH)
-                $dependenciaDIGH = AdminUsersDependency::where('dependency_id', 4)
-                                                        ->pluck('admin_user_id');
-                $usuariosDIGH = AdminUser::whereIn('id', $dependenciaDIGH)->get();
-                $emailsDIGH = $usuariosDIGH->pluck('email')->toArray();
 
-                // Combinar correos del SAT y DIGH, evitando duplicados
-                $userEmails = array_unique(array_merge([$useremailSAT], $emailsDIGH));
+                $toEmail = $useremailSAT; // El correo se enviará solo al SAT
 
                 $subject = 'PARA EVALUACION TECNICA ' . $projecto->name;
 
                 // Guardar estado del proyecto
                 $projectStatus = ProjectStatus::create($sanitized);
 
-                // Enviar correo
+                // Enviar correo solo al SAT
                 Mail::mailer('mail2')->send(
                     'admin.project-status.emailFONAVISSAT',
                     [
@@ -553,8 +545,8 @@ class ProjectStatusController extends Controller
                         'sat' => $sat,
                         'satnombre' => $satnombre
                     ],
-                    function ($message) use ($userEmails, $subject) {
-                        $message->to($userEmails);
+                    function ($message) use ($toEmail, $subject) { // Se usa $toEmail que contiene solo el email del SAT
+                        $message->to($toEmail);
                         $message->subject($subject);
                         $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
                     }
@@ -568,47 +560,73 @@ class ProjectStatusController extends Controller
 
             } catch (Exception $e) {
                 DB::rollBack();
+                return response()->json([
+                    'error' => 'Error durante el proceso de evaluación técnica: ' . $e->getMessage()
+                ], 500);
+            }
+        }elseif ($sanitized['stage_id'] == 12) { // Estado VERIFICACION TECNICO AMBIENTAL
+            DB::beginTransaction();
+
+            try {
+                $projecto = Project::where('id', $request->project_id)->first();
+                if (!$projecto) {
+                    return response()->json(['error' => 'No se encontró el proyecto'], 404);
+                }
+
+                $sat = $projecto->sat_id;
+
+                // Obtener nombre del SAT (aún necesario para el contenido del correo a DIGH)
+                $satobtenernombre = Sat::where('NucCod', $sat)->first();
+                $satnombre = $satobtenernombre?->NucNomSat;
+                if (!$satnombre) {
+                    return response()->json(['error' => 'No se encontró el nombre del SAT'], 404);
+                }
+
+                // Obtener los usuarios de la dependencia 4 (DIGH)
+                $dependenciaDIGH = AdminUsersDependency::where('dependency_id', 4)->pluck('admin_user_id');
+                $usuariosDIGH = AdminUser::whereIn('id', $dependenciaDIGH)->get();
+                $emailsDIGH = $usuariosDIGH->pluck('email')->toArray();
+
+                // Enviar correo solo a DIGH (no se incluye el email del SAT)
+                // Asegurarse de que haya al menos un correo de DIGH para enviar
+                if (empty($emailsDIGH)) {
+                    return response()->json(['error' => 'No se encontraron usuarios de la dependencia DIGH para enviar el correo'], 404);
+                }
+
+                $subject = 'PARA VERIFICACION TECNICO AMBIENTAL ' . $projecto->name;
+
+                // Guardar estado del proyecto
+                $projectStatus = ProjectStatus::create($sanitized);
+
+                // Enviar correo a los usuarios de DIGH
+                Mail::mailer('mail2')->send(
+                    'admin.project-status.emailFONAVISDIGH',
+                    [
+                        'proyecto' => $projecto->name,
+                        'id' => $projecto->id,
+                        'sat' => $sat,
+                        'satnombre' => $satnombre
+                    ],
+                    function ($message) use ($emailsDIGH, $subject) {
+                        $message->to($emailsDIGH); // Se envía solo a los correos de DIGH
+                        $message->subject($subject);
+                        $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
+                    }
+                );
+
+                DB::commit();
 
                 return response()->json([
-                    'error' => 'Error durante el proceso: ' . $e->getMessage()
+                    'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVISTECNICO')
                 ]);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => 'Error durante el proceso de verificación técnico ambiental: ' . $e->getMessage()
+                ], 500);
             }
-        }elseif ($sanitized['stage_id'] == 12) { //Estado VERIFICACION TECNICO AMBIENTAL;
-            //return "Estado VERIFICACION TECNICO AMBIENTAL";
-             $projecto = Project::where('id', $request->project_id)->get();
-             $sat = $projecto[0]->sat_id;
-            //  $useremail1 = User::where('sat_ruc', $sat)->get()->first();
-            //  $useremail = $useremail1->email;
-             $useremail = 'osemidei@gmail.com'; // Luego reemplazar por el correo de DIGH
-             $satnombre = Sat::where('NucCod', $sat)->get()->first();
-
-
-             $toEmail = $useremail;
-
-
-             $subject = 'PARA VERIFICACION TECNICO AMBIENTAL '.$projecto[0]->name;
-
-             // Store the ProjectStatus
-             $projectStatus = ProjectStatus::create($sanitized);
-
-             try {
-                 Mail::mailer('mail2')->send('admin.project-status.emailFONAVISDIGH', ['proyecto' => $projecto[0]->name ,'id' => $projecto[0]->id,'sat' => $sat,'satnombre' => $satnombre], function ($message) use ($toEmail, $subject) {
-                     $message->to($toEmail);
-                     $message->subject($subject);
-                     $message->from('preseleccionfonavis@muvh.gov.py', env('APP_NAME'));
-                 });
-
-                 return response()->json([
-                     'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVISTECNICO')
-                 ]);
-             } catch (Exception $e) {
-                 // Si se produce un error al enviar el correo electrónico, devolvemos una respuesta JSON con un mensaje de error
-                 //dd($e->getMessage());
-                 return response()->json([
-                     'error' => 'No se pudo enviar el correo electrónico'
-                 ]);
-             }
-         }elseif ($sanitized['stage_id'] == 13) { //Estado CON INFORME VTA
+        }elseif ($sanitized['stage_id'] == 13) { //Estado CON INFORME VTA
             //return "Estado CON INFORME VTA";
             $projecto = Project::where('id', $request->project_id)->get();
             $sat = $projecto[0]->sat_id;
