@@ -315,6 +315,13 @@
                     <i class="fa fa-search"></i>
                 </a>
             </div>
+
+             {{-- Imprimir postulantes --}}
+            <div class="p-1">
+                <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button">
+                    <i class="fa fa-print"></i>
+                </a>
+            </div>
         @endif
 
         {{-- DEPENDENCY 4 --}}
