@@ -564,8 +564,8 @@ class PostulantesController extends Controller
                         $title="Agregar Miembro Familiar";
                         $project_id = Project::find($id);
                         $par = [1, 8];
-                        if ($ultimoEstado==7 || $ultimoEstado==NULL){
-
+                        // if ($ultimoEstado==7 || $ultimoEstado==NULL){
+                            if ($ultimoEstado==NULL){
                             $parentesco = Parentesco::whereIn('id', $par)
                                                 ->orderBy('name', 'asc')->get();
                             $discapacdad = Discapacidad::all();
@@ -573,8 +573,7 @@ class PostulantesController extends Controller
 
                         }else{
 
-                            $parentesco = Parentesco::whereIn('id', $par)
-                            ->orderBy('name', 'asc')->get();
+                            $parentesco = Parentesco::all();
                         $discapacdad = Discapacidad::all();
                         $idpostulante = $x;
                             //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
@@ -781,25 +780,20 @@ class PostulantesController extends Controller
                     $ultimoEstado = null; // O cualquier otro valor que desees asignar para indicar que está vacío
                 }
                 $par = [1, 8];
-                if ($ultimoEstado==7 || $ultimoEstado=NULL){
+                // if ($ultimoEstado==7 || $ultimoEstado==NULL){
+                    if ($ultimoEstado==NULL){
+                        $parentesco = Parentesco::whereIn('id', $par)
+                                            ->orderBy('name', 'asc')->get();
+                        $discapacdad = Discapacidad::all();
+                        $idpostulante = $x;
 
-                   // return "Vacio";
+                    }else{
 
-                    // $parentesco = Parentesco::whereIn('id', $par)
-                    //                       ->orderBy('name', 'asc')->get();
-                    $parentesco = Parentesco::all();
+                        $parentesco = Parentesco::all();
                     $discapacdad = Discapacidad::all();
                     $idpostulante = $x;
-
-                }else{
-
-                // $parentesco = Parentesco::all();
-                $parentesco = Parentesco::whereIn('id', $par)
-                                          ->orderBy('name', 'asc')->get();
-                $discapacdad = Discapacidad::all();
-                $idpostulante = $x;
-                    //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
-                }
+                        //var_dump($datospersona->obtenerPersonaPorNroCedulaResponse);
+                    }
 
                 //return "parentesco:".$parentesco;
                 return view('postulantes.ficha.createmiembro',compact('nroexp','cedula','nombre','apellido','fecha','sexo',
