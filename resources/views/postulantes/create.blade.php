@@ -111,31 +111,16 @@
     </form>
   </div>
 </div>
-  @stop
-@section('js')
-
-    <script type="text/javascript">
-    $('select[name="state_id"]').on('change', function() {
-                var stateID = $(this).val();
-                if(stateID) {
-                    $.ajax({
-                        url: '{{URL::to('/projects')}}/ajax/'+stateID+"/cities",
-                        type: "GET",
-                        dataType: "json",
-                        success:function(data) {
-
-                            $('select[name="city_id"]').empty();
-                            $('select[name="city_id"]').append('<option value="">Selecciona un Distrito</option>');
-
-                            $.each(data, function(key, value) {
-                                $('select[name="city_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                            });
-
-                        }
-                    });
-                }else{
-                    $('select[name="city_id"]').empty();
-                }
-            });
-    </script>
 @stop
+@section('js')
+<script type="text/javascript">
+    $('form').on('submit', function() {
+        var submitButton = $(this).find('button[type="submit"]');
+        submitButton.text('Guardando...');
+        setTimeout(function() {
+            submitButton.hide();
+        }, 300); // espera un poco para que se vea el texto
+    });
+</script>
+@stop
+
