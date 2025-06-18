@@ -196,9 +196,20 @@ class ProjectController extends Controller
     //     return view('projects.show',compact('title','project','docproyecto','tipoproy','claves','history','postulantes'));
     // }
 
-    public function show($id)
+
+
+public function show($id)
 {
-    $project = Project::find($id);
+    $user = Auth::user();
+
+    // Buscar el proyecto
+    $project = Project::findOrFail($id);
+
+    // Verificar que el proyecto corresponda al usuario autenticado
+    if (trim($project->sat_id) !== trim($user->sat_ruc)) {
+        abort(403, 'No tienes permiso para acceder a este proyecto.');
+    }
+
     $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
     $title = "Resumen Proyecto " . $project->name;
 
@@ -209,7 +220,6 @@ class ProjectController extends Controller
         ->where('stage_id', 1)
         ->get();
 
-    // Documentación técnica
     $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
         ->whereIn('category_id', [2,3])
         ->where('stage_id', 1)
@@ -223,11 +233,10 @@ class ProjectController extends Controller
 
     $claves = $docproyecto->pluck('document_id');
 
-    $history = ProjectStatusF::where('project_id', $project['id'])
+    $history = ProjectStatusF::where('project_id', $project->id)
         ->orderBy('created_at')
         ->get();
 
-    // Verificar si se ha cargado un archivo para cada elemento
     $uploadedFiles = [];
     foreach ($docproyecto as $item) {
         $uploadedFile = Documents::where('project_id', $project->id)
@@ -237,7 +246,6 @@ class ProjectController extends Controller
         $uploadedFiles[$item->document_id] = $documentExists;
     }
 
-    // Verificar si se ha cargado un archivo para cada elemento
     $uploadedFiles2 = [];
     foreach ($documentos as $item) {
         $uploadedFile2 = Documents::where('project_id', $project->id)
@@ -247,7 +255,6 @@ class ProjectController extends Controller
         $uploadedFiles2[$item->document_id] = $documentExists;
     }
 
-    // Verificar si todos los documentos están cargados
     $todosCargados = true;
     foreach ($docproyecto as $item) {
         if (!isset($uploadedFiles[$item->document_id])) {
@@ -258,8 +265,23 @@ class ProjectController extends Controller
 
     $existenDocumentos = $documentos->isNotEmpty();
 
-    return view('projects.show', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
+    return view('projects.show', compact(
+        'title',
+        'project',
+        'docproyecto',
+        'tipoproy',
+        'claves',
+        'history',
+        'postulantes',
+        'uploadedFiles',
+        'todosCargados',
+        'existenDocumentos',
+        'datosAdiciones',
+        'documentos',
+        'uploadedFiles2'
+    ));
 }
+
 
 public function showEliminados($id)
 {
