@@ -154,10 +154,8 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($project->getEstado)
-                                                    @else
+                                                    @if ($project->getEstado && $project->getEstado->stage_id == 10)
                                                         @if ($uploadedFiles[$item->document_id])
-
                                                             <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
                                                                 @csrf
                                                                 @method('DELETE')
@@ -168,6 +166,7 @@
                                                             </form>
                                                         @endif
                                                     @endif
+
                                                 </td>
                                             </tr>
                                         @endforeach
