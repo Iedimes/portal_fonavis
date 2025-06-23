@@ -89,7 +89,7 @@
                             <td>{{ $item->document->name }}</td>
                             <td>
                                 @if ($uploadedFiles[$item->document_id])
-                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+                                    <a href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
                                         <button class="btn btn-info">
                                             <i class="fa fa-search"></i>
                                         </button>
@@ -107,7 +107,7 @@
                                 {{-- <td>{{ $key+1 }}</td> --}}
                                 <td>{{ $item->document->name }}</td>
                                 <td>
-                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles2[$item->document_id]]) }}">
+                                    <a href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles2[$item->document_id]]) }}">
                                         <button class="btn btn-info">
                                             <i class="fa fa-search"></i>
                                         </button>
@@ -127,7 +127,7 @@
                                 {{-- <td>{{ $key+1 }}</td> --}}
                                 <td>{{ $item->document->name }}</td>
                                 <td>
-                                    <a href="{{ route('downloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles1[$item->document_id]]) }}">
+                                    <a href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles1[$item->document_id]]) }}">
                                         <button class="btn btn-info">
                                             <i class="fa fa-search"></i>
                                         </button>

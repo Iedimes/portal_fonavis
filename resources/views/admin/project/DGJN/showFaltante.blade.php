@@ -89,7 +89,7 @@
                                 <i class="fa fa-search"></i>
                             </button>
                         </a> --}}
-                        <a href="{{ route('descargarDocumento', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
+                        <a href="{{ route('adminprojectsdescargarDocumento', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
                             <button class="btn btn-info">
                                 <i class="fa fa-search"></i>
                             </button>
