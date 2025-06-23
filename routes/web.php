@@ -240,103 +240,89 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
-Auth::routes();
+    Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->name('home');
+    // Página principal
+    Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
+    Route::get('/home', [App\Http\Controllers\ProjectController::class, 'index'])->name('home');
 
-Route::get('/', [App\Http\Controllers\ProjectController::class, 'index']);
+    // AJAX públicos
+    // Route::get('projects/ajax/{state_id?}/cities', [App\Http\Controllers\ProjectController::class, 'distrito']);
+    Route::get('projects/ajax/{state_id?}/lands', [App\Http\Controllers\ProjectController::class, 'lands']);
+    Route::get('projects/ajax/{state_id?}/typology', [App\Http\Controllers\ProjectController::class, 'typology']);
+    Route::get('projects/ajax/{state_id?}/local', [App\Http\Controllers\ProjectController::class, 'distrito']);
 
-Route::get('download/{project}/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'downloadFile'])->name('downloadFile');
+    // Middleware para proteger acceso al proyecto
+    Route::middleware('verificar.acceso.proyecto')->group(function () {
 
-Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
+        Route::resource('projects', App\Http\Controllers\ProjectController::class);
+        Route::get('projects/{id}/eliminados', [App\Http\Controllers\ProjectController::class, 'showEliminados']);
+        Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF'])->name('generate-pdf');
+        Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [App\Http\Controllers\ProjectController::class, 'checkdocuments']);
 
-// Descargar documentos del lado del ADM
-Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', 'App\Http\Controllers\Admin\ProjectsController@descargarDocumento')->name('descargarDocumento');
-Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'App\Http\Controllers\Admin\ProjectsController@downloadFile')->name('downloadFileDoc');
+        // Postulantes
+        Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class, 'index']);
+        Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'show'])->name('projects.postulantes.show');
+        Route::get('/postulantes/edit/{id}/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
+        Route::get('/miembros/edit/{id}/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'editmiembro'])->name('miembros.edit');
 
+        // Mostrar documentos
+        Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
+        Route::get('projectsMiembros/{id}', [App\Http\Controllers\ProjectController::class, 'showProyMiembros']);
+        Route::get('projectsTecnico/{id}', [App\Http\Controllers\ProjectController::class, 'showTecnico']);
+        Route::get('projectsDocTec/{id}', [App\Http\Controllers\ProjectController::class, 'showDocTec']);
+        Route::get('projectsDocNoExcluyentes/{id}', [App\Http\Controllers\ProjectController::class, 'showDocNoExcluyentes']);
+        Route::get('projectsDocCondominio/{id}', [App\Http\Controllers\ProjectController::class, 'showDocCondominio']);
 
-Route::resource('projects', ProjectController::class);
-Route::get('projects/{id}/eliminados', [App\Http\Controllers\ProjectController::class, 'showEliminados']);
-Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
+        // Descargar documentos
+        Route::get('download/{project}/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'downloadFile'])->name('downloadFile');
+        Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\Http\Controllers\ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
+        // Descargar documentos lado ADMIN
+        Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', [App\Http\Controllers\Admin\ProjectsController::class, 'descargarDocumento'])->name('descargarDocumento');
+        Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', [App\Http\Controllers\Admin\ProjectsController::class, 'downloadFile'])->name('downloadFileDoc');
 
-Route::get('generate-pdf/{id}', [App\Http\Controllers\ProjectController::class, 'generatePDF'])->name('generate-pdf');
+        // Eliminar documentos
+        Route::get('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
+        Route::get('documents/eliminardocumento/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
+    });
 
-Route::get('projects/ajax/{state_id?}/cities', [App\Http\Controllers\ProjectController::class, 'distrito']);
-Route::get('projects/ajax/{state_id?}/lands', [App\Http\Controllers\ProjectController::class, 'lands']);
-Route::get('projects/ajax/{state_id?}/typology', [App\Http\Controllers\ProjectController::class, 'typology']);
-Route::get('projects/ajax/{state_id?}/local', [App\Http\Controllers\ProjectController::class, 'distrito']);
+    // Operaciones POST públicas
+    Route::get('projects/send/{id}', [App\Http\Controllers\ProjectController::class, 'send']);
+    Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class, 'create']);
+    Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class, 'createmiembro']);
+    Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class, 'destroy']);
+    Route::post('postulantes/destroymiembro', [App\Http\Controllers\PostulantesController::class, 'destroymiembro']);
+    Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
+    Route::post('savepostulanteEdit', [App\Http\Controllers\PostulantesController::class, 'storeEditPostulante']);
+    Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, 'storemiembro']);
+    Route::post('savemiembroeditar', [App\Http\Controllers\PostulantesController::class, 'updatemiembro']);
 
-//Postulantes
-Route::get('projects/{id}/postulantes', [App\Http\Controllers\PostulantesController::class, 'index']);
-Route::post('projects/{id}/postulantes/create', [App\Http\Controllers\PostulantesController::class, 'create']);
-Route::post('projects/{id}/postulantes/{x}/createmiembro', [App\Http\Controllers\PostulantesController::class, 'createmiembro']);
-Route::post('postulantes/destroy', [App\Http\Controllers\PostulantesController::class, 'destroy']);
-Route::post('postulantes/destroymiembro', [App\Http\Controllers\PostulantesController::class, 'destroymiembro']);
-Route::post('savepostulante', [App\Http\Controllers\PostulantesController::class, 'store']);
-Route::post('savepostulanteEdit', [App\Http\Controllers\PostulantesController::class, 'storeEditPostulante']);
-Route::post('savemiembro', [App\Http\Controllers\PostulantesController::class, 'storemiembro']);
-Route::post('savemiembroeditar', [App\Http\Controllers\PostulantesController::class, 'updatemiembro']);
-Route::get('imprimir/{id}', 'App\Http\Controllers\PostulantesController@generatePDF')->name('imprimir');
+    // Adjuntar documentos
+    Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
+    Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
+    Route::post('levantarTecnico', [App\Http\Controllers\ProjectController::class, 'uploadTecnico']);
+    Route::post('levantarNoExcluyente', [App\Http\Controllers\ProjectController::class, 'uploadNoExcluyente']);
+    Route::post('levantarCondominio', [App\Http\Controllers\ProjectController::class, 'uploadCondominio']);
 
-// Route::get('/cities', [App\Http\Controllers\Admin\ReporteController::class, 'getCities']);
-// Route::get('projects/{id}/postulantes/{idpostulante}', 'PostulantesController@show');
-// Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class,'show']);
-Route::get('projects/{id}/postulantes/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'show'])->name('projects.postulantes.show');
-Route::get('/postulantes/edit/{id}/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
-Route::get('/miembros/edit/{id}/{idpostulante}', [App\Http\Controllers\PostulantesController::class, 'editmiembro'])->name('miembros.edit');
-/*Route::get('projects/{id}/postulantes/{idpostulante}/edit', 'PostulantesController@edit');
-Route::post('editpostulante', 'PostulantesController@update');
-Route::post('postulantes/upload', 'PostulantesController@upload');
-Route::post('postulantes/destroyfile', 'PostulantesController@destroyfile');
+    // Imprimir
+    Route::get('imprimir/{id}', [App\Http\Controllers\PostulantesController::class, 'generatePDF'])->name('imprimir');
 
-Route::post('postulantes/destroy', 'PostulantesController@destroy');
-*/
+    // Enviar documentos faltantes
+    Route::post('/enviar-documentos-faltantes', [App\Http\Controllers\ProjectController::class, 'enviarDocumentosFaltantes'])->name('enviarDocumentosFaltantes');
 
-// Route::post('postulantes/destroymiembro', 'PostulantesController@destroymiembro')->name('eliminar-miembro');
+    // Ver archivos almacenados
+    Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+        $path = storage_path("app/{$folder}/{$filename}");
+        if (file_exists($path)) {
+            return response()->file($path);
+        } else {
+            abort(404);
+        }
+    })->where('filename', '(.*)');
 
-//Adjuntar documentos
+    // Validación de código QR
+    Route::get('/{key}', [App\Http\Controllers\HomeController::class, 'verification']);
 
-// Route::post('upload', [App\Http\Controllers\ProjectController::class, 'upload']);
-Route::post('levantar', [App\Http\Controllers\ProjectController::class, 'upload']);
-Route::post('levantarDocumento', [App\Http\Controllers\ProjectController::class, 'uploadDocumento']);
-Route::post('levantarTecnico', [App\Http\Controllers\ProjectController::class, 'uploadTecnico']);
-Route::post('levantarNoExcluyente', [App\Http\Controllers\ProjectController::class, 'uploadNoExcluyente']);
-Route::post('levantarCondominio', [App\Http\Controllers\ProjectController::class, 'uploadCondominio']);
-Route::get('projectsDoc/{id}', [App\Http\Controllers\ProjectController::class, 'showDoc']);
-Route::get('projectsMiembros/{id}', [App\Http\Controllers\ProjectController::class, 'showProyMiembros']);
-Route::get('projectsTecnico/{id}', [App\Http\Controllers\ProjectController::class, 'showTecnico']);
-Route::get('projectsDocTec/{id}', [App\Http\Controllers\ProjectController::class, 'showDocTec']);
-Route::get('projectsDocNoExcluyentes/{id}', [App\Http\Controllers\ProjectController::class, 'showDocNoExcluyentes']);
-Route::get('projectsDocCondominio/{id}', [App\Http\Controllers\ProjectController::class, 'showDocCondominio']);
-
-
-
-
-// Ver documento
-
-// Route::get('/ver/{project}/{document}', [App\Http\Controllers\ProjectController::class, 'ver'])->name('ver');
-
-//Eliminar documentos
-// Route::delete('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
-Route::get('documents/eliminar/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminar'])->name('eliminar');
-Route::get('documents/eliminardocumento/{project_id}/{document_id}', [App\Http\Controllers\ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
-Route::post('/enviar-documentos-faltantes', [App\Http\Controllers\ProjectController::class, 'enviarDocumentosFaltantes'])->name('enviarDocumentosFaltantes');
-
-Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
-    $path = storage_path("app/{$folder}/{$filename}");
-    if (file_exists($path)) {
-        return response()->file($path);
-    } else {
-        abort(404);
-    }
-})->where('filename', '(.*)');
-
-
-//validacion qr
-Route::get('/{key}', [App\Http\Controllers\HomeController::class, 'verification']);
-
-//
-Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [App\Http\Controllers\ProjectController::class, 'checkdocuments']);
 
 
 /* Auto-generated admin routes */

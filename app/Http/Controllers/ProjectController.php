@@ -200,15 +200,8 @@ class ProjectController extends Controller
 
 public function show($id)
 {
-    $user = Auth::user();
-
     // Buscar el proyecto
     $project = Project::findOrFail($id);
-
-    // Verificar que el proyecto corresponda al usuario autenticado
-    if (trim($project->sat_id) !== trim($user->sat_ruc)) {
-        abort(403, 'No tienes permiso para acceder a este proyecto.');
-    }
 
     $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
     $title = "Resumen Proyecto " . $project->name;
@@ -221,7 +214,7 @@ public function show($id)
         ->get();
 
     $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->whereIn('category_id', [2,3])
+        ->whereIn('category_id', [2, 3])
         ->where('stage_id', 1)
         ->get();
 
