@@ -119,9 +119,8 @@ class PostulantesController extends Controller
 
             $persona = json_decode($response->getBody()->getContents());
 
-            // Verificar que exista la propiedad esperada
             if (!isset($persona->obtenerPersonaPorNroCedulaResponse->return)) {
-                \Log::error('Respuesta inesperada de la API', ['cedula' => $cedula, 'respuesta' => $persona]);
+                \Log::warning('API respondió pero sin datos válidos', ['cedula' => $cedula, 'respuesta' => $persona]);
                 return null;
             }
 
@@ -140,16 +139,19 @@ class PostulantesController extends Controller
                 'nac' => $p->nacionalidadBean ?? '',
                 'est' => $p->estadoCivil ?? ''
             ];
-
         } catch (\Exception $e) {
-            \Log::error('Error al obtener datos desde API o BD', [
+            // Solo error de la API, no incluye fallo en BD
+            \Log::warning('Error al obtener datos desde la API, intento con BD local', [
                 'cedula' => $cedula,
                 'mensaje' => $e->getMessage()
             ]);
 
             $persona = \App\Models\Persona::where('BDICed', $cedula)->first();
 
-            if (!$persona) return null;
+            if (!$persona) {
+                \Log::error('No se encontró la persona en la BD local', ['cedula' => $cedula]);
+                return null;
+            }
 
             return [
                 'nombre' => $persona->BDINom,
@@ -162,6 +164,7 @@ class PostulantesController extends Controller
             ];
         }
     }
+
 
 
     public function createmiembro(Request $request, $id, $x)
