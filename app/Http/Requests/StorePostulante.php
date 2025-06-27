@@ -18,19 +18,19 @@ class StorePostulante extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      */
-    public function rules()
+   public function rules()
     {
+        $postulanteId = $this->input('postulante_id'); // Captura el ID del postulante
+
         return [
             'cedula' => [
                 'required',
                 'string',
-                Rule::unique('postulantes')->where(function ($query) {
+                Rule::unique('postulantes')->ignore($postulanteId)->where(function ($query) {
                     return $query->whereNull('deleted_at');
                 }),
             ],
-            // Agregá aquí las demás validaciones necesarias, por ejemplo:
-            // 'first_name' => 'required|string|max:255',
-            // 'last_name' => 'required|string|max:255',
+            // Otras validaciones...
         ];
     }
 
@@ -40,7 +40,7 @@ class StorePostulante extends FormRequest
     public function messages()
     {
         return [
-            'cedula.unique' => 'Ya existe un postulante activo con esta cédula.',
+            // 'cedula.unique' => 'Ya existe un postulante activo con esta cédula.',
             'cedula.required' => 'El campo cédula es obligatorio.',
         ];
     }
