@@ -106,7 +106,9 @@ class PostulantesController extends Controller
 
             $tokenData = json_decode($auth->getBody()->getContents());
 
-            if (!$tokenData->success) throw new \Exception("API sin éxito");
+            if (empty($tokenData->success)) {
+                throw new \Exception("API sin éxito");
+            }
 
             $response = $client->get("http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/{$cedula}", [
                 'headers' => [
@@ -116,9 +118,18 @@ class PostulantesController extends Controller
             ]);
 
             $persona = json_decode($response->getBody()->getContents());
-            $p = $persona->obtenerPersonaPorNroCedulaResponse->return ?? null;
 
-            if (!$p || isset($p->error)) return null;
+            // Verificar que exista la propiedad esperada
+            if (!isset($persona->obtenerPersonaPorNroCedulaResponse->return)) {
+                \Log::error('Respuesta inesperada de la API', ['cedula' => $cedula, 'respuesta' => $persona]);
+                return null;
+            }
+
+            $p = $persona->obtenerPersonaPorNroCedulaResponse->return;
+
+            if (!$p || isset($p->error)) {
+                return null;
+            }
 
             return [
                 'nombre' => $p->nombres,
@@ -131,6 +142,11 @@ class PostulantesController extends Controller
             ];
 
         } catch (\Exception $e) {
+            \Log::error('Error al obtener datos desde API o BD', [
+                'cedula' => $cedula,
+                'mensaje' => $e->getMessage()
+            ]);
+
             $persona = \App\Models\Persona::where('BDICed', $cedula)->first();
 
             if (!$persona) return null;
@@ -146,6 +162,7 @@ class PostulantesController extends Controller
             ];
         }
     }
+
 
     public function createmiembro(Request $request, $id, $x)
     {
