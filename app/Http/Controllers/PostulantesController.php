@@ -57,7 +57,7 @@ class PostulantesController extends Controller
         $cedula = $request->input('cedula');
 
         // Verificación previa de registros
-        $mensajes = $this->verificarRestricciones($cedula);
+        $mensajes = $this->verificarRestriccionesGenerales($cedula);
         if ($mensajes) {
             return redirect()->back()->with('status', $mensajes);
         }
@@ -87,45 +87,6 @@ class PostulantesController extends Controller
         ));
     }
 
-
-    private function verificarRestricciones($cedula)
-    {
-        $expediente = SIG005::where('NroExpPer', $cedula)
-                        ->where('TexCod', 118)
-                        ->orderBy('NroExp', 'desc')
-                        ->first();
-
-        if ($expediente) {
-            $archivo = SIG006::where('NroExp', $expediente->NroExp)
-                            ->whereIn('DEExpEst', ['C', 'H'])
-                            ->first();
-            if (!$archivo) return null;
-        }
-
-        $mensajes = [
-            Postulante::where('cedula', $cedula)->exists() => 'Ya existe el postulante!',
-            SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists() => 'Ya cuenta con certificado de Subsidio como Titular!',
-            SHMCER::where('CerCoCI', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists() => 'Ya cuenta con certificado de Subsidio como Conyuge!',
-            PRMCLI::where('PerCod', $cedula)->where('PylCod', '!=', 'P.F.')->exists() => 'Ya cuenta con Beneficios en la Institución!',
-            IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists() => 'Ya es Beneficiario Final!'
-        ];
-
-        $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
-        if ($solicitante) {
-            $carterasol = PRMCLI::where('PerCod', trim($solicitante->SolPerCod))
-                                ->where('PylCod', '!=', 'P.F.')
-                                ->exists();
-            if ($carterasol) {
-                return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
-            }
-        }
-
-        foreach ($mensajes as $cond => $msg) {
-            if ($cond) return $msg;
-        }
-
-        return null;
-    }
 
     private function obtenerDatosPersona($cedula)
     {
@@ -198,7 +159,7 @@ class PostulantesController extends Controller
         $cedula = $request->input('cedula');
 
         // Verifica restricciones generales
-        if ($msg = $this->verificarRestriccionesMiembro($cedula)) {
+        if ($msg = $this->verificarRestriccionesGenerales($cedula)) {
             return redirect()->back()->with('status', $msg);
         }
 
@@ -238,19 +199,29 @@ class PostulantesController extends Controller
     }
 
 
-    private function verificarRestriccionesMiembro($cedula)
+    private function verificarRestriccionesGenerales($cedula)
     {
-        $expediente = SIG005::where('NroExpPer', $cedula)->where('TexCod', 118)->orderBy('NroExp', 'desc')->first();
+        // Verificar si existe un expediente
+        $expediente = SIG005::where('NroExpPer', $cedula)
+            ->where('TexCod', 118)
+            ->orderBy('NroExp', 'desc')
+            ->first();
 
         if ($expediente) {
+            // Verificar que el archivo esté en estado C o H
             $archivo = SIG006::where('NroExp', $expediente->NroExp)
                 ->whereIn('DEExpEst', ['C', 'H'])
                 ->first();
 
-            if (!$archivo) return null;
+            if (!$archivo) {
+                return 'Ya existe expendiente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!.';
+            }
         }
 
-        if (Postulante::where('cedula', $cedula)->exists()) return 'Ya existe el postulante!';
+        // Evaluar todas las restricciones, se haya pasado o no la condición de expediente
+        if (Postulante::where('cedula', $cedula)->exists()) {
+            return 'Ya existe el postulante!';
+        }
 
         if (SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists()) {
             return 'Ya cuenta con certificado de Subsidio como Titular!';
@@ -264,17 +235,24 @@ class PostulantesController extends Controller
             return 'Ya cuenta con Beneficios en la Institución!';
         }
 
-        $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
-        if ($solicitante && PRMCLI::where('PerCod', trim($solicitante->SolPerCod))->where('PylCod', '!=', 'P.F.')->exists()) {
-            return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
-        }
-
         if (IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists()) {
             return 'Ya es Beneficiario Final!';
         }
 
-        return null;
+        $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
+        if ($solicitante) {
+            $carterasol = PRMCLI::where('PerCod', trim($solicitante->SolPerCod))
+                ->where('PylCod', '!=', 'P.F.')
+                ->exists();
+
+            if ($carterasol) {
+                return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+            }
+        }
+
+        return null; // Alta permitida
     }
+
 
     public function store(StorePostulante $request)
     {
