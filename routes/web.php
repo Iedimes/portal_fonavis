@@ -511,10 +511,11 @@ Auth::routes();
     Route::get('projects/ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
     Route::get('projects/ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
     Route::get('projects/ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
+    Route::resource('projects', ProjectController::class);
 
     // Middleware para proteger acceso al proyecto
     Route::middleware('verificar.acceso.proyecto')->group(function () {
-        Route::resource('projects', ProjectController::class);
+
         Route::get('projects/{id}/eliminados', [ProjectController::class, 'showEliminados']);
         Route::get('generate-pdf/{id}', [ProjectController::class, 'generatePDF'])->name('generate-pdf');
         Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [ProjectController::class, 'checkdocuments']);
