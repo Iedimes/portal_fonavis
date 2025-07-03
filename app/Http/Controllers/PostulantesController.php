@@ -63,7 +63,7 @@ class PostulantesController extends Controller
         }
 
         // Intentar obtener datos desde la API o base local
-        return $datos = $this->obtenerDatosPersona($cedula);
+        $datos = $this->obtenerDatosPersona($cedula);
         if (!$datos) {
             return redirect()->back()->with('status', 'No se pudieron recuperar los datos desde el servicio ni desde la base local.');
         }
