@@ -63,7 +63,7 @@ class PostulantesController extends Controller
         }
 
         // Intentar obtener datos desde la API o base local
-        $datos = $this->obtenerDatosPersona($cedula);
+        return $datos = $this->obtenerDatosPersona($cedula);
         if (!$datos) {
             return redirect()->back()->with('status', 'No se pudieron recuperar los datos desde el servicio ni desde la base local.');
         }
@@ -93,14 +93,14 @@ class PostulantesController extends Controller
         try {
             $client = new \GuzzleHttp\Client();
 
-            $auth = $client->post('http://192.168.195.1:8080/mbohape-core/sii/security', [
+            $auth = $client->post('https://sii.paraguay.gov.py/security', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ],
                 'json' => [
-                    'username' => 'senavitatconsultas',
-                    'password' => 'S3n4vitat'
+                    'username' => 'muvhConsulta',
+                    'password' => '*Sipp*2025**'
                 ]
             ]);
 
@@ -110,7 +110,7 @@ class PostulantesController extends Controller
                 throw new \Exception("API sin éxito");
             }
 
-            $response = $client->get("http://192.168.195.1:8080/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/{$cedula}", [
+            $response = $client->get("https://sii.paraguay.gov.py/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/{$cedula}", [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $tokenData->token,
                     'Accept' => 'application/json'
