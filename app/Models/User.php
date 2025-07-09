@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,7 +19,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name','email','username','password','sat_ruc'
+        'name', 'email', 'username', 'password', 'sat_ruc'
     ];
 
     /**
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
     protected $appends = ['resource_url'];
     protected $with = ['getsat'];
 
@@ -44,10 +46,33 @@ class User extends Authenticatable
 
     public function getResourceUrlAttribute()
     {
-        return url('/admin/users/'.$this->getKey());
+        return url('/admin/users/' . $this->getKey());
     }
 
-    public function getsat() {
-        return $this->hasOne('App\Models\Sat','NucCod','sat_ruc');
+    public function getsat()
+    {
+        return $this->hasOne('App\Models\Sat', 'NucCod', 'sat_ruc');
+    }
+
+    /**
+     * Método que Laravel invoca automáticamente para enviar el email de reset.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->sendUserPasswordResetNotification($token);
+    }
+
+    /**
+     * Método personalizado para enviar la notificación de restablecer contraseña.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendUserPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPassword($token));
     }
 }
