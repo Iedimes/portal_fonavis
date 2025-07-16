@@ -150,16 +150,27 @@
 
 
   <div id="messageContainer" style="font-size: 20px; color: #333; text-align: center;"></div>
-  {{-- @if (session('status'))
-    <div class="alert alert-warning">
-        {{ session('status') }}
-    </div>
-  @endif --}}
+
+  {{-- Mensaje de status (advertencia) --}}
   @if (session('status'))
     <div class="alert alert-warning" id="status-message" style="display: block;">
-        {{ session('status') }}
+        <i class="fa fa-exclamation-triangle"></i> {{ session('status') }}
     </div>
-@endif
+  @endif
+
+  {{-- Mensaje de error (para validación de edad) --}}
+  @if (session('error'))
+    <div class="alert alert-danger" id="error-message" style="display: block;">
+        <i class="fa fa-times-circle"></i> {{ session('error') }}
+    </div>
+  @endif
+
+  {{-- Mensaje de éxito --}}
+  @if (session('success'))
+    <div class="alert alert-success" id="success-message" style="display: block;">
+        <i class="fa fa-check-circle"></i> {{ session('success') }}
+    </div>
+  @endif
 
   <br>
   @if (count($postulantes) > 0 )
@@ -288,7 +299,7 @@
                     <span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
-                <form id="miembro-form" action="{{ isset($post) ? url('projects/'.$project->id.'/postulantes/'.$post->postulante_id.'/createmiembro') : '#' }}" method="POST">
+                <form id="miembro-form" action="{{ isset($post) ? url('projects/'.$project->id.'/postulantes/'.$post->postulante_id.'/createmiembro') : '#' }}" method="GET">
                     {{ csrf_field() }}
                     <input type="hidden" name="postulante_id" id="postulante_id" value="{{ isset($post) ? $post->postulante_id : '' }}">
                     <div class="form-group {{ $errors->has('state_id') ? 'has-error' : '' }}">
@@ -358,9 +369,19 @@
         console.log($(this).attr('data-id'));
         console.log($(this).attr('data-title'));
         });
+
+        // Ocultar mensajes automáticamente después de 30 segundos
         setTimeout(function() {
-        $('#status-message').attr('style', 'display:none');
-    }, 30000); // 30 segundos
+            $('#status-message').attr('style', 'display:none');
+        }, 30000); // 30 segundos
+
+        setTimeout(function() {
+            $('#error-message').attr('style', 'display:none');
+        }, 30000); // 30 segundos
+
+        setTimeout(function() {
+            $('#success-message').attr('style', 'display:none');
+        }, 30000); // 30 segundos
 
     $(document).ready(function() {
   $('#enviarGrupoFamiliarBtn').on('click', function() {
@@ -415,8 +436,3 @@
     });
     </script>
 @endsection
-
-
-
-
-

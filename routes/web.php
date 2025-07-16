@@ -546,7 +546,8 @@ Auth::routes();
     // POST públicas
     Route::get('projects/send/{id}', [ProjectController::class, 'send']);
     Route::post('projects/{id}/postulantes/create', [PostulantesController::class, 'create']);
-    Route::post('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
+    // Route::post('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
+    Route::get('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
     Route::post('postulantes/destroy', [PostulantesController::class, 'destroy']);
     Route::post('postulantes/destroymiembro', [PostulantesController::class, 'destroymiembro']);
     Route::post('savepostulante', [PostulantesController::class, 'store']);

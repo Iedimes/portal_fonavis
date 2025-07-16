@@ -24,6 +24,9 @@ use App\Models\PostulanteHasDiscapacidad;
 use App\Models\PostulanteHasBeneficiary;
 use App\Http\Requests\StorePostulante;
 use PDF;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
 
 class PostulantesController extends Controller
 {
@@ -63,9 +66,15 @@ class PostulantesController extends Controller
         }
 
         // Intentar obtener datos desde la API o base local
-        return $datos = $this->obtenerDatosPersona($cedula);
+        $datos = $this->obtenerDatosPersona($cedula);
         if (!$datos) {
             return redirect()->back()->with('status', 'No se pudieron recuperar los datos desde el servicio ni desde la base local.');
+        }
+
+        // Validar que sea mayor de 18 años
+        $validacionEdad = $this->validarEdadMinima($datos['fecha']);
+        if (!$validacionEdad['esValido']) {
+            return redirect()->back()->with('error', $validacionEdad['mensaje']);
         }
 
         // Extraemos variables para pasar a la vista
@@ -87,6 +96,39 @@ class PostulantesController extends Controller
         ));
     }
 
+    /**
+     * Valida que la persona tenga al menos 18 años
+     */
+    private function validarEdadMinima($fechaNacimiento)
+    {
+        try {
+            $fechaNac = new \DateTime($fechaNacimiento);
+            $hoy = new \DateTime();
+            $edad = $hoy->diff($fechaNac)->y;
+
+            if ($edad < 18) {
+                return [
+                    'esValido' => false,
+                    'mensaje' => 'Un menor de edad no puede ser postulante o conyuge. La persona debe tener al menos 18 años.'
+                ];
+            }
+
+            return [
+                'esValido' => true,
+                'mensaje' => ''
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error al validar edad', [
+                'fecha' => $fechaNacimiento,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'esValido' => false,
+                'mensaje' => 'Error al validar la fecha de nacimiento. Verifique que la fecha sea válida.'
+            ];
+        }
+    }
 
     private function obtenerDatosPersona($cedula)
     {
@@ -135,7 +177,7 @@ class PostulantesController extends Controller
                 'apellido' => $p->apellido,
                 'cedula' => $p->cedula,
                 'sexo' => $p->sexo,
-                'fecha' => date('Y-m-d H:i:s', strtotime($p->fechNacim)),
+                'fecha' => Carbon::parse($p->fechNacim)->toDateString(),
                 'nac' => $p->nacionalidadBean ?? '',
                 'est' => $p->estadoCivil ?? ''
             ];
@@ -319,27 +361,72 @@ class PostulantesController extends Controller
 
     public function storemiembro(Request $request)
     {
-        //return $request;
-        $input = $request->except(['_token','project_id','discapacidad_id','postulante_id']);
-        $postulante = Postulante ::create($input);
+        // Validar los campos esenciales que vienen del formulario
+        $request->validate([
+            'cedula' => 'required|string|max:255',
+            'parentesco_id' => 'required|integer|exists:parentesco,id',
+            'birthdate' => 'required|date', // Valida 'birthdate'
+            'discapacidad_id' => 'nullable|integer|exists:discapacidad,id',
+            // Agrega aquí otras validaciones si es necesario para los campos del postulante
+        ]);
 
+        $parentescoId = $request->input('parentesco_id');
+        $fechaNacimiento = $request->input('birthdate'); // Obtenemos 'birthdate' del request
+
+        // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
+        \Log::info('storemiembro: Valor de parentesco_id: ' . $parentescoId);
+        \Log::info('storemiembro: Valor de fechaNacimiento (birthdate): ' . $fechaNacimiento);
+        // --- FIN DE LA SECCIÓN DEPURACIÓN ---
+
+        // Aplicar la validación de edad solo para parentesco 1 (Cónyuge) y 8 (Postulante Titular)
+        if (in_array($parentescoId, [1, 8])) {
+            // Llamamos al método auxiliar para validar la edad
+            $validacionEdad = $this->validarEdadMinima($fechaNacimiento);
+
+            // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
+            \Log::info('storemiembro: Resultado de validarEdadMinima: ', $validacionEdad);
+            // --- FIN DE LA SECCIÓN DEPURACIÓN ---
+
+            // Si la validación de edad falla, redirigimos con un error
+            if (!$validacionEdad['esValido']) {
+                // Se redirige directamente al listado general, no se necesita withInput() aquí
+                return redirect('projects/' . $request->project_id . '/postulantes')
+                                 ->with('error', $validacionEdad['mensaje']);
+            }
+        }
+
+        // Si la validación de edad pasa (o no aplica), procedemos a guardar los datos
+
+        // Excluimos campos que no van directamente a la tabla 'postulantes'
+        // IMPORTANTE: 'birthdate' ya NO se excluye porque es una columna directa en la tabla 'postulantes'
+        $input = $request->except(['_token', 'project_id', 'discapacidad_id', 'postulante_id']);
+
+        // No se necesita $input['fecha'] = $request->input('birthdate');
+        // porque 'birthdate' ya está incluido en $input si la columna en la BD se llama 'birthdate'.
+        // Si tu columna en la BD se llama 'fecha', entonces deberías cambiar el nombre del campo en el formulario a 'fecha'
+        // o asegurarte de que 'fecha' se mapee correctamente aquí.
+        // Dado el error, asumimos que la columna es 'birthdate'.
+
+        // Crear el nuevo postulante (miembro familiar)
+        $postulante = Postulante::create($input);
+
+        // Guardar la relación entre el postulante principal y el miembro familiar
         $miembro = new PostulanteHasBeneficiary();
-        $miembro->postulante_id=$request->postulante_id;
-        $miembro->miembro_id=$postulante->id;
-        $miembro->parentesco_id=$request->parentesco_id;
+        $miembro->postulante_id = $request->postulante_id; // ID del postulante principal
+        $miembro->miembro_id = $postulante->id; // ID del nuevo miembro familiar
+        $miembro->parentesco_id = $request->parentesco_id;
         $miembro->save();
 
-        $postulantediscapacidad = new PostulanteHasDiscapacidad();
-        $postulantediscapacidad->discapacidad_id=$request->discapacidad_id;
-        $postulantediscapacidad->postulante_id=$postulante->id;
-        $postulantediscapacidad->save();
-        //ProjectHasPostulantes::
+        // Guardar la relación de discapacidad si se seleccionó una
+        if ($request->filled('discapacidad_id')) {
+            $postulantediscapacidad = new PostulanteHasDiscapacidad();
+            $postulantediscapacidad->discapacidad_id = $request->discapacidad_id;
+            $postulantediscapacidad->postulante_id = $postulante->id;
+            $postulantediscapacidad->save();
+        }
 
-        //return $request->all();
-        //Postulante ::create($request->all());
-        //return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha agregado un nuevo Miembro!');
-        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha agregado un nuevo Miembro!');
-        //return $request;
+        // Redirigir a la vista de postulantes del proyecto con un mensaje de éxito
+        return redirect('projects/' . $request->project_id . '/postulantes')->with('success', 'Se ha agregado un nuevo Miembro!');
     }
 
     public function storemiembroeditar(Request $request){
