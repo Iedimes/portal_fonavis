@@ -513,8 +513,8 @@ Auth::routes();
     Route::get('projects/ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
     Route::resource('projects', ProjectController::class);
 
-    // Middleware para proteger acceso al proyecto
-    Route::middleware('verificar.acceso.proyecto')->group(function () {
+
+
 
         Route::get('projects/{id}/eliminados', [ProjectController::class, 'showEliminados']);
         Route::get('generate-pdf/{id}', [ProjectController::class, 'generatePDF'])->name('generate-pdf');
@@ -541,7 +541,7 @@ Auth::routes();
         // Eliminar documentos
         Route::get('documents/eliminar/{project_id}/{document_id}', [ProjectController::class, 'eliminar'])->name('eliminar');
         Route::get('documents/eliminardocumento/{project_id}/{document_id}', [ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
-    });
+
 
     // POST públicas
     Route::get('projects/send/{id}', [ProjectController::class, 'send']);
