@@ -248,6 +248,11 @@ public function show($id)
         $uploadedFiles2[$item->document_id] = $documentExists;
     }
 
+    $edadesPostulantes = $postulantes->map(function ($post) {
+        return \Carbon\Carbon::parse($post->getPostulante->birthdate)->age;
+    });
+
+
     $todosCargados = true;
     foreach ($docproyecto as $item) {
         if (!isset($uploadedFiles[$item->document_id])) {
@@ -271,7 +276,8 @@ public function show($id)
         'existenDocumentos',
         'datosAdiciones',
         'documentos',
-        'uploadedFiles2'
+        'uploadedFiles2',
+        'edadesPostulantes'
     ));
 }
 

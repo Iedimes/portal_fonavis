@@ -552,33 +552,20 @@
 
         function allchecked() {
             var sites = {!! json_encode($project['id']) !!};
-            var abc = sites;
             var keys = {!! json_encode($claves) !!};
-            var applicants = {!! $postulantes->count() !!}
-            var def = keys;
-            var si = 0;
-            var no = 0;
+            var applicants = {!! $postulantes->count() !!};
+            var edades = {!! json_encode($edadesPostulantes) !!}; // <- edades desde el backend
+
+            // 🚫 Verificar si algún postulante es menor de 18
+            const menorEdad = edades.some(edad => edad < 18);
+            if (menorEdad) {
+                alert('Existe al menos un postulante menor de 18 años. No se puede enviar el proyecto al MUVH.');
+                return;
+            }
 
             if (applicants >= 4) {
-                // var adjuntosCompletos = true;
+                let todosCargados = true;
 
-                // Verificar si todos los elementos tienen adjuntos
-                // Agrega tu lógica de verificación aquí
-                // Puedes usar un bucle o cualquier otra forma de verificar los adjuntos
-                // Si algún elemento no tiene adjunto, establece adjuntosCompletos en false
-                // Ejemplo de lógica de verificación:
-                // console.log(keys)
-                // for (var i = 0; i < def.length; i++) {
-                //     console.log(def[i].adjunto)
-                //     if (!def[i].adjunto) {
-                //         adjuntosCompletos = false;
-                //         break;
-                //     }
-                // }
-
-                let todosCargados = true; // Variable en JavaScript
-
-                // Verificar si todos los documentos están cargados
                 const rows = document.querySelectorAll('tr');
                 rows.forEach(row => {
                     const uploadForm = row.querySelector('form[action="/levantar"]');
@@ -589,10 +576,7 @@
 
                 if (todosCargados) {
                     console.log('Puede Enviar al MUVH');
-                    // Mostrar mensaje de éxito o realizar cualquier acción adicional
-                    //alert('Todos los documentos están adjuntos y cargados. Puede enviar al MUVH.');
 
-                    // Realizar la llamada AJAX solo si todos los documentos están adjuntos
                     $.ajax({
                         url: '{{ URL::to('/projects/send') }}/' + sites,
                         type: "GET",
@@ -616,13 +600,13 @@
                         }
                     });
                 } else {
-                    // Mostrar mensaje de error o realizar cualquier acción adicional
                     alert('Debe adjuntar y cargar todos los documentos para enviar al MUVH.');
                 }
             } else {
                 alert('Debe tener al menos 4 (cuatro) postulantes para enviar el proyecto al MUVH.');
             }
         }
+
 
         // Obtén las referencias a los elementos de mensaje
         var successMessage = document.getElementById('success-message');
