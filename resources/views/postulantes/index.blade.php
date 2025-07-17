@@ -41,11 +41,12 @@
 
 
 
-                    @if (!isset($project->getEstado->stage_id))
+                    @if (!isset($project->getEstado->stage_id) || $project->getEstado->stage_id == 7)
                         <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
                             <i class="fa fa-plus-circle"></i> Agregar Postulante
                         </button>
                     @endif
+
                 </div>
 
 
