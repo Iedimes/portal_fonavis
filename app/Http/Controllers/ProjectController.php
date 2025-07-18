@@ -248,9 +248,22 @@ public function show($id)
         $uploadedFiles2[$item->document_id] = $documentExists;
     }
 
+    // Validación de edades generales
     $edadesPostulantes = $postulantes->map(function ($post) {
         return \Carbon\Carbon::parse($post->getPostulante->birthdate)->age;
     });
+
+    // Validación específica para parentesco 1 (esposo/a) y 8 (concubino/a)
+    $edadesConyuges = $postulantes->flatMap(function ($post) {
+        return $post->getMembers->filter(function ($member) {
+            return in_array((int) $member->parentesco_id, [1, 8]) &&
+                   $member->getPostulante &&
+                   $member->getPostulante->birthdate;
+        })->map(function ($member) {
+            return \Carbon\Carbon::parse($member->getPostulante->birthdate)->age;
+        });
+    });
+
 
 
     $todosCargados = true;
@@ -277,10 +290,10 @@ public function show($id)
         'datosAdiciones',
         'documentos',
         'uploadedFiles2',
-        'edadesPostulantes'
+        'edadesPostulantes',
+        'edadesConyuges'
     ));
 }
-
 
 public function showEliminados($id)
 {
@@ -1268,7 +1281,7 @@ public function showTecnico($id)
             $state->record = 'Proyecto Enviado!';
             $state->save();
             try {
-            // Enviar correo electrónico
+            // // Enviar correo electrónico
             $project = Project::find($id);
             $sat_id = $project->sat_id;
             $sat_nombre = Sat::where('NucCod', $sat_id)->first();
@@ -1299,9 +1312,9 @@ public function showTecnico($id)
                 throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
             }
 
-        // return [
-        //              'message' => 'success'
-        //          ];
+        //  return [
+        //               'message' => 'success'
+        //           ];
 
     }
 
