@@ -549,54 +549,77 @@ public function showEliminados($id)
     }
 
     public function showProyMiembros($id)
-{
-    try {
-        $state = new ProjectStatusF();
-        $state->project_id = $id;
-        $state->stage_id = '8';
-        $state->user_id = Auth::user()->id;
-        $state->record = 'GRUPO FAMILIAR ENVIADO!';
-        $state->save();
+    {
+        try {
+            // Obtener todos los postulantes del proyecto
+            $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
 
-        // Enviar correo electrónico
+            // Validar edades de postulantes
+            $edadesPostulantes = $postulantes->map(function ($post) {
+                return $post->getPostulante && $post->getPostulante->birthdate
+                    ? \Carbon\Carbon::parse($post->getPostulante->birthdate)->age
+                    : null;
+            })->filter();
 
-        $projecto = Project::where('id', $id)->first();
-        $sat = $projecto->sat_id;
-        $satnombre = Sat::where('NucCod', $sat)->first();
+            if ($edadesPostulantes->contains(fn($edad) => $edad < 18)) {
+                return response()->json(['message' => 'Existe al menos un postulante menor de 18 años. No se puede enviar el proyecto.'], 400);
+            }
 
-        $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)
-                                                ->pluck('admin_user_id');
+            // Validar edades de cónyuges
+            $edadesConyuges = $postulantes->flatMap(function ($post) {
+                return $post->getMembers->filter(function ($member) {
+                    return in_array((int) $member->parentesco_id, [1, 8]) &&
+                        $member->getPostulante &&
+                        $member->getPostulante->birthdate;
+                })->map(function ($member) {
+                    return \Carbon\Carbon::parse($member->getPostulante->birthdate)->age;
+                });
+            });
 
-        $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+            if ($edadesConyuges->contains(fn($edad) => $edad < 18)) {
+                return response()->json(['message' => 'Existe al menos un cónyuge menor de 18 años. No se puede enviar el proyecto.'], 400);
+            }
 
-        // Extraer los correos en un array
-        $userEmails = $usuarios->pluck('email')->toArray(); // correos DGSO
+            // Guardar estado del proyecto
+            $state = new ProjectStatusF();
+            $state->project_id = $id;
+            $state->stage_id = '8';
+            $state->user_id = Auth::user()->id;
+            $state->record = 'GRUPO FAMILIAR ENVIADO!';
+            $state->save();
 
-        // Agregar el correo fijo
-        $toEmails = ['preseleccionfonavis@muvh.gov.py']; // correo FONAVIS
+            // Enviar correo electrónico
+            // $projecto = Project::where('id', $id)->first();
+            // $sat = $projecto->sat_id;
+            // $satnombre = Sat::where('NucCod', $sat)->first();
 
-        // Combinar ambas listas de correos
-        $allEmails = array_merge($userEmails, $toEmails);
+            // $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)
+            //                                         ->pluck('admin_user_id');
 
-        $subject = 'GRUPO FAMILIAR ENVIADO';
+            // $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+            // $userEmails = $usuarios->pluck('email')->toArray();
+            // $toEmails = ['preseleccionfonavis@muvh.gov.py'];
+            // $allEmails = array_merge($userEmails, $toEmails);
 
-            Mail::send('admin.project-status.emailSISASGOFONAVIS', ['proyecto' => $projecto->name ,'id' => $projecto->id,'sat' => $sat,'satnombre' => $satnombre->NucNomSat], function ($message) use ($allEmails, $subject) {
-            $message->to($allEmails);
-            $message->subject($subject);
-            $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
-        });
+            // $subject = 'GRUPO FAMILIAR ENVIADO';
 
-        return response()->json(['message' => 'Grupo Familiar enviado exitosamente!!!']);
-        // return [
-        //     'message' => 'success'
-        // ];
-        return response()->json(['message' => 'success']);
+            // Mail::send('admin.project-status.emailSISASGOFONAVIS', [
+            //     'proyecto' => $projecto->name,
+            //     'id' => $projecto->id,
+            //     'sat' => $sat,
+            //     'satnombre' => $satnombre->NucNomSat
+            // ], function ($message) use ($allEmails, $subject) {
+            //     $message->to($allEmails);
+            //     $message->subject($subject);
+            //     $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+            // });
 
-    } catch (\Exception $e) {
+            return response()->json(['message' => 'Grupo Familiar enviado exitosamente!!!']);
 
-        throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+        }
     }
-}
 
 public function showTecnico($id)
 {

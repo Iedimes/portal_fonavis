@@ -344,96 +344,104 @@
     <!-- /.modal-dialog -->
   </div>
 
+  <div id="loader" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+      <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Enviando...</span>
+      </div>
+  </div>
+
 
 @stop
 
 
 
 @section('js')
-
-    <script type="text/javascript">
+<script type="text/javascript">
     function delay(time) {
-            return new Promise(resolve => setTimeout(resolve, time));
+        return new Promise(resolve => setTimeout(resolve, time));
+    }
+
+    $(document).ready(function () {
+
+        // Botón eliminar postulante
+        $('body').on('click', '.feed-id', function () {
+            $('#delete_id').val($(this).data('id'));
+            $('#demo').html(`Esta seguro de eliminar el Postulante: <strong>"${$(this).data('title')}"</strong><br> Esta acción no se puede deshacer!!!`);
+            console.log($(this).data('id'));
+            console.log($(this).data('title'));
+        });
+
+        // Botón enviar proyecto
+        $('body').on('click', '.feed-id-proyecto', function () {
+            $('#send_id').val($(this).data('id'));
+            $('#demoproy').html(`Esta seguro de enviar el proyecto: "${$(this).data('title')}" <br> Esta acción no se puede deshacer!!!`);
+            console.log($(this).data('id'));
+            console.log($(this).data('title'));
+        });
+
+        // Ocultar mensajes después de 30s
+        setTimeout(() => $('#status-message').hide(), 30000);
+        setTimeout(() => $('#error-message').hide(), 30000);
+        setTimeout(() => $('#success-message').hide(), 30000);
+
+        // Acción enviar grupo familiar
+        $('#enviarGrupoFamiliarBtn').on('click', function () {
+            let projectId = {{ $project->id }};
+            $('#loader').show(); // ⏳ Mostrar spinner
+
+            $.ajax({
+                url: '/projectsMiembros/' + projectId,
+                type: 'GET',
+                success: function (response) {
+                    $('#loader').hide(); // ✅ Ocultar spinner
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 5000);
+                },
+                error: function (xhr) {
+                    $('#loader').hide(); // ❌ Ocultar spinner
+                    let errorMessage = xhr.responseJSON?.message || 'Ocurrió un error inesperado.';
+                    showToast(errorMessage, 'error');
+                    setTimeout(() => location.reload(), 5000);
+                }
+            });
+        });
+
+
+        // Toast con Bootstrap 5
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = 1055;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+
+            const bgColor = type === 'success' ? 'bg-success' : 'bg-danger';
+            toast.classList.add(bgColor);
+
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
         }
-    $(document).ready(function ()
-    {
-        $('body').on('click', '.feed-id',function(){
-        document.getElementById("delete_id").value = $(this).attr('data-id');
-        document.getElementById("demo").innerHTML = 'Esta seguro de eliminar el Postulante: <strong>"'+$(this).attr('data-title')+'" </strong><br> Esta acción no se puede deshacer!!!';
-        console.log($(this).attr('data-id'));
-        console.log($(this).attr('data-title'));
+
+        // Acción para asignar formulario de miembro
+        $('.feed-id').click(function () {
+            const postulante_id = $(this).data('postulante-id');
+            $('#postulante_id').val(postulante_id);
+            $('#miembro-form').attr('action', '{{ url("projects/" . $project->id . "/postulantes") }}/' + postulante_id + '/createmiembro');
         });
 
-        $('body').on('click', '.feed-id-proyecto',function(){
-        document.getElementById("send_id").value = $(this).attr('data-id');
-        document.getElementById("demoproy").innerHTML = 'Esta seguro de enviar el proyecto: "'+$(this).attr('data-title')+'" <br> Esta acción no se puede deshacer!!!';
-        console.log($(this).attr('data-id'));
-        console.log($(this).attr('data-title'));
-        });
-
-        // Ocultar mensajes automáticamente después de 30 segundos
-        setTimeout(function() {
-            $('#status-message').attr('style', 'display:none');
-        }, 30000); // 30 segundos
-
-        setTimeout(function() {
-            $('#error-message').attr('style', 'display:none');
-        }, 30000); // 30 segundos
-
-        setTimeout(function() {
-            $('#success-message').attr('style', 'display:none');
-        }, 30000); // 30 segundos
-
-    $(document).ready(function() {
-  $('#enviarGrupoFamiliarBtn').on('click', function() {
-    var projectId = {{ $project->id }};
-
-    $.ajax({
-      url: '/projectsMiembros/' + projectId,
-      type: 'GET',
-      success: function(response) {
-        showMessage(response.message, 'success');
-        // Recargar la página después de 7 segundos
-        setTimeout(function() {
-          location.reload();
-        }, 5000);
-      },
-      error: function(xhr, status, error) {
-        showMessage(xhr.responseJSON.message, 'error');
-        // Recargar la página después de 7 segundos
-        setTimeout(function() {
-          location.reload();
-        }, 5000);
-      }
     });
-  });
-
-  function showMessage(message, type) {
-    var toast = $('<div class="toast"></div>');
-    var toastBody = $('<div class="toast-body"></div>');
-    toastBody.text(message);
-    toastBody.addClass(type);
-    toast.append(toastBody);
-    $('body').append(toast);
-    toast.addClass('show');
-
-    // Ocultar el mensaje después de 5 segundos
-    setTimeout(function() {
-      toast.removeClass('show');
-      setTimeout(function() {
-        toast.remove();
-      }, 300);
-    }, 5000);
-  }
-});
-
-
-    });
-
-    $('.feed-id').click(function() {
-        var postulante_id = $(this).data('postulante-id');
-        $('#postulante_id').val(postulante_id); // Actualiza el valor del campo oculto postulante_id
-        $('#miembro-form').attr('action', '{{ url('projects/'.$project->id.'/postulantes/') }}' + '/' + postulante_id + '/createmiembro');
-    });
-    </script>
+</script>
 @endsection
