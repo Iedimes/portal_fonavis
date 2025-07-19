@@ -589,30 +589,30 @@ public function showEliminados($id)
             $state->save();
 
             // Enviar correo electrónico
-            // $projecto = Project::where('id', $id)->first();
-            // $sat = $projecto->sat_id;
-            // $satnombre = Sat::where('NucCod', $sat)->first();
+            $projecto = Project::where('id', $id)->first();
+            $sat = $projecto->sat_id;
+            $satnombre = Sat::where('NucCod', $sat)->first();
 
-            // $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)
-            //                                         ->pluck('admin_user_id');
+            $dependenciaDGSO = AdminUsersDependency::where('dependency_id', 3)
+                                                    ->pluck('admin_user_id');
 
-            // $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
-            // $userEmails = $usuarios->pluck('email')->toArray();
-            // $toEmails = ['preseleccionfonavis@muvh.gov.py'];
-            // $allEmails = array_merge($userEmails, $toEmails);
+            $usuarios = AdminUser::whereIn('id', $dependenciaDGSO)->get();
+            $userEmails = $usuarios->pluck('email')->toArray();
+            $toEmails = ['preseleccionfonavis@muvh.gov.py'];
+            $allEmails = array_merge($userEmails, $toEmails);
 
-            // $subject = 'GRUPO FAMILIAR ENVIADO';
+            $subject = 'GRUPO FAMILIAR ENVIADO';
 
-            // Mail::send('admin.project-status.emailSISASGOFONAVIS', [
-            //     'proyecto' => $projecto->name,
-            //     'id' => $projecto->id,
-            //     'sat' => $sat,
-            //     'satnombre' => $satnombre->NucNomSat
-            // ], function ($message) use ($allEmails, $subject) {
-            //     $message->to($allEmails);
-            //     $message->subject($subject);
-            //     $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
-            // });
+            Mail::send('admin.project-status.emailSISASGOFONAVIS', [
+                'proyecto' => $projecto->name,
+                'id' => $projecto->id,
+                'sat' => $sat,
+                'satnombre' => $satnombre->NucNomSat
+            ], function ($message) use ($allEmails, $subject) {
+                $message->to($allEmails);
+                $message->subject($subject);
+                $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+            });
 
             return response()->json(['message' => 'Grupo Familiar enviado exitosamente!!!']);
 
