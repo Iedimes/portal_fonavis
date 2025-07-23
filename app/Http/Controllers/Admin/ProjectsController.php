@@ -815,13 +815,27 @@ class ProjectsController extends Controller
     public function project($id)
     {
         $project = Project::find($id);
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $title = "Resumen Proyecto " . $project->name;
 
+        if (!$project) {
+            return view('admin.project.project', [
+                'project' => null,
+                'projectNotFound' => true,
+                'title' => 'Proyecto no encontrado',
+                'tipoproy' => null,
+                'postulantes' => collect(),
+            ]);
+        }
+
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . ($project->name ?? 'SIN NOMBRE');
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-
-
-        return view('admin.project.project', compact('project', 'title', 'tipoproy','postulantes'));
+        return view('admin.project.project', compact('project', 'title', 'tipoproy', 'postulantes'))
+            ->with('projectNotFound', false);
     }
+
+
+
 }
+
+

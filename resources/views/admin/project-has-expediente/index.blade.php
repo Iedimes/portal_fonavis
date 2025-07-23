@@ -101,6 +101,9 @@
                                                         <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}"><i class="fa fa-trash-o"></i></button>
                                                     </form>
                                                 @endif
+                                                <a class="btn btn-sm btn-primary" :href="'projects/' + item.project_id + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button">
+                                                    <i class="fa fa-print"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

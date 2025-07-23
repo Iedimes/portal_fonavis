@@ -5,15 +5,22 @@
 @section('body')
 <div class="row">
     <div class="col">
+
+        @if ($projectNotFound ?? false)
+            <div class="alert alert-danger">
+                {{ trans('El proyecto no fue encontrado.') }}
+            </div>
+        @else
+
         <div class="card">
             <div class="card-header d-flex align-items-center">
+            <span>
+                {{ trans('CODIGO: ') . ($project->id ?? '') }}
+                <br>
+                {{ trans('PROYECTO: ') . ($project->name ?? '') }}
+            </span>
+        </div>
 
-                <span>
-                    {{ trans('CODIGO: ') . $project->id }}
-                    <br>
-                    {{ trans('PROYECTO: ') . $project->name }}
-                </span>
-            </div>
 
 
             <div class="card-body">
@@ -95,5 +102,8 @@
             </div>
         </div>
     </div>
+    @endif
+
 </div>
+
 @endsection
