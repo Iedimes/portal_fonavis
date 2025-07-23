@@ -56,6 +56,7 @@
                                         <th is='sortable' :column="'sol'">{{ trans('admin.project-has-expediente.columns.solicitante') }}</th>
                                         <th is='sortable' :column="'con'">{{ trans('admin.project-has-expediente.columns.concepto') }}</th>
                                         <th is='sortable' :column="'fecha'">{{ trans('admin.project-has-expediente.columns.fecha_exp') }}</th>
+                                        <th is='sortable' :column="'postulantes'">{{ trans('ACCIONES') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -101,7 +102,7 @@
                                                         <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}"><i class="fa fa-trash-o"></i></button>
                                                     </form>
                                                 @endif
-                                                <a class="btn btn-sm btn-primary" :href="'projects/' + item.project_id + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button">
+                                                <a class="btn btn-sm btn-primary" :href="'projects/' + item.project_id + '/project'" title="{{ trans('VER POSTULANTES') }}" role="button">
                                                     <i class="fa fa-print"></i>
                                                 </a>
                                             </div>
