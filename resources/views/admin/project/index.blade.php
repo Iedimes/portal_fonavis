@@ -268,7 +268,11 @@
                     <i class="fa fa-search"></i>
                 </a>
             </div>
-
+            <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 8">
+                <a class="btn btn-sm btn-warning" :href="item.resource_url + '/showFONAVIS'" title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
+                    <i class="fa fa-search"></i>
+                </a>
+            </div>
 
             {{-- Stages especializados FONAVIS SIEMPRE--}}
             <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 9">

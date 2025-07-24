@@ -42,7 +42,7 @@
 
             @else
 
-                    @if ( $project->getEstado->stage_id == 3 || $project->getEstado->stage_id == 13 && Auth::user()->rol_app->dependency_id == 1)
+                    @if ( $project->getEstado->stage_id == 3 || $project->getEstado->stage_id == 8 || $project->getEstado->stage_id == 13 && Auth::user()->rol_app->dependency_id == 1)
                         <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
                     @endif
 

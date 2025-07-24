@@ -578,7 +578,7 @@ class ProjectsController extends Controller
                 break;
             case 3:
                     // Lógica específica para el estado 3
-                    $stages = Stage::whereIn('id', [7,2])->get();
+                    $stages = Stage::whereIn('id', [2, 7, 8])->get();
                     break;
             case 5:
                  // Lógica específica para el estado 5
@@ -592,7 +592,7 @@ class ProjectsController extends Controller
 
             case 8:
                  // Lógica específica para el estado 8
-                 $stages = Stage::whereIn('id', [9])->get();
+                 $stages = Stage::whereIn('id', [2, 9])->get();
                  break;
             case 9:
                  // Lógica específica para el estado 9
