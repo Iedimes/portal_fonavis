@@ -17,11 +17,13 @@ use App\Models\ProjectStatus;
 use App\Models\ProjectStatusF;
 use App\Models\Sat;
 use App\Models\AdminUser;
+use App\Models\Dependency;
 use App\Models\Departamento;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Documents;
 use App\Models\Documentsmissing;
 use App\Models\Medium;
+use App\Models\User;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -47,7 +49,9 @@ class ProjectsController extends Controller
     public function index(IndexProject $request)
     {
         // Obtener el rol del usuario
+        $usuario=Auth::user()->id;
         $usuarioRol = Auth::user()->rol_app->dependency_id;
+        $dependencia = Dependency::where('id', $usuarioRol)->first();
 
         // Crear una instancia de AdminListing
         $listing = AdminListing::create(Project::class);
@@ -71,7 +75,7 @@ class ProjectsController extends Controller
         }
 
         // Retornar la vista con los datos (sin filtro en el backend)
-        return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol]);
+        return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol, 'dependencia' => $dependencia]);
 }
 
 
@@ -563,6 +567,7 @@ class ProjectsController extends Controller
         $project->getEstado->getStage->id;
         $estado=$project->getEstado->getStage->id;
         $user = Auth::user()->id;
+        $dependencia = Auth::user()->rol_app->dependency_id;
         $email = Auth::user()->email;
         // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
@@ -623,7 +628,7 @@ class ProjectsController extends Controller
 
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
-        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado'));
+        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado', 'dependencia'));
 
     }
 
@@ -659,7 +664,7 @@ class ProjectsController extends Controller
 
     }
 
-   public function historial($id)
+    public function historial($id)
     {
         $project = Project::findOrFail($id);
 
@@ -669,7 +674,7 @@ class ProjectsController extends Controller
             ->get()
             ->map(function ($item) {
                 if (in_array($item->stage_id, [1, 5, 8, 11])) {
-                    $user = \App\Models\User::find($item->user_id);
+                    $user = User::find($item->user_id);
                     $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
                 } else {
                     $adminUser = \App\Models\AdminUser::find($item->user_id);
@@ -683,14 +688,6 @@ class ProjectsController extends Controller
 
         return view('admin.project.historial', compact('title', 'history', 'project'));
     }
-
-
-
-
-
-
-
-
 
 
     /**

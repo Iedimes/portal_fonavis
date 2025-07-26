@@ -38,6 +38,7 @@
             :estado={{$estado}}
             :stages="{{ $stages->toJson() }}"
             :user="{{$user}}"
+            :dependencia="{{$dependencia}}"
             email={{$email}}
             v-cloak
             inline-template>
@@ -47,7 +48,9 @@
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
-                    @if ($estado==1 || $estado==3 || $estado==8 || $estado==9 || $estado==11 )
+                    @if ($estado==1 || $estado==3 || $estado==9 || $estado==11 )
+
+                    @elseif($estado==8 && $dependencia == 1)
 
                     @else
                     @include('brackets/admin-ui::admin.includes.media-uploader', [
