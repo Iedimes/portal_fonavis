@@ -61,48 +61,84 @@
 
 </div>
 
-@if ( $project->getEstado->stage_id == 12 && Auth::user()->rol_app->dependency_id == 4)
-<div class="card">
-    <div class="card-header text-center">
+@if (($project->getEstado->stage_id == 12 || $project->getEstado->stage_id == 14) && Auth::user()->rol_app->dependency_id == 4)
+<div class="card mt-4">
+    <div class="card-header text-center font-weight-bold">
         DOCUMENTOS PRESENTADOS
     </div>
     <div class="card-body">
-            <div class="card-block">
-                <table class="table table-hover table-listing">
-                <thead>
-                    <tr>
+        <table class="table table-bordered align-middle">
+            <thead class="text-white bg-primary text-center">
+                <tr>
                     <th>#</th>
                     <th>Documento</th>
-                    <th>Ver</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <th>Archivo</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody>
                 @foreach ($docproyecto as $key => $item)
                 <tr>
-                    <td>{{ $key+1 }}</td>
-                    <td>{{ $item->document->name}}</td>
-                    <td>@if ($uploadedFiles[$item->document_id])
-
-                        <a href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
-                            <button class="btn btn-info">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </a>
-@endif</td>
-
-
-                    <td>
-
+                    <td class="text-center align-middle">{{ $key + 1 }}</td>
+                    <td class="align-middle">
+                        {{ $item->document->name }}
+                        @if (!empty($observations[$item->document_id]))
+                            <span class="badge bg-warning text-dark ml-1">Comentado</span>
+                        @endif
                     </td>
+                    <td class="text-center align-middle">
+                        @if ($uploadedFiles[$item->document_id])
+                            <a href="{{ route('adminprojectsdownloadFileDoc', [
+                                'project' => $project->id,
+                                'document_id' => $item->document_id,
+                                'file_name' => $uploadedFiles[$item->document_id],
+                            ]) }}"
+                            class="btn btn-sm btn-primary d-flex align-items-center justify-content-center gap-2"
+                            style="min-width: 100px; color: #fff;">
 
+                                <span>Ver documento</span>
+                            </a>
+
+                        @else
+                            <span class="text-muted">No disponible</span>
+                        @endif
+                    </td>
+                    <td class="align-middle">
+                        @if ($uploadedFiles[$item->document_id])
+                        <form method="POST" action="{{ route('adminprojectssaveDIGHObservation', [$project->id]) }}">
+                            @csrf
+                            <input type="hidden" name="document_id" value="{{ $item->document_id }}">
+
+                            <div class="form-group mb-1">
+                                @error("observation.$item->document_id")
+                                    <div class="alert alert-danger p-1 mb-1">{{ $message }}</div>
+                                @enderror
+
+                                @if (session("success_{$item->document_id}"))
+                                    <div class="alert alert-success p-1 mb-1">
+                                        {{ session("success_{$item->document_id}") }}
+                                    </div>
+                                @endif
+
+                                <textarea name="observation[{{ $item->document_id }}]"
+                                          id="observation_{{ $item->document_id }}"
+                                          class="form-control form-control-sm"
+                                          rows="2">{{ old("observation.$item->document_id", $observations[$item->document_id] ?? '') }}</textarea>
+                            </div>
+
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                            </div>
+                        </form>
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
-                </tbody>
-                </table>
-            </div>
+            </tbody>
+        </table>
     </div>
 </div>
-@else
 @endif
+
 
 @endsection

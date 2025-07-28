@@ -24,6 +24,7 @@ use App\Models\Documents;
 use App\Models\Documentsmissing;
 use App\Models\Medium;
 use App\Models\User;
+use App\Models\DighObservation;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -36,6 +37,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 class ProjectsController extends Controller
 {
@@ -496,10 +498,59 @@ class ProjectsController extends Controller
            $uploadedFiles[$item->document_id] = $documentExists;
        }
 
+       $observations = DighObservation::where('project_id', $project->id)
+                                        ->pluck('observation', 'document_id'); // [document_id => 'observación']
+
        //return $history;
 
-       return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+       return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles', 'observations'));
     }
+
+    public function saveDIGHObservation(Request $request, Project $project)
+    {
+
+        $documentId = $request->input('document_id');
+        $observationText = $request->input("observation.$documentId");
+
+        $request->validate([
+            "observation.$documentId" => 'required|string',
+        ], [
+            "observation.$documentId.required" => 'La observación no puede estar vacía.',
+        ]);
+
+
+        if (!$observationText) {
+            return redirect()->back()
+                ->withErrors(["observation.$documentId" => 'La observación no puede estar vacía.'])
+                ->withInput();
+        }
+
+        DighObservation::updateOrCreate(
+            ['project_id' => $project->id, 'document_id' => $documentId],
+            ['observation' => $observationText]
+        );
+
+        $hasObservations = DighObservation::where('project_id', $project->id)->exists();
+
+        if ($hasObservations) {
+            // Obtenemos el último estado registrado del proyecto
+            $lastStatus = ProjectStatus::where('project_id', $project->id)
+                ->orderByDesc('id') // o orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$lastStatus || $lastStatus->stage_id != 14) {
+                ProjectStatus::create([
+                    'project_id' => $project->id,
+                    'stage_id' => 14,
+                    'user_id' => auth()->id(),
+                    'record' => 'OBSERVACION DIGH'
+                ]);
+            }
+        }
+
+        return redirect()->back()->with("success_{$documentId}", 'Observación guardada.');
+    }
+
 
     public function showDSGO(Project $project)
     {

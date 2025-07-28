@@ -292,6 +292,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             //DESCARGAR DOCUMENTOS LADO ADM
             Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', 'ProjectsController@descargarDocumento')->name('descargarDocumento');
             Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'ProjectsController@downloadFile')->name('downloadFileDoc');
+            Route::post('/{project}/save-digh-observation', 'ProjectsController@saveDIGHObservation')->name('saveDIGHObservation');
+
         });
     });
 });
