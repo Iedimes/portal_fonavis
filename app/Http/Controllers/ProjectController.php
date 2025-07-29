@@ -24,6 +24,7 @@ use App\Models\ProjectStatusF;
 use App\Models\User;
 use App\Models\AdminUser;
 use App\Models\AdminUsersDependency;
+use App\Models\DighObservation;
 use Symfony\Component\HttpFoundation\Response;
 use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -454,6 +455,68 @@ public function showEliminados($id)
 
         return view('projects.showDocTec', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'hayDocumentoFaltante'));
     }
+
+
+    public function DocObservados($id)
+    {
+        $project = Project::findOrFail($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
+
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+        // Traer solo los document_id observados por DIGH
+        $documentosObservados = DighObservation::where('project_id', $project->id)
+                                ->pluck('document_id')
+                                ->toArray();
+
+        // Filtrar solo los documentos observados
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->whereIn('category_id', [2])
+            ->where('stage_id', 1)
+            ->whereIn('document_id', $documentosObservados)
+            ->get();
+
+        $claves = $docproyecto->pluck('document_id');
+
+        $history = ProjectStatusF::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+
+            $uploadedFiles[$item->document_id] = $uploadedFile ? $uploadedFile->file_path : false;
+        }
+
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        $hayDocumentoFaltante = !$todosCargados;
+
+        return view('projects.showDocObs', compact(
+            'title',
+            'project',
+            'docproyecto',
+            'tipoproy',
+            'claves',
+            'history',
+            'postulantes',
+            'uploadedFiles',
+            'todosCargados',
+            'hayDocumentoFaltante'
+        ));
+    }
+
 
     public function showDocNoExcluyentes($id)
     {
@@ -1050,6 +1113,76 @@ public function showTecnico($id)
         $document->save();
 
         return redirect("/projectsDocTec/$project_id")
+            ->with('message', 'Archivo subido');
+    }
+
+    public function uploadObservado(Request $request)
+    {
+
+        // Validación
+        $this->validate($request, [
+            // 'archivo' => 'required|max:100000|mimes:pdf',
+            'archivo' => 'required|max:30720|mimes:pdf'
+        ], [
+            'archivo.required' => 'Debe seleccionar un archivo.',
+            'archivo.max' => 'El archivo supera el tamaño definido..',
+            'archivo.mimes' => 'El archivo debe ser de formato PDF.',
+        ]);
+
+
+        // Obtener ids
+        $project_id = $request->project_id;
+        $document_id = $request->document_id;
+
+        // Ruta de carpetas
+        $folder = "uploads/$project_id/$document_id";
+
+        // Validar documento existente
+        $exists = Documents::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->first();
+
+        if ($exists) {
+            return redirect("/docObservados/$project_id")->withErrors('El documento ya existe');
+        }
+
+        // Obtener archivo
+        $file = $request->file('archivo');
+
+        // Generar nombre archivo
+        $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
+
+        try {
+            $localDisk = Storage::disk('local'); // Acceder al disco remoto
+
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
+            }
+
+            $localDisk->putFileAs($folder, $file, $filename);
+
+            // $localDisk = Storage::disk('local'); // Acceder al disco local
+
+            // if (!$localDisk->exists($folder)) {
+            //     $localDisk->makeDirectory($folder);
+            // }
+
+            // $localDisk->putFileAs($folder, $file, $filename);
+        } catch (\Exception $e) {
+            return back()->withErrors('Error subiendo archivo');
+        }
+
+        // Guardar en BD
+        $document = new Documents;
+
+        $document->project_id = $request->project_id;
+        $document->document_id = $request->document_id;
+        $document->file_path = $filename;
+        $document->title = $request->title;
+
+        $document->save();
+
+        return redirect("/docObservados/$project_id")
             ->with('message', 'Archivo subido');
     }
 

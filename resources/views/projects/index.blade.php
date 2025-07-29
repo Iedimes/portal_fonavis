@@ -53,6 +53,8 @@
                     <div class="dropdown-menu" role="menu" style="">
                     @if (isset($project->getEstado->stage_id) && $project->getEstado->stage_id == 10)
                             <a class="dropdown-item" href="{{ url('projectsDocTec/'.$project->id) }}">Documentos VTA y ETH</a>
+                    @elseif (isset($project->getEstado->stage_id) && $project->getEstado->stage_id == 14)
+                            <a class="dropdown-item" href="{{ url('docObservados/'.$project->id) }}">Documentos obs. DIGH</a>
                     @else
                     <a class="dropdown-item" href="{{ url('projects/'.$project->id) }}">Ver</a>
                     @endif

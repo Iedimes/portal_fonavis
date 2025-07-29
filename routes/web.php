@@ -533,6 +533,7 @@ Auth::routes();
         Route::get('projectsMiembros/{id}', [ProjectController::class, 'showProyMiembros']);
         Route::get('projectsTecnico/{id}', [ProjectController::class, 'showTecnico']);
         Route::get('projectsDocTec/{id}', [ProjectController::class, 'showDocTec']);
+        Route::get('docObservados/{id}', [ProjectController::class, 'DocObservados']);
         Route::get('projectsDocNoExcluyentes/{id}', [ProjectController::class, 'showDocNoExcluyentes']);
         Route::get('projectsDocCondominio/{id}', [ProjectController::class, 'showDocCondominio']);
 
@@ -561,6 +562,7 @@ Auth::routes();
     Route::post('levantar', [ProjectController::class, 'upload']);
     Route::post('levantarDocumento', [ProjectController::class, 'uploadDocumento']);
     Route::post('levantarTecnico', [ProjectController::class, 'uploadTecnico']);
+    Route::post('levantarObs', [ProjectController::class, 'uploadObservado']);
     Route::post('levantarNoExcluyente', [ProjectController::class, 'uploadNoExcluyente']);
     Route::post('levantarCondominio', [ProjectController::class, 'uploadCondominio']);
 
