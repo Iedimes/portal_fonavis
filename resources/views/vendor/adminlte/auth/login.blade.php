@@ -18,16 +18,15 @@
     @php( $password_reset_url = $password_reset_url ? url($password_reset_url) : '' )
 @endif
 
-<div class="fonavis">
-</div>
-{{-- <img src="/img/muvh transparente.png"width="300px;"class="img-responsive"> --}}
+<div class="fonavis"></div>
 
 @section('auth_body')
-<img src="/img/logofonavis.png"width="300px;"class="img-responsive">
-<h3 class="card-title float-none text-center">INGRESE LOS DATOS SOLICITADOS  </h3> <hr>
-<style>
-personalizado {color:black;}
 
+<img src="/img/logofonavis.png" width="300px;" class="img-responsive">
+<h3 class="card-title float-none text-center">INGRESE LOS DATOS SOLICITADOS</h3>
+<hr>
+
+<style>
 .login-page, .register-page {
     -ms-flex-align: center;
     align-items: center;
@@ -44,9 +43,6 @@ personalizado {color:black;}
     justify-content: center;
     background-color: #fff;
     box-shadow: 0 0 50px 5px rgb(0 0 0 / 30%), 0 0 5px -1px white;
-
-
-
 }
 
 .login-box, .register-box {
@@ -55,66 +51,74 @@ personalizado {color:black;}
     top: -31px;
 }
 
-.fonavis {background-color: #fff; margin-top:16px;}
-
+.fonavis {
+    background-color: #fff;
+    margin-top: 16px;
+}
 </style>
 
-    <form action="{{ $login_url }}" method="post">
-        @csrf
+<form action="{{ $login_url }}" method="post">
+    @csrf
 
-        {{-- Email field --}}
-        <label> CORREO ELECTRONICO</label>
-        <div class="input-group mb-3">
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="{{ __('Ingrese su correo Electronico') }}" autofocus>
+    {{-- Email field --}}
+    <label>CORREO ELECTRONICO</label>
+    <div class="input-group mb-3">
+        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+               value="{{ old('email') }}" placeholder="{{ __('Ingrese su correo Electronico') }}" autofocus>
 
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
-                </div>
-            </div>
-
-            @error('email')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-            @enderror
-        </div>
-
-        {{-- Password field --}}
-        <label> CONTRASEÑA </label>
-
-        <div class="input-group mb-3">
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                   placeholder="{{ __('Ingrese su contraseña') }}">
-
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
-                </div>
-            </div>
-
-            @error('password')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-            @enderror
-        </div>
-
-        {{-- Login field --}}
-        <div class="row">
-            <div class="col-12">
-                <button type=submit class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
-                    <span class="fas fa-sign-in-alt"></span>
-                    {{ __('Acceder') }}
-                </button>
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
             </div>
         </div>
-        <a href="https://www.muvh.gov.py" style="/* text-align:center; */float: right;margin-top: 18px;"> ir a la página web </a>
-    </form>
+
+        @error('email')
+            <span class="invalid-feedback d-block text-center" role="alert">
+                <strong>{!! $message !!}</strong>
+            </span>
+        @enderror
+    </div>
+
+    {{-- Password field --}}
+    <label>CONTRASEÑA</label>
+    <div class="input-group mb-3">
+        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+               placeholder="{{ __('Ingrese su contraseña') }}">
+
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
+            </div>
+        </div>
+
+        @error('password')
+            <span class="invalid-feedback" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+        @enderror
+    </div>
+
+    @if(session('force_password_email'))
+        <div class="alert alert-warning text-center">
+            Por seguridad, debés <a href="{{ route('password.request') }}">cambiar tu contraseña</a> antes de ingresar.
+        </div>
+    @endif
+
+
+    {{-- Login button --}}
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
+                <span class="fas fa-sign-in-alt"></span>
+                {{ __('Acceder') }}
+            </button>
+        </div>
+    </div>
+
+    <a href="https://www.muvh.gov.py" style="float: right; margin-top: 18px;">ir a la página web</a>
+</form>
 @stop
 
 @section('auth_footer')
-    {{-- Password reset link --}}
-
+    {{-- Extra footer content (opcional) --}}
 @stop

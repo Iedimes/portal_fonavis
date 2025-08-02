@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\CustomResetPassword;
 
 class User extends Authenticatable
 {
@@ -42,6 +43,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
+
     public function getResourceUrlAttribute()
     {
         return url('/admin/users/'.$this->getKey());
@@ -49,5 +52,10 @@ class User extends Authenticatable
 
     public function getsat() {
         return $this->hasOne('App\Models\Sat','NucCod','sat_ruc');
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPassword($token));
     }
 }
