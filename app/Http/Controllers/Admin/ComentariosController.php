@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\Comentario\UpdateComentario;
 use App\Models\Comentario;
 use App\Models\Postulante;
 use App\Models\ProjectHasPostulantes;
+use App\Models\PostulanteHasBeneficiary;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -86,14 +87,17 @@ class ComentariosController extends Controller
         // Obtener el postulante_id desde el request
         $postulanteId = $request->input('postulante_id');
 
-        // Si el postulante_id está presente, proceder a eliminar el Postulante y su relación en ProjectHasPostulantes
+        // Si el postulante_id está presente, proceder a eliminar el Postulante y sus relaciones
         if ($postulanteId) {
             // Buscar el postulante
             $postulante = Postulante::find($postulanteId);
 
             if ($postulante) {
                 // Eliminar el registro de ProjectHasPostulantes relacionado
-                ProjectHasPostulantes::where('postulante_id', $postulanteId)->delete(); // Esto realizará un soft delete
+                ProjectHasPostulantes::where('postulante_id', $postulanteId)->delete(); // Soft delete
+
+                // Eliminar el registro de PostulanteHasBeneficiary si existe
+                PostulanteHasBeneficiary::where('miembro_id', $postulanteId)->delete();
 
                 // Realizar el soft delete del postulante
                 $postulante->delete();
