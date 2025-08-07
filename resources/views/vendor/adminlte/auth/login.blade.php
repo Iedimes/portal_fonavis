@@ -99,7 +99,7 @@
     </div>
 
     @if(session('force_password_email'))
-        <div class="alert alert-warning text-center">
+        <div class="alert alert-danger text-center">
             Por seguridad, debés <a href="{{ route('password.request') }}">cambiar tu contraseña</a> antes de ingresar.
         </div>
     @endif
