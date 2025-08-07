@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\Motivo\UpdateMotivo;
 use App\Models\Motivo;
 use App\Models\Project;
 use App\Models\ProjectHasPostulantes;
+use App\Models\PostulanteHasBeneficiary;
 use App\Models\Postulante;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
@@ -80,55 +81,60 @@ class MotivosController extends Controller
      * @return array|RedirectResponse|Redirector
      */
     public function store(StoreMotivo $request)
-{
-    // Sanitize input
-    $sanitized = $request->getSanitized();
+    {
+        // Sanitize input
+        $sanitized = $request->getSanitized();
 
-    // Store the Motivo
-    $motivo = Motivo::create($sanitized);
+        // Store the Motivo
+        $motivo = Motivo::create($sanitized);
 
-    // ID del proyecto a dar de baja
-    $projectId = $request->input('project_id'); // suponiendo que llega el ID en el request
+        $projectId = $request->input('project_id');
 
-    // Iniciar transacción para asegurar que todas las operaciones se completen correctamente
-    DB::beginTransaction();
+        DB::beginTransaction();
 
-    try {
-        // Dar de baja el proyecto
-        $project = Project::findOrFail($projectId);
+        try {
+            $project = Project::findOrFail($projectId);
 
-        // Obtener los IDs de los postulantes asociados al proyecto
-        $postulanteIds = ProjectHasPostulantes::where('project_id', $projectId)
-                         ->pluck('postulante_id');
+            // 1. Obtener los titulares del proyecto
+            $titularIds = ProjectHasPostulantes::where('project_id', $projectId)
+                            ->pluck('postulante_id');
 
-        // Dar de baja los postulantes en la tabla `postulantes`
-        Postulante::whereIn('id', $postulanteIds)->delete();
+            // 2. Obtener los miembro_id asociados a esos titulares
+            $miembroIds = PostulanteHasBeneficiary::whereIn('postulante_id', $titularIds)
+                            ->pluck('miembro_id');
 
-        // Eliminar las relaciones en la tabla `project_has_postulantes`
-        ProjectHasPostulantes::where('project_id', $projectId)->delete();
+            // 3. Eliminar físicamente los registros en postulante_has_beneficiaries
+            PostulanteHasBeneficiary::whereIn('postulante_id', $titularIds)->delete();
 
-        // Finalmente, eliminar el proyecto
-        $project->delete();
+            // 4. Borrado lógico de los miembros (grupo familiar)
+            Postulante::whereIn('id', $miembroIds)->delete();
 
-        // Confirmar transacción
-        DB::commit();
+            // 5. Borrado lógico de los titulares
+            Postulante::whereIn('id', $titularIds)->delete();
 
-        // Redirección o respuesta AJAX
-        if ($request->ajax()) {
-            return [
-                'redirect' => url('admin/projects'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded')
-            ];
+            // 6. Eliminar las relaciones en project_has_postulantes
+            ProjectHasPostulantes::where('project_id', $projectId)->delete();
+
+            // 7. Borrado lógico del proyecto
+            $project->delete();
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return [
+                    'redirect' => url('admin/projects'),
+                    'message' => trans('brackets/admin-ui::admin.operation.succeeded')
+                ];
+            }
+
+            return redirect('admin/projects');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect('admin/projects')->withErrors(['error' => 'No se pudo dar de baja el proyecto y sus postulantes']);
         }
-
-        return redirect('admin/projects');
-
-    } catch (\Exception $e) {
-        // Revertir transacción en caso de error
-        DB::rollBack();
-        return redirect('admin/projects')->withErrors(['error' => 'No se pudo dar de baja el proyecto y sus postulantes']);
     }
-}
+
 
 
 
