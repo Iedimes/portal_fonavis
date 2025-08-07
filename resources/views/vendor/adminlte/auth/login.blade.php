@@ -99,10 +99,17 @@
     </div>
 
     @if(session('force_password_email'))
-        <div class="alert alert-danger text-center">
-            Por seguridad, debés <a href="{{ route('password.request') }}">cambiar tu contraseña</a> antes de ingresar.
+        <div class="alert alert-danger text-center" style="font-size: 1.1em;">
+            ⚠️ Por seguridad, debes cambiar tu contraseña antes de ingresar.
+            <br><br>
+            <a href="{{ route('password.request') }}" class="btn btn-warning font-weight-bold" style="color: #212529;">
+                Click aqui para cambiar la contraseña
+            </a>
         </div>
     @endif
+
+
+
 
 
     {{-- Login button --}}
