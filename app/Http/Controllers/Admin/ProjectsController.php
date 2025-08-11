@@ -23,6 +23,10 @@ use App\Models\ProjectHasPostulantes;
 use App\Models\Documents;
 use App\Models\Documentsmissing;
 use App\Models\Medium;
+use App\Models\Modality;
+use App\Models\Land;
+use App\Models\Typology;
+use App\Models\Distrito;
 use App\Models\User;
 use App\Models\DighObservation;
 use Brackets\AdminListing\Facades\AdminListing;
@@ -98,8 +102,23 @@ class ProjectsController extends Controller
     {
         $this->authorize('admin.project.create');
 
-        return view('admin.project.create');
+        $sat = Sat::where('NucRuc', '!=', null)
+            ->where('NucEst', '=', 'H')
+            ->select('NucNomSat', 'NucCod', 'NucCont')
+            ->get();
+
+        $modalidad = Modality::all();
+
+        $dep = [18, 19, 20, 21, 999];
+
+        // Solo departamentos, sin localidades
+        $departamentos = Departamento::whereNotIn('DptoId', $dep)
+                        ->orderBy('DptoNom', 'asc')
+                        ->get();
+
+        return view('admin.project.create', compact('sat', 'modalidad', 'departamentos'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -111,6 +130,16 @@ class ProjectsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+
+        // Reemplazar sat_id con el código real
+        $sanitized['sat_id'] = $request->getSatId();
+        $sanitized['modalidad_id'] = $request->getModalidadId();
+        $sanitized['land_id'] = $request->getLandId();
+        $sanitized['typology_id'] = $request->getTypologyId();
+
+        // Agregar state_id y city_id igual que los anteriores
+        $sanitized['state_id'] = $request->getStateId();
+        $sanitized['city_id'] = $request->getCityId();
 
         // Store the Project
         $project = Project::create($sanitized);
