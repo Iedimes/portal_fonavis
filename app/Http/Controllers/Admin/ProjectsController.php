@@ -781,9 +781,31 @@ class ProjectsController extends Controller
     {
         $this->authorize('admin.project.edit', $project);
 
+        $sat = Sat::whereNotNull('NucRuc')
+                    ->where('NucEst', '=', 'H')
+                    ->select('NucNomSat', DB::raw('LTRIM(RTRIM(NucCod)) as NucCod'), 'NucCont')
+                    ->get();
+
+
+
+        $modalidad = Modality::all();
+        $tierra = Land::all();
+        $tipologias = Typology::all();
+
+        $dep = [18, 19, 20, 21, 999];
+
+        // Solo departamentos, sin localidades
+        $departamentos = Departamento::whereNotIn('DptoId', $dep)
+                        ->orderBy('DptoNom', 'asc')
+                        ->get();
 
         return view('admin.project.edit', [
             'project' => $project,
+            'sat' => $sat,
+            'modalidad' => $modalidad,
+            'tierra' => $tierra,
+            'tipologias' => $tipologias,
+            'departamentos' => $departamentos,
         ]);
     }
 
@@ -798,6 +820,16 @@ class ProjectsController extends Controller
     {
         // Sanitize input
         $sanitized = $request->getSanitized();
+
+         // Reemplazar sat_id con el código real
+        $sanitized['sat_id'] = $request->getSatId();
+        $sanitized['modalidad_id'] = $request->getModalidadId();
+        $sanitized['land_id'] = $request->getLandId();
+        $sanitized['typology_id'] = $request->getTypologyId();
+
+        // Agregar state_id y city_id igual que los anteriores
+        $sanitized['state_id'] = $request->getStateId();
+        $sanitized['city_id'] = $request->getCityId();
 
         // Update changed values Project
         $project->update($sanitized);

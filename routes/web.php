@@ -294,6 +294,10 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'ProjectsController@downloadFile')->name('downloadFileDoc');
             Route::post('/{project}/save-digh-observation', 'ProjectsController@saveDIGHObservation')->name('saveDIGHObservation');
 
+            Route::get('ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
+            Route::get('ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
+            Route::get('ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
+
         });
     });
 });

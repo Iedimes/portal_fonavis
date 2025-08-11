@@ -26,35 +26,70 @@ class UpdateProject extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string'],
-            'phone' => ['sometimes', 'string'],
-            'sat_id' => ['sometimes', 'string'],
-            'state_id' => ['sometimes', 'string'],
-            'city_id' => ['sometimes', 'string'],
-            'modalidad_id' => ['sometimes', 'string'],
+            'name' => ['required', 'string'],
+            'phone' => ['required', 'string'],
+            'sat_id' => ['required'],          // puede ser string o array
+            'state_id' => ['required'],
+            'city_id' => ['required'],
+            'modalidad_id' => ['required'],    // puede ser string o array
             'leader_name' => ['nullable', 'string'],
             'localidad' => ['nullable', 'string'],
-            'land_id' => ['sometimes', 'string'],
-            'typology_id' => ['sometimes', 'integer'],
+            'land_id' => ['required'],         // puede ser string o array
+            'typology_id' => ['required'],     // puede ser string o array
             'action' => ['nullable', 'string'],
             'expsocial' => ['nullable', 'string'],
             'exptecnico' => ['nullable', 'string'],
-            
         ];
     }
 
     /**
-     * Modify input data
-     *
-     * @return array
-     */
+    * Modify input data
+    *
+    * @return array
+    */
     public function getSanitized(): array
     {
         $sanitized = $this->validated();
 
-
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getSatId()
+    {
+        $sat = $this->get('sat_id');
+        return is_array($sat) ? ($sat['NucCod'] ?? null) : $sat;
+    }
+
+    public function getModalidadId()
+    {
+        $modalidad = $this->get('modalidad_id');
+        return is_array($modalidad) ? ($modalidad['id'] ?? null) : $modalidad;
+    }
+
+    public function getLandId()
+    {
+        $land = $this->get('land_id');
+        return is_array($land) ? ($land['id'] ?? null) : $land;
+    }
+
+    public function getTypologyId()
+    {
+        $typology = $this->get('typology_id');
+        return is_array($typology) ? ($typology['id'] ?? null) : $typology;
+    }
+
+
+    public function getStateId()
+    {
+        $state = $this->get('state_id');
+        return is_array($state) ? ($state['id'] ?? null) : $state;
+    }
+
+    public function getCityId()
+    {
+        $city = $this->get('city_id');
+        return is_array($city) ? ($city['id'] ?? null) : $city;
     }
 }
