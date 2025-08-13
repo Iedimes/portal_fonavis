@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Motivo\StoreMotivo;
 use App\Http\Requests\Admin\Motivo\UpdateMotivo;
 use App\Models\Motivo;
 use App\Models\Project;
+use App\Models\ProjectOld;
 use App\Models\ProjectHasPostulantes;
 use App\Models\PostulanteHasBeneficiary;
 use App\Models\Postulante;
@@ -69,10 +70,17 @@ class MotivosController extends Controller
     {
         $this->authorize('admin.motivo.create');
 
-        $proyecto = Project::where('id', $project_id)->first();
+        // Primero busca en Project
+        $proyecto = Project::find($project_id);
+
+        // Si no encuentra, busca en ProjectOld por project_id
+        if (!$proyecto) {
+           $proyecto = ProjectOld::where('project_id', $project_id)->first();
+        }
 
         return view('admin.motivo.create', compact('proyecto', 'project_id'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -93,7 +101,22 @@ class MotivosController extends Controller
         DB::beginTransaction();
 
         try {
-            $project = Project::findOrFail($projectId);
+            // Buscar primero en Project
+            $project = Project::find($projectId);
+
+            // Si no existe en Project, buscar en ProjectOld por project_id
+            $isOld = false;
+            if (!$project) {
+                $project = ProjectOld::where('project_id', $projectId)->first();
+                if ($project) {
+                    $isOld = true;
+                }
+            }
+
+            // Si no existe en ninguna, lanzamos excepción
+            if (!$project) {
+                throw new \Exception("Proyecto no encontrado");
+            }
 
             // 1. Obtener los titulares del proyecto
             $titularIds = ProjectHasPostulantes::where('project_id', $projectId)
@@ -120,20 +143,26 @@ class MotivosController extends Controller
 
             DB::commit();
 
+            $redirectUrl = $isOld ? url('admin/project-olds') : url('admin/projects');
+
             if ($request->ajax()) {
                 return [
-                    'redirect' => url('admin/projects'),
+                    'redirect' => $redirectUrl,
                     'message' => trans('brackets/admin-ui::admin.operation.succeeded')
                 ];
             }
 
-            return redirect('admin/projects');
+            return redirect($redirectUrl);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect('admin/projects')->withErrors(['error' => 'No se pudo dar de baja el proyecto y sus postulantes']);
+            return redirect('admin/projects')->withErrors([
+                'error' => 'No se pudo dar de baja el proyecto y sus postulantes'
+            ]);
         }
     }
+
+
 
 
 

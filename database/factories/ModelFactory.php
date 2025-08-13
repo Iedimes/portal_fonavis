@@ -338,3 +338,14 @@ $factory->define(App\Models\ProjectHasExpediente::class, static function (Faker\
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\ProjectOld::class, static function (Faker\Generator $faker) {
+    return [
+        'project_id' => $faker->sentence,
+        'name' => $faker->firstName,
+        'created_at' => $faker->dateTime,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

@@ -30,6 +30,8 @@
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes/create') }}"><i class="fa fa-list-alt "></i> {{ trans('admin.reporte.title') }}</a></li>
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-has-expedientes') }}"><i class="fa fa-archive" aria-hidden="true"></i> {{ trans('admin.project-has-expediente.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-olds') }}"><i class="fa fa-check-square-o" aria-hidden="true"></i>
+ {{ trans('admin.project-old.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 
@@ -70,6 +72,7 @@
            {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/motivos') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.motivo.title') }}</a></li> --}}
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes/create') }}"><i class="nav-icon icon-graduation"></i> {{ trans('admin.reporte.title') }}</a></li>
            <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-has-expedientes') }}"><i class="nav-icon icon-star"></i> {{ trans('admin.project-has-expediente.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-olds') }}"><i class="nav-icon icon-diamond"></i> {{ trans('admin.project-old.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
 

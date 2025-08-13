@@ -588,3 +588,19 @@ Auth::routes();
 
     // Validación de código QR
     Route::get('/{key}', [HomeController::class, 'verification']);
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
+        Route::prefix('project-olds')->name('project-olds/')->group(static function() {
+            Route::get('/',                                             'ProjectOldsController@index')->name('index');
+            Route::get('/create',                                       'ProjectOldsController@create')->name('create');
+            Route::post('/',                                            'ProjectOldsController@store')->name('store');
+            Route::get('/{projectOld}/edit',                            'ProjectOldsController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ProjectOldsController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{projectOld}',                                'ProjectOldsController@update')->name('update');
+            Route::delete('/{projectOld}',                              'ProjectOldsController@destroy')->name('destroy');
+        });
+    });
+});

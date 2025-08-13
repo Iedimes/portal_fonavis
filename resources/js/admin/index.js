@@ -25,3 +25,4 @@ import './admin-users-dependency';
 import './dependency';
 import './reporte';
 import './project-has-expediente';
+import './project-old';

@@ -468,5 +468,22 @@ return [
         ],
     ],
 
+    'project-old' => [
+        'title' => 'Project Olds',
+
+        'actions' => [
+            'index' => 'Project Olds',
+            'create' => 'New Project Old',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'project_id' => 'Project',
+            'name' => 'Name',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];
