@@ -9,6 +9,9 @@ use App\Http\Requests\Admin\ProjectOld\IndexProjectOld;
 use App\Http\Requests\Admin\ProjectOld\StoreProjectOld;
 use App\Http\Requests\Admin\ProjectOld\UpdateProjectOld;
 use App\Models\ProjectOld;
+use App\Models\Project;
+use App\Models\ProjectHasPostulantes;
+use App\Models\Land_project;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -76,18 +79,26 @@ class ProjectOldsController extends Controller
      */
     public function store(StoreProjectOld $request)
     {
-        // Sanitize input
         $sanitized = $request->getSanitized();
 
-        // Store the ProjectOld
-        $projectOld = ProjectOld::create($sanitized);
-
-        if ($request->ajax()) {
-            return ['redirect' => url('admin/project-olds'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
+        $proyecto = Project::find($request->project_id);
+        if ($proyecto) {
+            return response()->json([
+                'errors' => [
+                    'project_id' => ['NO SE PUEDE CREAR ESTE PROYECTO PORQUE YA EXISTEN EN LA BD']
+                ]
+            ], 422);
         }
 
-        return redirect('admin/project-olds');
+        $projectOld = ProjectOld::create($sanitized);
+
+        return [
+            'redirect' => url('admin/project-olds'),
+            'message' => trans('brackets/admin-ui::admin.operation.succeeded')
+        ];
     }
+
+
 
     /**
      * Display the specified resource.
@@ -184,5 +195,27 @@ class ProjectOldsController extends Controller
         });
 
         return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
+    }
+
+    public function project($id)
+    {
+        $project = ProjectOld::where('project_id', $id)->first();
+
+        if (!$project) {
+            return view('admin.project-old.project', [
+                'project' => null,
+                'projectNotFound' => true,
+                'title' => 'Proyecto no encontrado',
+                'tipoproy' => null,
+                'postulantes' => collect(),
+            ]);
+        }
+
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . ($project->name ?? 'SIN NOMBRE');
+        // return $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+        return view('admin.project-old.project', compact('project', 'title', 'postulantes'))
+            ->with('projectNotFound', false);
     }
 }
