@@ -751,18 +751,36 @@ class ProjectsController extends Controller
         $history = ProjectStatusF::where('project_id', $project->id)
             ->orderBy('created_at')
             ->with('imagen')
-            ->get()
-            ->map(function ($item) {
-                if (in_array($item->stage_id, [1, 5, 8, 11])) {
+            ->get();
+
+        // Contador específico para estado 1
+        $state1Count = 0;
+
+        $history = $history->map(function ($item) use (&$state1Count) {
+            if ($item->stage_id == 1) {
+                $state1Count++;
+
+                if ($state1Count == 1) {
+                    // Primera vez -> SAT
                     $user = User::find($item->user_id);
                     $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
                 } else {
+                    // Desde la segunda vez en adelante -> Admin
                     $adminUser = \App\Models\AdminUser::find($item->user_id);
                     $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
                 }
+            } elseif (in_array($item->stage_id, [5, 8, 11])) {
+                // Siempre SAT
+                $user = User::find($item->user_id);
+                $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
+            } else {
+                // Siempre Admin
+                $adminUser = \App\Models\AdminUser::find($item->user_id);
+                $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
+            }
 
-                return $item;
-            });
+            return $item;
+        });
 
         $title = "HISTORIAL";
 
