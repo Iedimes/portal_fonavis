@@ -2,106 +2,201 @@
 
 @section('title', trans('admin.projects.actions.show'))
 
+<style>
+    .table-responsive {
+        position: relative;
+        overflow: auto; /* Permitir scroll */
+        max-height: 400px; /* Altura máxima para el scroll vertical */
+    }
+
+    .table {
+        width: auto; /* Cambiar a auto para ajustar a los títulos */
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
+        padding: 12px; /* Aumentar padding para mejor presentación */
+    }
+
+    .thead-light th {
+        background-color: #f8f9fa; /* Color de fondo para la cabecera */
+        position: sticky; /* Mantener la cabecera fija */
+        top: 0; /* Fijar en la parte superior */
+        z-index: 10; /* Asegúrate de que la cabecera esté por encima del contenido */
+    }
+
+    textarea.form-control {
+        height: 150px; /* Aumentar la altura de los textarea */
+        resize: vertical; /* Permitir redimensionar verticalmente */
+    }
+</style>
+
 @section('body')
-
-<div class="card">
-    <div class="card-header text-center">
-        DATOS {{utf8_encode($project->name)}}
-    </div>
-    <div class="card-body">
-        <div class="row invoice-info">
-            <div class="col-sm-4 invoice-col">
-            <address>
-            <strong>Lider:</strong> {{($project->leader_name)}}<br>
-            <strong>Departamento: </strong>{{utf8_encode($project->state_id?$project->getState->DptoNom:"")}}<br>
-            <strong>Modalidad:</strong> {{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}<br>
-            <strong>Estado:</strong> <span class="badge bg-success " style="font-size:1.1em; color:white">  {{ $project->getEstado ? $project->getEstado->getStage->name : "Pendiente"}}</span><br>
-            </address>
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header text-center" data-toggle="collapse" data-target="#projectInfo" aria-expanded="true" aria-controls="projectInfo">
+                DATOS {{ utf8_encode($project->name) }}
             </div>
+            <div id="projectInfo" class="collapse show">
+                <div class="card-body">
+                    <div class="row invoice-info">
+                        <div class="col-sm-4 invoice-col">
+                            <address>
+                                <strong>Lider:</strong> {{ $project->leader_name ?? 'N' }}<br>
+                                <strong>Departamento:</strong> {{ utf8_encode($project->state_id ? $project->getState->DptoNom : 'N') }}<br>
+                                <strong>Modalidad:</strong> {{ utf8_encode($project->modalidad_id ? $project->getModality->name : 'N') }}<br>
+                                <strong>Estado:</strong> <span class="badge bg-success" style="font-size:1.1em; color:white">{{ $project->getEstado ? $project->getEstado->getStage->name : 'Pendiente' }}</span><br>
+                            </address>
+                        </div>
 
-            <div class="col-sm-4 invoice-col">
-            <address>
-            <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
-            <strong>Distrito:</strong> {{utf8_encode($project->city_id)}}<br>
-            <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
-            <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
-            </address>
-            </div>
+                        <div class="col-sm-4 invoice-col">
+                            <address>
+                                <strong>Telefono:</strong> {{ utf8_encode($project->phone ?? 'N') }}<br>
+                                <strong>Distrito:</strong> {{ $project->city_id ? strtoupper($project->getCity->CiuNom) : 'N' }}<br>
+                                <strong>Tipo de Terreno:</strong> {{ utf8_encode($project->land_id ? $project->getLand->name : 'N') }}<br>
+                                <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
+                            </address>
+                        </div>
 
-            <div class="col-sm-4 invoice-col">
-            <address>
-            <strong>SAT:</strong> {{utf8_encode($project->sat_id?$project->getSat->NucNomSat:"")}}<br>
-            <strong>Localidad:</strong> {{utf8_encode($project->localidad)}}<br>
-            <strong>Tipologia:</strong> {{utf8_encode($project->typology_id?$project->getTypology->name:"")}}<br>
-            </address>
-            </div>
+                        <div class="col-sm-4 invoice-col">
+                            <address>
+                                <strong>SAT:</strong> {{ utf8_encode($project->sat_id ? $project->getSat->NucNomSat : 'N') }}<br>
+                                <strong>Localidad:</strong> {{ utf8_encode($project->localidad ?? 'N') }}<br>
+                                <strong>Tipologia:</strong> {{ utf8_encode($project->typology_id ? $project->getTypology->name : 'N') }}<br>
+                            </address>
+                        </div>
+                    </div>
 
-            </div>
-
-            @if (empty($project->getEstado))
-
-            @else
-
-                    @if ( $project->getEstado->stage_id == 8 && Auth::user()->rol_app->dependency_id == 3)
-                        <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
+                    @if (!empty($project->getEstado) && $project->getEstado->stage_id == 8 && Auth::user()->rol_app->dependency_id == 3)
+                        <a href="{{ url('admin/projects/' . $project->id . '/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
                     @endif
+                </div>
 
-            @endif
-    </div>
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-    <script>
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 10000);
-    </script>
-@endif
-
-</div>
-
-
-{{-- <div class="card">
-    <div class="card-header text-center">
-        DOCUMENTOS PRESENTADOS
-    </div>
-    <div class="card-body">
-            <div class="card-block">
-                <table class="table table-hover table-listing">
-                <thead>
-                    <tr>
-                    <th>#</th>
-                    <th>Documento</th>
-                    <th>Ver</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach ($docproyecto as $key => $item)
-                <tr>
-                    <td>{{ $key+1 }}</td>
-                    <td>{{ $item->document->name}}</td>
-                    <td>@if ($uploadedFiles[$item->document_id])
-
-                        <a href="{{ route('downloadFile', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
-                            <button class="btn btn-info">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </a>
-@endif</td>
-
-
-                    <td>
-
-                    </td>
-
-                </tr>
-                @endforeach
-                </tbody>
-                </table>
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            $('.alert').fadeOut('slow');
+                        }, 10000);
+                    </script>
+                @endif
             </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header text-center">
+                POSTULANTES
+                <a href="{{ url('/admin/postulantes/export-postulantes') }}" class="btn btn-secondary">Exportar a Excel</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Orden</th>
+                                <th>Biblio</th>
+                                <th>Exp.</th>
+                                <th>{{ trans('Apellido y Nombre') }}</th>
+                                <th class="text-center">{{ trans('N° de cedula de identidad') }}</th>
+                                <th class="text-center">{{ trans('Ingreso') }}</th>
+                                <th class="text-center">{{ trans('Apellido y Nombre del Conyuge o concubino') }}</th>
+                                <th class="text-center">{{ trans('N° de cedula de identidad') }}</th>
+                                <th class="text-center">{{ trans('Ingreso') }}</th>
+                                <th class="text-center">{{ trans('Ingreso Total') }}</th>
+                                <th class="text-center">{{ trans('Nivel') }}</th>
+                                <th class="text-center">{{ trans('Cantidad de Hijos') }}</th>
+                                <th class="text-center">{{ trans('Discap') }}</th>
+                                <th class="text-center">{{ trans('3°Edad') }}</th>
+                                <th class="text-center">{{ trans('Hijo Sosten') }}</th>
+                                <th class="text-center">{{ trans('Otra Persona a Cargo') }}</th>
+                                <th class="text-center">{{ trans('Terreno') }}</th>
+                                <th class="text-center">{{ trans('Residencia') }}</th>
+                                <th class="text-center">{{ trans('Composición del Grupo Familiar') }}</th>
+                                <th class="text-center">{{ trans('Documentos Presentados') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (count($postulantes) > 0)
+                                @foreach ($postulantes as $key => $post)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>1</td>
+                                        <td>{{ $post->getPostulante->nexp ?? 'N' }}</td>
+                                        <td>{{ $post->getPostulante->last_name . ' ' . $post->getPostulante->first_name ?? 'N' }}</td>
+                                        <td class="text-center">{{ is_numeric($post->getPostulante->cedula ?? '') ? number_format($post->getPostulante->cedula, 0, '.', '') : 'N' }}</td>
+                                        <td class="text-center">{{ number_format($post->getPostulante->ingreso ?? 0, 0, '.', '') }}</td>
+                                        @php
+                                            $conyuge = $post->getMembers->firstWhere('parentesco_id', 1) ?? $post->getMembers->firstWhere('parentesco_id', 8);
+                                        @endphp
+                                        <td class="text-center">@if ($conyuge) {{ $conyuge->getPostulante->last_name . ' ' . $conyuge->getPostulante->first_name }} @else -------------- @endif</td>
+                                        <td class="text-center">@if ($conyuge) {{ number_format($conyuge->getPostulante->cedula ?? 0, 0, '.', '') }} @else -------------- @endif</td>
+                                        <td class="text-center">@if ($conyuge) {{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, '.', '') }} @else -------------- @endif</td>
+                                        <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, '.', '') }}</td>
+                                        <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
+                                        <td class="text-center">{{ $post->getPostulante->cantidad_hijos ?? 0 }}</td>
+                                        <td class="text-center">{{ $post->getPostulante->discapacidad ?? 'N' }}</td>
+                                        <td class="text-center">{{ $post->getPostulante->tercera_edad ?? 'N' }}</td>
+                                        <td class="text-center">{{ $post->getPostulante->hijo_sosten ?? 'N' }}</td>
+                                        <td class="text-center">
+                                            <select class="form-control" onchange="saveField('{{ $post->getPostulante->id }}', 'otra_persona_a_cargo', this.value)" style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
+                                                <option value="" disabled {{ $post->getPostulante->otra_persona_a_cargo == null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="S" {{ $post->otra_persona_a_cargo == 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->otra_persona_a_cargo == 'N' ? 'selected' : '' }}>N</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">{{ utf8_encode($project->land_id ? $project->getLand->name : 'N') }}</td>
+                                        <td class="text-center">{{ $post->getPostulante->address ?? 'N' }}</td>
+                                        <td class="text-center">
+                                            <textarea class="form-control"
+                                                      onchange="saveField('{{ $post->getPostulante->id }}', 'composicion_del_grupo', this.value)"
+                                                      style="background-color: #f0f8ff;">
+                                                {{ $post->getPostulante->composicion_del_grupo ?? '' }}
+                                            </textarea>
+                                        </td>
+                                        <td class="text-center">
+                                            <textarea class="form-control"
+                                                      onchange="saveField('{{ $post->getPostulante->id }}', 'documentos_presentados', this.value)"
+                                                      style="background-color: #f0f8ff;">
+                                                {{ $post->getPostulante->documentos_presentados ?? '' }}
+                                            </textarea>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="20" class="text-center">{{ trans('admin.project.messages.no_applicants') }}</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-</div> --}}
-
-
+</div>
 @endsection
+
+<script>
+    function saveField(postId, fieldName, value) {
+        // Aquí puedes usar AJAX para enviar los datos al servidor
+        $.ajax({
+            url: '/admin/postulantes/' + postId + '/actualizar',
+            method: 'POST',
+            data: {
+                field: fieldName,
+                value: value,
+                _token: '{{ csrf_token() }}' // Asegúrate de incluir el token CSRF
+            },
+            success: function(response) {
+                console.log('Campo guardado exitosamente.');
+            },
+            error: function(error) {
+                console.error('Error al guardar el campo:', error);
+            }
+        });
+    }
+</script>

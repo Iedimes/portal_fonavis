@@ -398,6 +398,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::delete('/{postulante}',                              'PostulantesController@destroy')->name('destroy');
             Route::get('/{id}/comentario',                              'PostulantesController@comentario')->name('comentario');
             Route::get('/{postulante}/imprimir',                        'PostulantesController@imprimir')->name('imprimir');
+            Route::post('/{id}/actualizar',                             'PostulantesController@actualizar')->name('actualizar');
+            Route::get('/export-postulantes',                           'PostulantesController@export')->name('export');
         });
     });
 });

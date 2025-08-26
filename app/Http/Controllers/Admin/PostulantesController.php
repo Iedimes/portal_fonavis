@@ -22,6 +22,9 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+use App\Exports\PostulantesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PostulantesController extends Controller
 {
@@ -213,6 +216,31 @@ class PostulantesController extends Controller
         $pdf = PDF::loadView('postulantesPDF', compact('project','postulantes', 'contar'))->setPaper('a4', 'landscape');
 
         return $pdf->download('Listadopostulantes.pdf');
+    }
+
+    public function actualizar(Request $request, $id)
+    {
+
+        // Validar la solicitud
+        $request->validate([
+             'field' => 'required|string',
+             'value' => 'required|string',
+        ]);
+
+        // Buscar el postulante
+        $postulante = Postulante::findOrFail($id);
+
+        // Actualizar el campo correspondiente
+        $postulante->{$request->field} = $request->value;
+        $postulante->save();
+
+        // Retornar una respuesta
+        return response()->json(['success' => true]);
+    }
+
+    public function export()
+    {
+        return Excel::download(new PostulantesExport, 'postulantes.xlsx');
     }
 
 }
