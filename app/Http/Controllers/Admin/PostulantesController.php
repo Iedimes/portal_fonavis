@@ -25,6 +25,7 @@ use Illuminate\View\View;
 use Illuminate\Http\Request;
 use App\Exports\PostulantesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 
 class PostulantesController extends Controller
 {
@@ -238,9 +239,30 @@ class PostulantesController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function export()
+    public function exportar($projectId = null)
     {
-        return Excel::download(new PostulantesExport, 'postulantes.xlsx');
+        // Si no se proporciona projectId, usar el primer proyecto disponible o manejar según tu lógica
+        if (!$projectId) {
+            // Aquí puedes ajustar la lógica según cómo determines qué proyecto exportar
+            $projectId = request()->get('project_id');
+        }
+
+        $project = Project::with([
+            'getState',
+            'getCity',
+            'getSat',
+            'getModality',
+            'getLand',
+            'getTypology'
+        ])->findOrFail($projectId);
+
+        $postulantes = ProjectHasPostulantes::with([
+            'getPostulante',
+            'getMembers.getPostulante'
+        ])->where('project_id', $projectId)->get();
+
+        return Excel::download(new PostulantesExport($project, $postulantes),
+            'Lista_Postulantes_' . str_replace(' ', '_', $project->name) . '.xlsx');
     }
 
 }

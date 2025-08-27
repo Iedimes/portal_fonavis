@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum('tercera_edad', ['S', 'N'])->nullable()->after('discapacidad'); // Nuevo campo
             $table->integer('ingreso_familiar')->nullable()->after('tercera_edad'); // Nuevo campo
             $table->integer('cantidad_hijos')->nullable()->after('ingreso_familiar'); // Nuevo campo
+            $table->text('documentos_faltantes')->nullable()->after('cantidad_hijos');
+            $table->text('observacion_de_consideracion')->nullable()->after('documentos_faltantes');
         });
     }
 

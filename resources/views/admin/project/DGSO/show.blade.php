@@ -89,12 +89,14 @@
 
         <div class="card">
             <div class="card-header text-center">
-                POSTULANTES
-                <a href="{{ url('/admin/postulantes/export-postulantes') }}" class="btn btn-secondary">Exportar a Excel</a>
+                {{-- POSTULANTES
+
+                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-secondary">Exportar a Excel</a> --}}
+
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    {{-- <table class="table table-striped">
                         <thead class="thead-light">
                             <tr>
                                 <th>Orden</th>
@@ -117,6 +119,8 @@
                                 <th class="text-center">{{ trans('Residencia') }}</th>
                                 <th class="text-center">{{ trans('Composición del Grupo Familiar') }}</th>
                                 <th class="text-center">{{ trans('Documentos Presentados') }}</th>
+                                <th class="text-center">{{ trans('Documentos Faltantes') }}</th>
+                                <th class="text-center">{{ trans('Observaciones de Consideracion') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -127,15 +131,33 @@
                                         <td>1</td>
                                         <td>{{ $post->getPostulante->nexp ?? 'N' }}</td>
                                         <td>{{ $post->getPostulante->last_name . ' ' . $post->getPostulante->first_name ?? 'N' }}</td>
-                                        <td class="text-center">{{ is_numeric($post->getPostulante->cedula ?? '') ? number_format($post->getPostulante->cedula, 0, '.', '') : 'N' }}</td>
-                                        <td class="text-center">{{ number_format($post->getPostulante->ingreso ?? 0, 0, '.', '') }}</td>
+                                        <td class="text-center">
+                                            @if (is_numeric($post->getPostulante->cedula ?? ''))
+                                                {{ number_format($post->getPostulante->cedula, 0, ',', '.') }}
+                                            @else
+                                                N
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ number_format($post->getPostulante->ingreso ?? 0, 0, ',', '.') }}</td>
                                         @php
                                             $conyuge = $post->getMembers->firstWhere('parentesco_id', 1) ?? $post->getMembers->firstWhere('parentesco_id', 8);
                                         @endphp
                                         <td class="text-center">@if ($conyuge) {{ $conyuge->getPostulante->last_name . ' ' . $conyuge->getPostulante->first_name }} @else -------------- @endif</td>
-                                        <td class="text-center">@if ($conyuge) {{ number_format($conyuge->getPostulante->cedula ?? 0, 0, '.', '') }} @else -------------- @endif</td>
-                                        <td class="text-center">@if ($conyuge) {{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, '.', '') }} @else -------------- @endif</td>
-                                        <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, '.', '') }}</td>
+                                        <td class="text-center">
+                                            @if ($conyuge && is_numeric($conyuge->getPostulante->cedula ?? ''))
+                                                {{ number_format($conyuge->getPostulante->cedula, 0, ',', '.') }}
+                                            @else
+                                                --------------
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if ($conyuge)
+                                                {{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') }}
+                                            @else
+                                                --------------
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.') }}</td>
                                         <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
                                         <td class="text-center">{{ $post->getPostulante->cantidad_hijos ?? 0 }}</td>
                                         <td class="text-center">{{ $post->getPostulante->discapacidad ?? 'N' }}</td>
@@ -153,16 +175,22 @@
                                         <td class="text-center">
                                             <textarea class="form-control"
                                                       onchange="saveField('{{ $post->getPostulante->id }}', 'composicion_del_grupo', this.value)"
-                                                      style="background-color: #f0f8ff;">
-                                                {{ $post->getPostulante->composicion_del_grupo ?? '' }}
-                                            </textarea>
+                                                      style="background-color: #f0f8ff;">{{ $post->getPostulante->composicion_del_grupo ?? '' }}</textarea>
                                         </td>
                                         <td class="text-center">
                                             <textarea class="form-control"
                                                       onchange="saveField('{{ $post->getPostulante->id }}', 'documentos_presentados', this.value)"
-                                                      style="background-color: #f0f8ff;">
-                                                {{ $post->getPostulante->documentos_presentados ?? '' }}
-                                            </textarea>
+                                                      style="background-color: #f0f8ff;">{{ $post->getPostulante->documentos_presentados ?? '' }}</textarea>
+                                        </td>
+                                        <td class="text-center">
+                                            <textarea class="form-control"
+                                                      onchange="saveField('{{ $post->getPostulante->id }}', 'documentos_faltantes', this.value)"
+                                                      style="background-color: #f0f8ff;">{{ $post->getPostulante->documentos_faltantes ?? '' }}</textarea>
+                                        </td>
+                                        <td class="text-center">
+                                            <textarea class="form-control"
+                                                      onchange="saveField('{{ $post->getPostulante->id }}', 'observacion_de_consideracion', this.value)"
+                                                      style="background-color: #f0f8ff;">{{ $post->getPostulante->observacion_de_consideracion ?? '' }}</textarea>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -173,7 +201,7 @@
                             @endif
                         </tbody>
                     </table>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
