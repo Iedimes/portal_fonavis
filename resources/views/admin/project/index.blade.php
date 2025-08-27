@@ -275,9 +275,9 @@
                 </a>
             </div>
 
-            {{-- <div class="p-1" v-if="item.get_estado">
+            <div class="p-1" v-if="item.get_estado">
                 <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
-            </div> --}}
+            </div>
 
             {{-- Stages especializados FONAVIS SIEMPRE--}}
             <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 9">
