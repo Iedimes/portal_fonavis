@@ -317,10 +317,14 @@ class PostulantesController extends Controller
         //     }
         // }
 
-        $ivmsolcge = IVMSOL::where('SolPerCge', $cedula)->first();
-        // dd($ivmsolcge);
-        if ($ivmsolcge) {
-                return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        // $ivmsolcge = IVMSOL::where('SolPerCge', $cedula)->first();
+        // // dd($ivmsolcge);
+        // if ($ivmsolcge) {
+        //         return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        // }
+
+        if (IVMSOL::where('SolPerCge', $cedula)->where('SolEtapa', 'B')->exists()) {
+            return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
         }
         
 
