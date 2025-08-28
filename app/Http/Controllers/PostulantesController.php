@@ -268,12 +268,12 @@ class PostulantesController extends Controller
             ->where('TexCod', 118)
             ->orderBy('NroExp', 'desc')
             ->first();
-
         if ($expediente) {
             // Verificar que el archivo esté en estado C o H
             $archivo = SIG006::where('NroExp', $expediente->NroExp)
                 ->whereIn('DEExpEst', ['C', 'H'])
                 ->first();
+            
 
             if (!$archivo) {
                 return 'Ya existe expendiente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!.';
@@ -284,33 +284,45 @@ class PostulantesController extends Controller
         if (Postulante::where('cedula', $cedula)->exists()) {
             return 'Ya existe el postulante!';
         }
-
+        // $shmcer=SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists();
+        // dd($shmcer);
         if (SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists()) {
             return 'Ya cuenta con certificado de Subsidio como Titular!';
         }
-
+        // $shmcerCge=SHMCER::where('CerCoCI', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists();
+        // dd($shmcerCge);
         if (SHMCER::where('CerCoCI', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists()) {
             return 'Ya cuenta con certificado de Subsidio como Conyuge!';
         }
-
+        // $prmcli=PRMCLI::where('PerCod', $cedula)->where('PylCod', '!=', 'P.F.')->exists();
+        // dd($prmcli);
         if (PRMCLI::where('PerCod', $cedula)->where('PylCod', '!=', 'P.F.')->exists()) {
             return 'Ya cuenta con Beneficios en la Institución!';
         }
 
+        // $ivmsol=IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists();
+        // dd($ivmsol);
         if (IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists()) {
             return 'Ya es Beneficiario Final!';
         }
 
-        $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
-        if ($solicitante) {
-            $carterasol = PRMCLI::where('PerCod', trim($solicitante->SolPerCod))
-                ->where('PylCod', '!=', 'P.F.')
-                ->exists();
+        // $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
+        // if ($solicitante) {
+        //     $carterasol = PRMCLI::where('PerCod', trim($solicitante->SolPerCod))
+        //         ->where('PylCod', '!=', 'P.F.')
+        //         ->exists();
 
-            if ($carterasol) {
+        //     if ($carterasol) {
+        //         return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        //     }
+        // }
+
+        $ivmsolcge = IVMSOL::where('SolPerCge', $cedula)->first();
+        // dd($ivmsolcge);
+        if ($ivmsolcge) {
                 return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
-            }
         }
+        
 
         return null; // Alta permitida
     }
