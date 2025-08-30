@@ -4,7 +4,6 @@ namespace App\Http\Requests\Admin\ProjectStatus;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 
 class StoreProjectStatus extends FormRequest
 {
@@ -24,43 +23,52 @@ class StoreProjectStatus extends FormRequest
      * @return array
      */
     public function rules(): array
-{
-    $rules = [
-        'project_id' => ['required'],
-        'stage' => ['required'],
-        'user_id' => ['required', 'integer'],
-        'record' => ['required', 'string'],
-    ];
+    {
+        $rules = [
+            'project_id' => ['required'],
+            'stage' => ['required'],
+            'user_id' => ['required', 'integer'],
+            'record' => ['required', 'string'],
+            'dependencia' => ['required', 'integer'], // <-- agregar
 
-    $stageId = $this->getStageId(); // Almacenar el valor antes de la condición
+        ];
 
-    // if ($stageId === 3 || $stageId === 5 || $stageId === 9 || $stageId === 10) {
-    if ($stageId === 3 || $stageId === 5) { // saque pase estado 9 y 10
-        $rules['gallery'] = ['required'];
-    } else {
-        //dd('Sale por Else'.$stageId); // Imprimir el valor si no se entra en la condición
+        $stageId = $this->getStageId(); // obtener el ID del stage
+        $dependencia = $this->get('dependencia'); // obtener la dependencia del request
+
+         // depuración
+    // dd($stageId, $dependencia, gettype($stageId), gettype($dependencia));
+
+        // Validación para requerir 'gallery' según condiciones
+        if ($stageId === 3 || $stageId === 5 || ($stageId === 13 && $dependencia === 4)) {
+            $rules['gallery'] = ['required'];
+        }
+
+        return $rules;
     }
 
-    return $rules;
-}
-
     /**
-    * Modify input data
-    *
-    * @return array
-    */
+     * Modify input data
+     *
+     * @return array
+     */
     public function getSanitized(): array
     {
         $sanitized = $this->validated();
 
-        //Add your code for manipulation with request data here
+        // Aquí puedes manipular los datos antes de retornarlos si es necesario
 
         return $sanitized;
     }
 
+    /**
+     * Obtener el ID del stage desde el request
+     *
+     * @return int|null
+     */
     public function getStageId()
-     {
-         return $this->get('stage')['id'];
-     }
+    {
+        $stage = $this->get('stage');
+        return $stage['id'] ?? null;
+    }
 }
-

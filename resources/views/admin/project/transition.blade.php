@@ -48,10 +48,17 @@
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
-                    @if ($estado==1 || $estado==3 || $estado==9 || $estado==11 )
+
+                    @if ($estado==1 || $estado==3 || $estado==9 || ($estado==11 && $dependencia != 4) || $estado==13)
 
                     @elseif($estado==8 && $dependencia == 1)
 
+                    @elseif ($estado==11 && $dependencia == 4 )
+                        @include('brackets/admin-ui::admin.includes.media-uploader', [
+                        'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),
+                        //'media' => $call->getThumbs200ForCollection('gallery'),
+                        'label' => 'Documentos Adjuntos'
+                    ])
                     @else
                     @include('brackets/admin-ui::admin.includes.media-uploader', [
                         'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),

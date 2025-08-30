@@ -685,7 +685,12 @@ class ProjectsController extends Controller
                  break;
             case 11:
                  // Lógica específica para el estado 11
-                 $stages = Stage::whereIn('id', [12])->get();
+                 if ($dependencia==1){
+                    $stages = Stage::whereIn('id', [12])->get();
+                 break;
+                 }
+
+                 $stages = Stage::whereIn('id', [13])->get();
                  break;
             case 12:
                  // Lógica específica para el estado 12

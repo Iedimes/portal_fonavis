@@ -20,6 +20,7 @@
         <table class="table table-striped">
             <tbody>
             <tr>
+              <th>Codigo Proyecto</th>
               <th>Proyecto</th>
               <th>Empresa/Sat</th>
               <th>Terreno</th>
@@ -31,6 +32,7 @@
             </tr>
             @foreach($projects as $project)
             <tr>
+            <td>{{$project->id}}</td>
             <td>{{$project->name}}</td>
             <td>{{$project->sat_id?$project->getSat->NucNomSat:""}}</td>
             <td>{{utf8_encode($project->land_id?$project->getLand->name:"")}}</td>

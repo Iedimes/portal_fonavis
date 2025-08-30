@@ -465,10 +465,13 @@ public function showEliminados($id)
 
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-        // Traer solo los document_id observados por DIGH
-        $documentosObservados = DighObservation::where('project_id', $project->id)
-                                ->pluck('document_id')
-                                ->toArray();
+        // Traer observaciones indexadas por document_id
+        $observaciones = DighObservation::where('project_id', $project->id)
+            ->pluck('observation', 'document_id') // clave: document_id, valor: observation
+            ->toArray();
+
+        // Obtener solo los IDs de documentos observados
+        $documentosObservados = array_keys($observaciones);
 
         // Filtrar solo los documentos observados
         $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
@@ -476,6 +479,7 @@ public function showEliminados($id)
             ->where('stage_id', 1)
             ->whereIn('document_id', $documentosObservados)
             ->get();
+
 
         $claves = $docproyecto->pluck('document_id');
 
@@ -513,7 +517,8 @@ public function showEliminados($id)
             'postulantes',
             'uploadedFiles',
             'todosCargados',
-            'hayDocumentoFaltante'
+            'hayDocumentoFaltante',
+            'observaciones'
         ));
     }
 
@@ -1346,6 +1351,18 @@ public function showTecnico($id)
 
         return redirect()->back()->with('message', 'Archivo eliminado correctamente');
     }
+
+    public function eliminarObservacion(Request $request, $project_id, $document_id)
+    {
+        $observacion = DighObservation::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->firstOrFail();
+
+        $observacion->delete(); // Soft delete
+
+        return redirect()->back()->with('message', 'Observación eliminada correctamente');
+    }
+
 
     public function eliminarDocumento(Request $request, $project_id, $document_id)
     {
