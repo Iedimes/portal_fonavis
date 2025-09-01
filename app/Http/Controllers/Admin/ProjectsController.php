@@ -415,7 +415,7 @@ class ProjectsController extends Controller
     public function showDGSO(Project $project)
     {
         //$this->authorize('admin.project.show', $project);
-        $id=$project->id;
+        return $id=$project->id;
         $project_type= Land_project::where('land_id',$project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
         $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
@@ -594,7 +594,7 @@ class ProjectsController extends Controller
 
         DighObservation::updateOrCreate(
             ['project_id' => $project->id, 'document_id' => $documentId],
-            ['observation' => $observationText, 'origen' => 2]
+            ['observation' => $observationText, 'origen' => 3]
         );
 
         $hasStage17 = ProjectStatus::where('project_id', $project->id)
@@ -679,7 +679,7 @@ class ProjectsController extends Controller
 
         // 🔹 SOLO observaciones con origen = 2
         $observations = DighObservation::where('project_id', $project->id)
-            ->where('origen', 2)
+            ->where('origen', 4)
             ->pluck('observation', 'document_id'); // [document_id => 'observación']
 
         return view('admin.project.DSGO.show', compact(

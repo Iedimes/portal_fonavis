@@ -105,7 +105,7 @@
                                                     <i class="fa fa-search"></i> Ver
                                                 </a>
                                             @else
-                                                <form action="/levantarObs" method="POST" enctype="multipart/form-data" class="form-inline">
+                                                <form action="/levantarObsDSGO" method="POST" enctype="multipart/form-data" class="form-inline">
                                                     @csrf
                                                     <input type="hidden" name="project_id" value="{{ $project->id }}">
                                                     <input type="hidden" name="title" value="{{ $item->document->name }}">

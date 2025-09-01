@@ -534,7 +534,7 @@ public function showEliminados($id)
 
         // Traer observaciones indexadas por document_id
         $observaciones = DighObservation::where('project_id', $project->id)
-            ->where('origen', 2)
+            ->where('origen', 3)
             ->pluck('observation', 'document_id') // clave: document_id, valor: observation
             ->toArray();
 
@@ -1247,72 +1247,59 @@ public function showTecnico($id)
 
     public function uploadObservadoDSGO(Request $request)
     {
-        // Validación
         $this->validate($request, [
-            // 'archivo' => 'required|max:100000|mimes:pdf',
             'archivo' => 'required|max:30720|mimes:pdf'
         ], [
             'archivo.required' => 'Debe seleccionar un archivo.',
-            'archivo.max' => 'El archivo supera el tamaño definido..',
+            'archivo.max' => 'El archivo supera el tamaño definido.',
             'archivo.mimes' => 'El archivo debe ser de formato PDF.',
         ]);
 
-
-        // Obtener ids
         $project_id = $request->project_id;
         $document_id = $request->document_id;
 
-        // Ruta de carpetas
         $folder = "uploads/$project_id/$document_id";
 
-        // Validar documento existente
         $exists = Documents::where('project_id', $project_id)
             ->where('document_id', $document_id)
             ->first();
 
         if ($exists) {
-            return redirect("/docObservadosDSGO/$project_id")->withErrors('El documento ya existe');
+            return redirect("/docObservados/$project_id")->withErrors('El documento ya existe');
         }
 
-        // Obtener archivo
         $file = $request->file('archivo');
-
-        // Generar nombre archivo
         $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
 
         try {
-            $localDisk = Storage::disk('local'); // Acceder al disco remoto
-
+            $localDisk = Storage::disk('local');
             if (!$localDisk->exists($folder)) {
                 $localDisk->makeDirectory($folder);
             }
-
             $localDisk->putFileAs($folder, $file, $filename);
-
-            // $localDisk = Storage::disk('local'); // Acceder al disco local
-
-            // if (!$localDisk->exists($folder)) {
-            //     $localDisk->makeDirectory($folder);
-            // }
-
-            // $localDisk->putFileAs($folder, $file, $filename);
         } catch (\Exception $e) {
             return back()->withErrors('Error subiendo archivo');
         }
 
-        // Guardar en BD
         $document = new Documents;
-
-        $document->project_id = $request->project_id;
-        $document->document_id = $request->document_id;
+        $document->project_id = $project_id;
+        $document->document_id = $document_id;
         $document->file_path = $filename;
         $document->title = $request->title;
-
         $document->save();
 
+        // 🔹 Crear observación de origen = 2
+        DighObservation::create([
+            'project_id'  => $project_id,
+            'document_id' => $document_id,
+            'observation' => 'Documento cargado por SAT-DSGO',
+            'origen'      => 4,
+        ]);
+
         return redirect("/docObservadosDSGO/$project_id")
-            ->with('message', 'Archivo subido');
+                ->with('message', 'Archivo subido');
     }
+
 
     public function uploadNoExcluyente(Request $request)
     {
