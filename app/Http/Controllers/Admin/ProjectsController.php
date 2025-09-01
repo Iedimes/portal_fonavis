@@ -415,7 +415,7 @@ class ProjectsController extends Controller
     public function showDGSO(Project $project)
     {
         //$this->authorize('admin.project.show', $project);
-        return $id=$project->id;
+        $id=$project->id;
         $project_type= Land_project::where('land_id',$project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
         $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
