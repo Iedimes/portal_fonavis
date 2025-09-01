@@ -465,8 +465,76 @@ public function showEliminados($id)
 
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
+        // Traer SOLO observaciones con origen = 1
+        $observaciones = DighObservation::where('project_id', $project->id)
+            ->where('origen', 1)
+            ->pluck('observation', 'document_id') // clave: document_id, valor: observation
+            ->toArray();
+
+        // Obtener solo los IDs de documentos observados
+        $documentosObservados = array_keys($observaciones);
+
+        // Filtrar solo los documentos observados
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->whereIn('category_id', [2])
+            ->where('stage_id', 1)
+            ->whereIn('document_id', $documentosObservados)
+            ->get();
+
+        $claves = $docproyecto->pluck('document_id');
+
+        $history = ProjectStatusF::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+
+            $uploadedFiles[$item->document_id] = $uploadedFile ? $uploadedFile->file_path : false;
+        }
+
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        $hayDocumentoFaltante = !$todosCargados;
+
+        return view('projects.showDocObs', compact(
+            'title',
+            'project',
+            'docproyecto',
+            'tipoproy',
+            'claves',
+            'history',
+            'postulantes',
+            'uploadedFiles',
+            'todosCargados',
+            'hayDocumentoFaltante',
+            'observaciones'
+        ));
+    }
+
+
+
+    public function DocObservadosDSGO($id)
+    {
+        $project = Project::findOrFail($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
+
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
         // Traer observaciones indexadas por document_id
         $observaciones = DighObservation::where('project_id', $project->id)
+            ->where('origen', 2)
             ->pluck('observation', 'document_id') // clave: document_id, valor: observation
             ->toArray();
 
@@ -507,7 +575,7 @@ public function showEliminados($id)
 
         $hayDocumentoFaltante = !$todosCargados;
 
-        return view('projects.showDocObs', compact(
+        return view('projects.showDocObsDSGO', compact(
             'title',
             'project',
             'docproyecto',
@@ -1123,7 +1191,62 @@ public function showTecnico($id)
 
     public function uploadObservado(Request $request)
     {
+        $this->validate($request, [
+            'archivo' => 'required|max:30720|mimes:pdf'
+        ], [
+            'archivo.required' => 'Debe seleccionar un archivo.',
+            'archivo.max' => 'El archivo supera el tamaño definido.',
+            'archivo.mimes' => 'El archivo debe ser de formato PDF.',
+        ]);
 
+        $project_id = $request->project_id;
+        $document_id = $request->document_id;
+
+        $folder = "uploads/$project_id/$document_id";
+
+        $exists = Documents::where('project_id', $project_id)
+            ->where('document_id', $document_id)
+            ->first();
+
+        if ($exists) {
+            return redirect("/docObservados/$project_id")->withErrors('El documento ya existe');
+        }
+
+        $file = $request->file('archivo');
+        $filename = time() . rand() . '.' . $file->getClientOriginalExtension();
+
+        try {
+            $localDisk = Storage::disk('local');
+            if (!$localDisk->exists($folder)) {
+                $localDisk->makeDirectory($folder);
+            }
+            $localDisk->putFileAs($folder, $file, $filename);
+        } catch (\Exception $e) {
+            return back()->withErrors('Error subiendo archivo');
+        }
+
+        $document = new Documents;
+        $document->project_id = $project_id;
+        $document->document_id = $document_id;
+        $document->file_path = $filename;
+        $document->title = $request->title;
+        $document->save();
+
+        // 🔹 Crear observación de origen = 2
+        DighObservation::create([
+            'project_id'  => $project_id,
+            'document_id' => $document_id,
+            'observation' => 'Documento cargado por SAT',
+            'origen'      => 2,
+        ]);
+
+        return redirect("/docObservados/$project_id")
+            ->with('message', 'Archivo subido');
+    }
+
+
+    public function uploadObservadoDSGO(Request $request)
+    {
         // Validación
         $this->validate($request, [
             // 'archivo' => 'required|max:100000|mimes:pdf',
@@ -1148,7 +1271,7 @@ public function showTecnico($id)
             ->first();
 
         if ($exists) {
-            return redirect("/docObservados/$project_id")->withErrors('El documento ya existe');
+            return redirect("/docObservadosDSGO/$project_id")->withErrors('El documento ya existe');
         }
 
         // Obtener archivo
@@ -1187,7 +1310,7 @@ public function showTecnico($id)
 
         $document->save();
 
-        return redirect("/docObservados/$project_id")
+        return redirect("/docObservadosDSGO/$project_id")
             ->with('message', 'Archivo subido');
     }
 
@@ -1352,16 +1475,16 @@ public function showTecnico($id)
         return redirect()->back()->with('message', 'Archivo eliminado correctamente');
     }
 
-    public function eliminarObservacion(Request $request, $project_id, $document_id)
-    {
-        $observacion = DighObservation::where('project_id', $project_id)
-            ->where('document_id', $document_id)
-            ->firstOrFail();
+    // public function eliminarObservacion(Request $request, $project_id, $document_id)
+    // {
+    //     $observacion = DighObservation::where('project_id', $project_id)
+    //         ->where('document_id', $document_id)
+    //         ->firstOrFail();
 
-        $observacion->delete(); // Soft delete
+    //     $observacion->delete(); // Soft delete
 
-        return redirect()->back()->with('message', 'Observación eliminada correctamente');
-    }
+    //     return redirect()->back()->with('message', 'Observación eliminada correctamente');
+    // }
 
 
     public function eliminarDocumento(Request $request, $project_id, $document_id)

@@ -105,7 +105,7 @@
                     </td>
                     <td class="align-middle">
                         @if ($uploadedFiles[$item->document_id])
-                        <form method="POST" action="{{ route('adminprojectssaveDIGHObservation', [$project->id]) }}">
+                        <form method="POST" action="/admin/projects/{{ $project->id }}/save-digh-observation">
                             @csrf
                             <input type="hidden" name="document_id" value="{{ $item->document_id }}">
 

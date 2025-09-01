@@ -293,6 +293,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', 'ProjectsController@descargarDocumento')->name('descargarDocumento');
             Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'ProjectsController@downloadFile')->name('downloadFileDoc');
             Route::post('/{project}/save-digh-observation', 'ProjectsController@saveDIGHObservation')->name('saveDIGHObservation');
+            Route::post('/{project}/save-dsgo-observation', 'ProjectsController@saveDSGOObservation')->name('saveDSGOObservation');
 
             Route::get('ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
             Route::get('ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
@@ -556,8 +557,11 @@ Auth::routes();
         Route::get('projectsDoc/{id}', [ProjectController::class, 'showDoc']);
         Route::get('projectsMiembros/{id}', [ProjectController::class, 'showProyMiembros']);
         Route::get('projectsTecnico/{id}', [ProjectController::class, 'showTecnico']);
+        Route::get('projectsTecnicoDSGO/{id}', [ProjectController::class, 'showTecnicoDSGO']);
         Route::get('projectsDocTec/{id}', [ProjectController::class, 'showDocTec']);
+        Route::get('projectsDocTecDSGO/{id}', [ProjectController::class, 'showDocTecDSGO']);
         Route::get('docObservados/{id}', [ProjectController::class, 'DocObservados']);
+        Route::get('docObservadosDSGO/{id}', [ProjectController::class, 'DocObservadosDSGO']);
         Route::get('projectsDocNoExcluyentes/{id}', [ProjectController::class, 'showDocNoExcluyentes']);
         Route::get('projectsDocCondominio/{id}', [ProjectController::class, 'showDocCondominio']);
 
@@ -586,7 +590,9 @@ Auth::routes();
     Route::post('levantar', [ProjectController::class, 'upload']);
     Route::post('levantarDocumento', [ProjectController::class, 'uploadDocumento']);
     Route::post('levantarTecnico', [ProjectController::class, 'uploadTecnico']);
+    Route::post('levantarTecnicoDSGO', [ProjectController::class, 'uploadTecnicoDSGO']);
     Route::post('levantarObs', [ProjectController::class, 'uploadObservado']);
+    Route::post('levantarObsDSGO', [ProjectController::class, 'uploadObservadoDSGO']);
     Route::post('levantarNoExcluyente', [ProjectController::class, 'uploadNoExcluyente']);
     Route::post('levantarCondominio', [ProjectController::class, 'uploadCondominio']);
 

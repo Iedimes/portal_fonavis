@@ -10,16 +10,18 @@ class DighObservation extends Model
         'document_id',
         'project_id',
         'observation',
-    
+        'origen',
+
+
     ];
-    
-    
+
+
     protected $dates = [
         'created_at',
         'updated_at',
-    
+
     ];
-    
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */
