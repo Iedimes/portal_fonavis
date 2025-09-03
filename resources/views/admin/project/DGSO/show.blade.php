@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header text-center">
                 POSTULANTES
 
@@ -256,7 +256,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 </div>
 @endsection
