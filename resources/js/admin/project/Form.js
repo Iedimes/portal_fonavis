@@ -20,7 +20,11 @@ Vue.component('project-form', {
         localidad: this.data?.localidad || '',
         action: this.data?.action || '',
         expsocial: this.data?.expsocial || '',
-        exptecnico: this.data?.exptecnico || ''
+        exptecnico: this.data?.exptecnico || '',
+        res_nro: this.data?.res_nro || '',
+        coordenadax: this.data?.coordenadax || '',
+        coordenaday: this.data?.coordenaday || '',
+        ubicacion: this.data?.ubicacion || '',
       },
       tierraOptions: [],
       tipologiaOptions: [],

@@ -121,7 +121,37 @@
     </div>
 </div>
 
+<div class="form-group row align-items-center" :class="{'has-danger': errors.has('res_nro'), 'has-success': fields.res_nro && fields.res_nro.valid }">
+    <label for="res_nro" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.res_nro') }}</label>
+        <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.res_nro" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('res_nro'), 'form-control-success': fields.res_nro && fields.res_nro.valid}" id="res_nro" name="res_nro" placeholder="{{ trans('admin.project.columns.res_nro') }}">
+        <div v-if="errors.has('res_nro')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('res_nro') }}</div>
+    </div>
+</div>
 
+<div class="form-group row align-items-center" :class="{'has-danger': errors.has('coordenadax'), 'has-success': fields.coordenadax && fields.coordenadax.valid }">
+    <label for="coordenadax" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.coordenadax') }}</label>
+        <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.coordenadax" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('coordenadax'), 'form-control-success': fields.coordenadax && fields.coordenadax.valid}" id="coordenadax" name="coordenadax" placeholder="{{ trans('admin.project.columns.coordenadax') }}">
+        <div v-if="errors.has('coordenadax')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('coordenadax') }}</div>
+    </div>
+</div>
+
+<div class="form-group row align-items-center" :class="{'has-danger': errors.has('coordenaday'), 'has-success': fields.coordenaday && fields.coordenaday.valid }">
+    <label for="coordenaday" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.coordenaday') }}</label>
+        <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.coordenaday" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('coordenaday'), 'form-control-success': fields.coordenaday && fields.coordenaday.valid}" id="coordenaday" name="coordenaday" placeholder="{{ trans('admin.project.columns.coordenaday') }}">
+        <div v-if="errors.has('coordenaday')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('coordenaday') }}</div>
+    </div>
+</div>
+
+<div class="form-group row align-items-center" :class="{'has-danger': errors.has('ubicacion'), 'has-success': fields.ubicacion && fields.ubicacion.valid }">
+    <label for="ubicacion" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.ubicacion') }}</label>
+        <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.ubicacion" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('ubicacion'), 'form-control-success': fields.ubicacion && fields.ubicacion.valid}" id="ubicacion" name="ubicacion" placeholder="{{ trans('admin.project.columns.ubicacion') }}">
+        <div v-if="errors.has('ubicacion')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('ubicacion') }}</div>
+    </div>
+</div>
 
 {{-- <div class="form-group row align-items-center" :class="{'has-danger': errors.has('action'), 'has-success': fields.action && fields.action.valid }">
     <label for="action" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.action') }}</label>

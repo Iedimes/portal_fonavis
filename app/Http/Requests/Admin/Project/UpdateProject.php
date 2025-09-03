@@ -39,6 +39,10 @@ class UpdateProject extends FormRequest
             'action' => ['nullable', 'string'],
             'expsocial' => ['nullable', 'string'],
             'exptecnico' => ['nullable', 'string'],
+            'res_nro' => ['required'],
+            'coordenadax' => ['nullable', 'string'],
+            'coordenaday' => ['nullable', 'string'],
+            'ubicacion' => ['nullable', 'string'],
         ];
     }
 
