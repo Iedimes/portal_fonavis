@@ -10,12 +10,25 @@
             <h4>
             <i class="fas fa-university"></i> Proyectos
             <a href="{{ url('projects/create') }}" class="announce">
-                 <button class="btn btn-primary float-right" hr type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button>
+                 <button class="btn btn-primary float-right" type="button"><i class="fa fa-fw fa-plus"></i> Crear Proyecto</button>
             </a>
             </h4>
         </div>
     </div>
     <br>
+
+    <!-- Formulario de búsqueda -->
+    <form method="GET" action="{{ url('projects') }}">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Buscar proyecto por código o nombre" value="{{ request('search') }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </div>
+    </form>
+
     <div class="row invoice-info">
         <table class="table table-striped">
             <tbody>
@@ -34,14 +47,14 @@
             <tr>
             <td>{{$project->id}}</td>
             <td>{{$project->name}}</td>
-            <td>{{$project->sat_id?$project->getSat->NucNomSat:""}}</td>
-            <td>{{utf8_encode($project->land_id?$project->getLand->name:"")}}</td>
-            <td>{{utf8_encode($project->state_id?$project->getState->DptoNom:"")}}</td>
-            <td>{{utf8_encode($project->city_id?$project->getCity->CiuNom:"")}}</td>
-            <td>{{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}</td>
+            <td>{{$project->sat_id ? $project->getSat->NucNomSat : ""}}</td>
+            <td>{{utf8_encode($project->land_id ? $project->getLand->name : "")}}</td>
+            <td>{{utf8_encode($project->state_id ? $project->getState->DptoNom : "")}}</td>
+            <td>{{utf8_encode($project->city_id ? $project->getCity->CiuNom : "")}}</td>
+            <td>{{utf8_encode($project->modalidad_id ? $project->getModality->name : "")}}</td>
             <td>
                     @if (isset($project->getEstado->stage_id))
-                    <label for="" class="text-green"> {{ $project->getEstado->stage_id?$project->getEstado->getStage->name:"" }}</label>
+                    <label for="" class="text-green"> {{ $project->getEstado->stage_id ? $project->getEstado->getStage->name : "" }}</label>
                     @else
                     <label for="" class="text-yellow">Pendiente</label>
                     @endif
@@ -64,43 +77,13 @@
                     @endif
                     <a class="dropdown-item {{ $project->getEstado ? 'disabled' : ''}} " href="{{ url('projects/'.$project->id.'/edit') }}">Editar</a>
                     <div class="dropdown-divider"></div>
-                    {{-- <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled'}} " href="{{ url('projects/'.$project->id.'/postulantes') }}">Postulantes</a> --}}
-
                     <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled' }}" href="{{ url('projects/'.$project->id.'/postulantes') }}">Grupo Familiar</a>
                     </div>
                 </div>
             </td>
-            {{--<td style="text-align:center; width: 150px;">
-                    <div class="btn-group">
-                            <button type="button" class="btn btn-info">Acciones</button>
-                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                              <span class="caret"></span>
-                              <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                              <li><a href="{{ url('projects/'.$project->id) }}">Ver</a></li>
-                              @if (!isset($project->getEstado->stage_id))
-                             <!-- <li><a href="">Editar</a></li> -->
-                              @endif
-                              <li><a href="">Postulantes</a></li>
-                            </ul>
-                          </div>
-            </td> --}}
             </tr>
             @endforeach
           </tbody>
-          {{-- <tfoot>
-            <tr>
-                <th>Proyecto</th>
-                <th>Empresa/Sat</th>
-                <th>Terreno</th>
-                <th>Departamento</th>
-                <th>Distrito</th>
-                <th>Modalidad</th>
-                <th>Estado</th>
-                <th style="text-align:center">Acciones</th>
-            </tr>
-        </tfoot> --}}
     </table>
 </div>
 </div>

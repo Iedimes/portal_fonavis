@@ -59,16 +59,27 @@ class ProjectController extends Controller
     public function index()
     {
         $title = "Lista de Proyectos";
-
         $id = Auth::user()->id;
         $currentuser = User::find($id);
 
-        $projects = Project::where('sat_id', trim($currentuser->sat_ruc))
-            ->where('action', '=', null)
-            ->get();
+        // Obtener la consulta de búsqueda
+        $search = request('search');
 
-        //return $projects;
-        //Mapper::map(-24.3697635, -56.5912129, ['zoom' => 6, 'type' => 'ROADMAP']);
+        // Construir la consulta
+        $projects = Project::where('sat_id', trim($currentuser->sat_ruc))
+            ->where('action', '=', null);
+
+        // Filtrar por código o nombre si se proporciona el término de búsqueda
+        if ($search) {
+            $projects = $projects->where(function($query) use ($search) {
+                $query->where('id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+
+        // Obtener los resultados
+        $projects = $projects->get();
+
         return view('projects.index', compact('projects', 'title'));
     }
 
