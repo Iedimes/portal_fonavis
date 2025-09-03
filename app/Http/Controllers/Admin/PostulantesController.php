@@ -221,11 +221,10 @@ class PostulantesController extends Controller
 
     public function actualizar(Request $request, $id)
     {
-
         // Validar la solicitud
         $request->validate([
-             'field' => 'required|string',
-             'value' => 'required|string',
+            'field' => 'required|string',
+            'value' => 'required|string',
         ]);
 
         // Buscar el postulante

@@ -89,14 +89,14 @@
 
         <div class="card">
             <div class="card-header text-center">
-                {{-- POSTULANTES
+                POSTULANTES
 
-                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-secondary">Exportar a Excel</a> --}}
+                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-secondary">Exportar a Excel</a>
 
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    {{-- <table class="table table-striped">
+                    <table class="table table-striped">
                         <thead class="thead-light">
                             <tr>
                                 <th>Orden</th>
@@ -138,7 +138,13 @@
                                                 N
                                             @endif
                                         </td>
-                                        <td class="text-center">{{ number_format($post->getPostulante->ingreso ?? 0, 0, ',', '.') }}</td>
+                                       <td class="text-center">
+                                            <input type="text" class="form-control"
+                                                style="background-color: #f0f8ff; text-align: right; width: 120px;"
+                                                value="{{ number_format($post->getPostulante->ingreso ?? 0, 0, ',', '.') }}"
+                                                onchange="saveField('{{ $post->getPostulante->id }}', 'ingreso', this.value.replace(/\./g, '').replace(',', '.'))">
+                                       </td>
+
                                         @php
                                             $conyuge = $post->getMembers->firstWhere('parentesco_id', 1) ?? $post->getMembers->firstWhere('parentesco_id', 8);
                                         @endphp
@@ -152,22 +158,69 @@
                                         </td>
                                         <td class="text-center">
                                             @if ($conyuge)
-                                                {{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') }}
+                                                <input type="text" class="form-control"
+                                                    style="background-color: #f0f8ff; text-align: right; width: 120px;"
+                                                    value="{{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') }}"
+                                                    onchange="saveField('{{ $conyuge->getPostulante->id }}', 'ingreso', this.value.replace(/\./g, '').replace(',', '.'))">
                                             @else
                                                 --------------
                                             @endif
                                         </td>
-                                        <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.') }}</td>
-                                        <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
-                                        <td class="text-center">{{ $post->getPostulante->cantidad_hijos ?? 0 }}</td>
-                                        <td class="text-center">{{ $post->getPostulante->discapacidad ?? 'N' }}</td>
-                                        <td class="text-center">{{ $post->getPostulante->tercera_edad ?? 'N' }}</td>
-                                        <td class="text-center">{{ $post->getPostulante->hijo_sosten ?? 'N' }}</td>
                                         <td class="text-center">
-                                            <select class="form-control" onchange="saveField('{{ $post->getPostulante->id }}', 'otra_persona_a_cargo', this.value)" style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
-                                                <option value="" disabled {{ $post->getPostulante->otra_persona_a_cargo == null ? 'selected' : '' }}>Selecciona</option>
-                                                <option value="S" {{ $post->otra_persona_a_cargo == 'S' ? 'selected' : '' }}>S</option>
-                                                <option value="N" {{ $post->otra_persona_a_cargo == 'N' ? 'selected' : '' }}>N</option>
+                                            <input type="text" class="form-control"
+                                                style="background-color: #f0f8ff; text-align: right; width: 120px;"
+                                                value="{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.') }}"
+                                                onchange="saveField('{{ $post->postulante_id }}', 'ingreso_familiar', this.value.replace(/\./g, '').replace(',', '.'))">
+                                        </td>
+
+                                        <td class="text-center">
+                                            <input type="text" class="form-control"
+                                                style="background-color: #f0f8ff; text-align: right; width: 120px;"
+                                                value="{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}"
+                                                onchange="saveField('{{ $post->postulante_id }}', 'nivel', this.value)">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" class="form-control"
+                                                value="{{ $post->getPostulante->cantidad_hijos ?? 0 }}"
+                                                onchange="saveField('{{ $post->getPostulante->id }}', 'cantidad_hijos', this.value)"
+                                                style="background-color: #f0f8ff; text-align: right; width: 80px;">
+                                        </td>
+                                        <td class="text-center">
+                                            <select class="form-control"
+                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'discapacidad', this.value)"
+                                                    style="background-color: #f0f8ff;">
+                                                <option value="" disabled {{ $post->getPostulante->discapacidad === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="S" {{ $post->getPostulante->discapacidad == 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->getPostulante->discapacidad == 'N' ? 'selected' : '' }}>N</option>
+                                            </select>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <select class="form-control"
+                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'tercera_edad', this.value)"
+                                                    style="background-color: #f0f8ff;">
+                                                <option value="" disabled {{ $post->getPostulante->tercera_edad === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="S" {{ $post->getPostulante->tercera_edad == 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->getPostulante->tercera_edad == 'N' ? 'selected' : '' }}>N</option>
+                                            </select>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <select class="form-control"
+                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'hijo_sosten', this.value)"
+                                                    style="background-color: #f0f8ff;">
+                                                <option value="" disabled {{ $post->getPostulante->hijo_sosten === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="S" {{ $post->getPostulante->hijo_sosten == 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->getPostulante->hijo_sosten == 'N' ? 'selected' : '' }}>N</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <select class="form-control"
+                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'otra_persona_a_cargo', this.value)"
+                                                    style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
+                                                <option value="" disabled {{ $post->getPostulante->otra_persona_a_cargo === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="S" {{ $post->getPostulante->otra_persona_a_cargo == 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->getPostulante->otra_persona_a_cargo == 'N' ? 'selected' : '' }}>N</option>
                                             </select>
                                         </td>
                                         <td class="text-center">{{ utf8_encode($project->land_id ? $project->getLand->name : 'N') }}</td>
@@ -201,7 +254,7 @@
                             @endif
                         </tbody>
                     </table>
-                </div> --}}
+                </div>
             </div>
         </div>
     </div>

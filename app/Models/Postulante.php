@@ -28,12 +28,24 @@ class Postulante extends Model implements AuditableContract
         'phone',
         'mobile',
         'nexp',
+        'hijo_sosten',
+        'otra_persona_a_cargo',
+        'composicion_del_grupo',
+        'documentos_presentados',
+        'discapacidad',
+        'tercera_edad',
+        'ingreso_familiar',
+        'cantidad_hijos',
+        'documentos_faltantes',
+        'observacion_de_consideracion',
+        'nivel',
     ];
 
     protected $dates = [
         'created_at',
         'updated_at',
         'deleted_at',
+        'birthdate', // Asegúrate de que 'birthdate' sea tratado como una fecha
     ];
 
     protected $appends = ['resource_url'];
