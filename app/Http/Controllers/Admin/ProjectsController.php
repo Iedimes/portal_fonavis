@@ -29,6 +29,15 @@ use App\Models\Typology;
 use App\Models\Distrito;
 use App\Models\User;
 use App\Models\DighObservation;
+use App\Models\SIG005;
+use App\Models\SIG006;
+use App\Models\SHMCER;
+use App\Models\PRMCLI;
+use App\Models\IVMSOL;
+use App\Models\Postulante;
+use Carbon\Carbon;
+use App\Models\Discapacidad;
+use App\Models\Parentesco;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -1049,6 +1058,208 @@ class ProjectsController extends Controller
 
         return view('admin.project.project', compact('project', 'title', 'tipoproy', 'postulantes'))
             ->with('projectNotFound', false);
+    }
+
+    public function crearmiembro(Request $request, $project, $postulante)
+    {
+        // return $request;
+        // Obtener el estado del proyecto
+        $proyectoEstado = ProjectStatus::where('project_id', $project)->latest()->first();
+        // $ultimoEstado = $proyectoEstado->stage_id ?? null;
+
+        // Validar la cédula
+        if (!$request->filled('cedula')) {
+            return redirect()->back()->with('error', 'Ingrese Cédula');
+        }
+
+        $cedula = $request->input('cedula');
+
+        // Verifica restricciones generales
+        if ($msg = $this->verificarRestriccionesGenerales($cedula)) {
+            return redirect()->back()->with('status', $msg);
+        }
+
+        // Consulta datos desde el SII
+        $datosPersona = $this->obtenerDatosPersona($cedula);
+        if (isset($datosPersona['error'])) {
+            return redirect()->back()->with('status', $datosPersona['error']);
+        }
+
+        // Extraer variables individuales
+        $nombre = $datosPersona['nombre'] ?? '';
+        $apellido = $datosPersona['apellido'] ?? '';
+        $fecha = $datosPersona['fecha'] ?? '';
+        $sexo = $datosPersona['sexo'] ?? '';
+        $nac = $datosPersona['nac'] ?? '';
+        $est = $datosPersona['est'] ?? '';
+
+        $title = "Agregar Miembro Familiar";
+        $project_id = Project::find($project);
+        $nroexp = $cedula;
+
+        $par = [1, 8];
+        $parentesco = Parentesco::whereIn('id', $par)->orderBy('name', 'asc')->get();
+        // if ($ultimoEstado === null) {
+        //     $parentesco = Parentesco::whereIn('id', $par)->orderBy('name', 'asc')->get();
+        // } else {
+        //     $parentesco = Parentesco::all();
+        // }
+
+        $discapacdad = Discapacidad::all();
+        $idpostulante=$postulante;
+
+        return view('admin.postulante.ficha.createmiembro', compact(
+            'nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo',
+            'nac', 'est', 'title', 'project_id',
+            'discapacdad', 'parentesco', 'idpostulante'
+        ));
+    }
+
+    private function verificarRestriccionesGenerales($cedula)
+    {
+        // Verificar si existe un expediente
+        $expediente = SIG005::where('NroExpPer', $cedula)
+            ->where('TexCod', 118)
+            ->orderBy('NroExp', 'desc')
+            ->first();
+        if ($expediente) {
+            // Verificar que el archivo esté en estado C o H
+            $archivo = SIG006::where('NroExp', $expediente->NroExp)
+                ->whereIn('DEExpEst', ['C', 'H'])
+                ->first();
+
+
+            if (!$archivo) {
+                return 'Ya existe expendiente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!.';
+            }
+        }
+
+        // Evaluar todas las restricciones, se haya pasado o no la condición de expediente
+        if (Postulante::where('cedula', $cedula)->exists()) {
+            return 'Ya existe el postulante!';
+        }
+        // $shmcer=SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists();
+        // dd($shmcer);
+        if (SHMCER::where('CerPosCod', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists()) {
+            return 'Ya cuenta con certificado de Subsidio como Titular!';
+        }
+        // $shmcerCge=SHMCER::where('CerCoCI', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists();
+        // dd($shmcerCge);
+        if (SHMCER::where('CerCoCI', $cedula)->whereNotIn('CerEst', [2, 7, 8, 12])->exists()) {
+            return 'Ya cuenta con certificado de Subsidio como Conyuge!';
+        }
+        // $prmcli=PRMCLI::where('PerCod', $cedula)->where('PylCod', '!=', 'P.F.')->exists();
+        // dd($prmcli);
+        if (PRMCLI::where('PerCod', $cedula)->where('PylCod', '!=', 'P.F.')->exists()) {
+            return 'Ya cuenta con Beneficios en la Institución!';
+        }
+
+        // $ivmsol=IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists();
+        // dd($ivmsol);
+        if (IVMSOL::where('SolPerCod', $cedula)->where('SolEtapa', 'B')->exists()) {
+            return 'Ya es Beneficiario Final!';
+        }
+
+        // $solicitante = IVMSOL::where('SolPerCge', $cedula)->first();
+        // if ($solicitante) {
+        //     $carterasol = PRMCLI::where('PerCod', trim($solicitante->SolPerCod))
+        //         ->where('PylCod', '!=', 'P.F.')
+        //         ->exists();
+
+        //     if ($carterasol) {
+        //         return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        //     }
+        // }
+
+        // $ivmsolcge = IVMSOL::where('SolPerCge', $cedula)->first();
+        // // dd($ivmsolcge);
+        // if ($ivmsolcge) {
+        //         return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        // }
+
+        if (IVMSOL::where('SolPerCge', $cedula)->where('SolEtapa', 'B')->exists()) {
+            return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
+        }
+
+
+        return null; // Alta permitida
+    }
+
+    private function obtenerDatosPersona($cedula)
+    {
+        try {
+            $client = new \GuzzleHttp\Client();
+
+            $auth = $client->post('https://sii.paraguay.gov.py/security', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ],
+                'json' => [
+                    'username' => 'muvhConsulta',
+                    'password' => '*Sipp*2025**'
+                ]
+            ]);
+
+            $tokenData = json_decode($auth->getBody()->getContents());
+
+            if (empty($tokenData->success)) {
+                throw new \Exception("API sin éxito");
+            }
+
+            $response = $client->get("https://sii.paraguay.gov.py/frontend-identificaciones/api/persona/obtenerPersonaPorCedula/{$cedula}", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $tokenData->token,
+                    'Accept' => 'application/json'
+                ]
+            ]);
+
+            $persona = json_decode($response->getBody()->getContents());
+
+            if (!isset($persona->obtenerPersonaPorNroCedulaResponse->return)) {
+                \Log::warning('API respondió pero sin datos válidos', ['cedula' => $cedula, 'respuesta' => $persona]);
+                return null;
+            }
+
+            $p = $persona->obtenerPersonaPorNroCedulaResponse->return;
+
+            if (!$p || isset($p->error)) {
+                return null;
+            }
+
+            return [
+                'nombre' => $p->nombres,
+                'apellido' => $p->apellido,
+                'cedula' => $p->cedula,
+                'sexo' => $p->sexo,
+                'fecha' => Carbon::parse($p->fechNacim)->toDateString(),
+                'nac' => $p->nacionalidadBean ?? '',
+                'est' => $p->estadoCivil ?? ''
+            ];
+        } catch (\Exception $e) {
+            // Solo error de la API, no incluye fallo en BD
+            \Log::warning('Error al obtener datos desde la API, intento con BD local', [
+                'cedula' => $cedula,
+                'mensaje' => $e->getMessage()
+            ]);
+
+            $persona = \App\Models\Persona::where('BDICed', $cedula)->first();
+
+            if (!$persona) {
+                \Log::error('No se encontró la persona en la BD local', ['cedula' => $cedula]);
+                return null;
+            }
+
+            return [
+                'nombre' => $persona->BDINom,
+                'apellido' => $persona->BDIAPE,
+                'cedula' => $persona->BDICed,
+                'sexo' => $persona->BDISexo,
+                'fecha' => $persona->BDIFecNac,
+                'nac' => '',
+                'est' => $persona->BDIEstCiv
+            ];
+        }
     }
 
 

@@ -11,6 +11,8 @@ use App\Http\Requests\Admin\Postulante\UpdatePostulante;
 use App\Models\Postulante;
 use App\Models\Project;
 use App\Models\ProjectHasPostulantes;
+use App\Models\PostulanteHasBeneficiary;
+use App\Models\PostulanteHasDiscapacidad;
 use PDF;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
@@ -262,6 +264,107 @@ class PostulantesController extends Controller
 
         return Excel::download(new PostulantesExport($project, $postulantes),
             'Lista_Postulantes_' . str_replace(' ', '_', $project->name) . '.xlsx');
+    }
+
+    public function guardarmiembro(Request $request)
+    {
+        // Validar los campos esenciales que vienen del formulario
+        $request->validate([
+            'cedula' => 'required|string|max:255',
+            'parentesco_id' => 'required|integer|exists:parentesco,id',
+            'birthdate' => 'required|date', // Valida 'birthdate'
+            'discapacidad_id' => 'nullable|integer|exists:discapacidad,id',
+            // Agrega aquí otras validaciones si es necesario para los campos del postulante
+        ]);
+
+        $parentescoId = $request->input('parentesco_id');
+        $fechaNacimiento = $request->input('birthdate'); // Obtenemos 'birthdate' del request
+
+        // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
+        \Log::info('storemiembro: Valor de parentesco_id: ' . $parentescoId);
+        \Log::info('storemiembro: Valor de fechaNacimiento (birthdate): ' . $fechaNacimiento);
+        // --- FIN DE LA SECCIÓN DEPURACIÓN ---
+
+        // Aplicar la validación de edad solo para parentesco 1 (Cónyuge) y 8 (Postulante Titular)
+        if (in_array($parentescoId, [1, 8])) {
+            // Llamamos al método auxiliar para validar la edad
+            $validacionEdad = $this->validarEdadMinima($fechaNacimiento);
+
+            // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
+            \Log::info('storemiembro: Resultado de validarEdadMinima: ', $validacionEdad);
+            // --- FIN DE LA SECCIÓN DEPURACIÓN ---
+
+            // Si la validación de edad falla, redirigimos con un error
+            if (!$validacionEdad['esValido']) {
+                // Se redirige directamente al listado general, no se necesita withInput() aquí
+                return redirect('admin/projects/' . $request->project_id . '/showDGSO')
+                                 ->with('error', $validacionEdad['mensaje']);
+            }
+        }
+
+        // Si la validación de edad pasa (o no aplica), procedemos a guardar los datos
+
+        // Excluimos campos que no van directamente a la tabla 'postulantes'
+        // IMPORTANTE: 'birthdate' ya NO se excluye porque es una columna directa en la tabla 'postulantes'
+        $input = $request->except(['_token', 'project_id', 'discapacidad_id', 'postulante_id']);
+
+        // No se necesita $input['fecha'] = $request->input('birthdate');
+        // porque 'birthdate' ya está incluido en $input si la columna en la BD se llama 'birthdate'.
+        // Si tu columna en la BD se llama 'fecha', entonces deberías cambiar el nombre del campo en el formulario a 'fecha'
+        // o asegurarte de que 'fecha' se mapee correctamente aquí.
+        // Dado el error, asumimos que la columna es 'birthdate'.
+
+        // Crear el nuevo postulante (miembro familiar)
+        $postulante = Postulante::create($input);
+
+        // Guardar la relación entre el postulante principal y el miembro familiar
+        $miembro = new PostulanteHasBeneficiary();
+        $miembro->postulante_id = $request->postulante_id; // ID del postulante principal
+        $miembro->miembro_id = $postulante->id; // ID del nuevo miembro familiar
+        $miembro->parentesco_id = $request->parentesco_id;
+        $miembro->save();
+
+        // Guardar la relación de discapacidad si se seleccionó una
+        if ($request->filled('discapacidad_id')) {
+            $postulantediscapacidad = new PostulanteHasDiscapacidad();
+            $postulantediscapacidad->discapacidad_id = $request->discapacidad_id;
+            $postulantediscapacidad->postulante_id = $postulante->id;
+            $postulantediscapacidad->save();
+        }
+
+        // Redirigir a la vista de postulantes del proyecto con un mensaje de éxito
+        return redirect('admin/projects/' . $request->project_id . '/showDGSO')->with('success', 'Se ha agregado un nuevo Miembro!');
+    }
+
+    private function validarEdadMinima($fechaNacimiento)
+    {
+        try {
+            $fechaNac = new \DateTime($fechaNacimiento);
+            $hoy = new \DateTime();
+            $edad = $hoy->diff($fechaNac)->y;
+
+            if ($edad < 18) {
+                return [
+                    'esValido' => false,
+                    'mensaje' => 'Un menor de edad no puede ser postulante o conyuge. La persona debe tener al menos 18 años.'
+                ];
+            }
+
+            return [
+                'esValido' => true,
+                'mensaje' => ''
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error al validar edad', [
+                'fecha' => $fechaNacimiento,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'esValido' => false,
+                'mensaje' => 'Error al validar la fecha de nacimiento. Verifique que la fecha sea válida.'
+            ];
+        }
     }
 
 }

@@ -299,6 +299,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
             Route::get('ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
 
+            Route::post('{project}/postulante/{postulante}/crearmiembro', 'ProjectsController@crearmiembro')->name('crearmiembro');
+
         });
     });
 });
@@ -403,6 +405,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             // Route::get('/exportar',                                     'PostulantesController@export')->name('export');
             // En tu archivo de rutas (routes/web.php o routes/admin.php)
             Route::get('/exportar/{project_id}',                        'PostulantesController@exportar')->name('exportar');
+            Route::post('/miembro/guardar',                             'PostulantesController@guardarmiembro')->name('guardarmiembro');
+
         });
     });
 });

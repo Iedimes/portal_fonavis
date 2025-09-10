@@ -84,10 +84,21 @@
                         }, 10000);
                     </script>
                 @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger" id="error-message" style="display: block;">
+                        <i class="fa fa-times-circle"></i> {{ session('error') }}
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            $('.alert').fadeOut('slow');
+                        }, 10000);
+                    </script>
+                @endif
             </div>
         </div>
 
-        {{-- <div class="card">
+        <div class="card">
             <div class="card-header text-center">
                 POSTULANTES
 
@@ -148,7 +159,14 @@
                                         @php
                                             $conyuge = $post->getMembers->firstWhere('parentesco_id', 1) ?? $post->getMembers->firstWhere('parentesco_id', 8);
                                         @endphp
-                                        <td class="text-center">@if ($conyuge) {{ $conyuge->getPostulante->last_name . ' ' . $conyuge->getPostulante->first_name }} @else -------------- @endif</td>
+                                        <td class="text-center">
+                                            @if ($conyuge)
+                                                 {{ $conyuge->getPostulante->last_name . ' ' . $conyuge->getPostulante->first_name }}
+                                            @else
+                                                {{-- <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal" data-postulante-id="{{ $post->getPostulante->id }}" href="#">Agregar Conyuge</a> --}}
+                                                <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal" data-postulante-id="{{ $post->getPostulante->id }}" href="#" onclick="setPostulanteId({{ $post->getPostulante->id }})">Agregar Conyuge</a>
+                                            @endif
+                                        </td>
                                         <td class="text-center">
                                             @if ($conyuge && is_numeric($conyuge->getPostulante->cedula ?? ''))
                                                 {{ number_format($conyuge->getPostulante->cedula, 0, ',', '.') }}
@@ -256,21 +274,52 @@
                     </table>
                 </div>
             </div>
-        </div> --}}
+        </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="miembro-form" action="#" method="POST">
+                {{ csrf_field() }}
+                <div class="modal-header">
+                    <h4 class="modal-title">Ingrese Número de Cédula del Conyuge</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="postulante_id" id="postulante_id" value="">
+                    <div class="form-group {{ $errors->has('cedula') ? 'has-error' : '' }}">
+                        <input type="text" class="form-control" name="cedula" value="" required placeholder="Ingrese número de cédula">
+                        {!! $errors->first('cedula', '<span class="help-block">:message</span>') !!}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
-<script>
+<script type="text/javascript">
+    function setPostulanteId(postulanteId) {
+        document.getElementById('postulante_id').value = postulanteId;
+    }
+
     function saveField(postId, fieldName, value) {
-        // Aquí puedes usar AJAX para enviar los datos al servidor
         $.ajax({
             url: '/admin/postulantes/' + postId + '/actualizar',
             method: 'POST',
             data: {
                 field: fieldName,
                 value: value,
-                _token: '{{ csrf_token() }}' // Asegúrate de incluir el token CSRF
+                _token: '{{ csrf_token() }}'
             },
             success: function(response) {
                 console.log('Campo guardado exitosamente.');
@@ -280,4 +329,14 @@
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('miembro-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Previene el envío del formulario
+            const postulanteId = document.getElementById('postulante_id').value;
+            form.action = '{{ url('admin/projects/'.$project->id.'/postulante/') }}' + '/' + postulanteId + '/crearmiembro';
+            form.submit(); // Ahora envía el formulario
+        });
+    });
 </script>
