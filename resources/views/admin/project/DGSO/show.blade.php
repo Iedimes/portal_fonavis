@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header text-center">
                 POSTULANTES
 
@@ -163,7 +163,7 @@
                                             @if ($conyuge)
                                                  {{ $conyuge->getPostulante->last_name . ' ' . $conyuge->getPostulante->first_name }}
                                             @else
-                                                {{-- <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal" data-postulante-id="{{ $post->getPostulante->id }}" href="#">Agregar Conyuge</a> --}}
+
                                                 <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal" data-postulante-id="{{ $post->getPostulante->id }}" href="#" onclick="setPostulanteId({{ $post->getPostulante->id }})">Agregar Conyuge</a>
                                             @endif
                                         </td>
@@ -274,7 +274,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 </div>
 
