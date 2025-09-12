@@ -206,14 +206,38 @@
 
                                                 <button v-else-if="item.get_estado && item.get_estado.stage_id === 17"
                                                         class="btn"
-                                                        style="background-color: rgb(8, 160, 21); color: white;">
-                                                    CON CALIFICACION TECNICA HABITACIONAL
+                                                        style="background-color: rgb(50, 110, 160); color: white;">
+                                                    OBSERVACION DSGO
                                                 </button>
 
                                                 <button v-else-if="item.get_estado && item.get_estado.stage_id === 18"
                                                         class="btn"
-                                                        style="background-color: rgb(27, 92, 145); color: white;">
+                                                        style="background-color: rgb(241, 25, 25); color: white;">
+                                                    RECHAZADO DSGO
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 19"
+                                                        class="btn"
+                                                        style="background-color: rgb(8, 160, 21); color: white;">
+                                                    CON CALIFICACION TECNICA HABITACIONAL
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 20"
+                                                        class="btn"
+                                                        style="background-color: rgb(3, 63, 6); color: white;">
                                                     ADJUDICADO
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 21"
+                                                        class="btn"
+                                                        style="background-color: rgb(199, 132, 9); color: white;">
+                                                    DEVOLUCION FONAVIS
+                                                </button>
+
+                                                <button v-else-if="item.get_estado && item.get_estado.stage_id === 22"
+                                                        class="btn"
+                                                        style="background-color: rgb(13, 128, 173); color: white;">
+                                                    DEVOLUCION SAT
                                                 </button>
                                             </span>
                                         </td>
