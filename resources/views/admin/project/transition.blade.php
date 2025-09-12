@@ -49,7 +49,7 @@
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
 
-                    @if ($estado==1 || $estado==3 || $estado==9 || ($estado==11 && $dependencia != 4) || $estado==13)
+                    @if ($estado==1 || $estado==3 || $estado==9 || ($estado==11 && $dependencia != 4) || $estado==13 || $estado==21)
 
                     @elseif($estado==8 && $dependencia == 1)
 

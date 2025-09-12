@@ -34,9 +34,7 @@
             <i class="fa fa-plus-circle"></i> Enviar al MUVH
         </button> --}}
 
-        @if (($project->getEstado))
-
-        @else
+       @if (!$project->getEstado || $project->getEstado->stage_id == 22)
             <button id="enviarBtn" type="button" class="btn btn-success float-right" onclick="allchecked()"
                 {{ $todosCargados ? '' : 'disabled' }}>
                 <i class="fa fa-plus-circle"></i> Enviar al MUVH
@@ -220,8 +218,7 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if ($project->getEstado)
-                                                    @else
+                                                    @if (!$project->getEstado || $project->getEstado->stage_id == 22)
                                                         @if ($uploadedFiles[$item->document_id])
                                                             {{-- <form
                                                                 action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}"
@@ -419,19 +416,17 @@
                         aria-labelledby="custom-tabs-one-profile-tab">
                         <a href="{{ url('projects/' . $project->id . '/postulantes') }}">
 
-                            @if ($project->getEstado)
-                                <a href="{{ url('imprimir/' . $project->id) }}"> <button type="button"
-                                        class="btn btn-info btn-block btn-lg btn-lg">
-                                        <i class="fa fa-file-excel-o"></i> Imprimir Listado
-                                    </button></a>
-                            @endif
-
-
+                           @if ($project->getEstado && $project->getEstado->getStage && $project->getEstado->getStage->id != 22)
+    <a href="{{ url('imprimir/' . $project->id) }}">
+        <button type="button" class="btn btn-info btn-block btn-lg btn-lg">
+            <i class="fa fa-file-excel-o"></i> Imprimir Listado
+        </button>
+    </a>
+@endif
 
 
                             {{-- @if ($project->getEstado || $postulantes->count() >= 50) --}}
-                            @if ($project->getEstado)
-                            @else
+                            @if (!$project->getEstado || $project->getEstado->stage_id == 22)
                                 <button type="button" class="btn btn-info float-right">
                                     <i class="fa fa-user"></i> Ir a la Seccion de Postulantes
                                 </button>

@@ -39,7 +39,10 @@
                         </a>
                     @endif
 
-                    @if (!isset($project->getEstado->stage_id) ||($project->getEstado->stage_id == 7 && !(($project->modalidad_id == 2 && $project->land_id == 8) || ($project->modalidad_id == 3 && $project->land_id == 11))))
+                   @if (!isset($project->getEstado->stage_id) ||
+                        ($project->getEstado->stage_id == 7 && !(($project->modalidad_id == 2 && $project->land_id == 8) ||
+                        ($project->modalidad_id == 3 && $project->land_id == 11))) ||
+                        $project->getEstado->stage_id == 22)
                         <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
                             <i class="fa fa-plus-circle"></i> Agregar Postulante
                         </button>
@@ -224,7 +227,7 @@
                                {{-- <a class="dropdown-item feed-id"data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a> --}}
                               {{-- @endif --}}
 
-                              @if (!isset($project->getEstado->stage_id))
+                                @if (!isset($project->getEstado) || !isset($project->getEstado->stage_id))
                                 {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Miembro</a> //en la primera etapa cuando el estado esta vacio no deben aparecer las opciones
                                 <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a> --}}
                                 @if (($post->getMembers->count() + 1) ==1)
@@ -240,7 +243,25 @@
                                     <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a>
                                     {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a> --}}
                                     <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar Postulante</a>
-@endif
+                                @endif
+
+                                @if (isset($project->getEstado) && $project->getEstado->stage_id == 22)
+
+                                    {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Conyuge</a> --}}
+
+                                    {{-- <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a> --}}
+
+                                    <a class="dropdown-item feed-id" data-toggle="modal" data-target="#modal-default1" data-postulante-id="{{ $post->postulante_id }}" href="#">Agregar Miembro</a>
+
+                                    <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('postulantes.edit', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Editar Postulante</a>
+
+                                    <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar Postulante</a>
+
+
+                                    {{-- <a class="dropdown-item feed-id" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('projects.postulantes.show', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a> --}}
+                                    {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar</a> --}}
+                                    {{-- <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $post->postulante_id }}" data-target="#modal-danger" data-title="{{ $post->postulante_id?$post->getPostulante->first_name:"" }} {{ $post->postulante_id?$post->getPostulante->last_name:"" }}" href="#">Eliminar Postulante</a> --}}
+                                @endif
                             </div>
                     </div>
               </td>

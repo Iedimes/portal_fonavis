@@ -67,6 +67,11 @@ class Project extends Model implements AuditableContract
         return $this->hasOne('App\Models\ProjectStatus', 'project_id', 'id')->latest('updated_at');
     }
 
+    public function getEstados()
+    {
+        return $this->hasMany('App\Models\ProjectStatus', 'project_id', 'id');
+    }
+
     /* ************************ EVENTS ************************* */
 
     protected static function boot()

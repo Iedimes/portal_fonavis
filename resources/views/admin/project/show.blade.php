@@ -38,29 +38,84 @@
 
             </div>
 
-            @if (empty($project->getEstado))
-                {{-- <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a> --}}
+            {{-- @if (empty($project->getEstado))
+
             @else
-                @if ( $project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
-
+                @if ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
                     @if (collect($uploadedFiles2)->filter()->isEmpty())
-                    <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
-                        SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
-                    </div>
-                    {{-- <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a> --}}
-
-
+                        <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                            SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                        </div>
+                    @else
+                        <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                    @endif
                 @else
-                    <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
-                    {{-- <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a> --}}
+
+                    <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                @endif
+            @endif
+
+
+            @if ($project->getEstados()->count() <= 1)
+                <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button" class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+            @endif
+
+            <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a>
+            <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a> --}}
+
+            {{-- @if (empty($project->getEstado))
+
+                    @else
+                    @if ( $project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
+                        @if (collect($uploadedFiles2)->filter()->isEmpty())
+                        <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                            SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                        </div>
+
+
+
+                        @else
+                            <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button"  class="btn btn-primary">CAMBIAR ESTADO</a>
+
+                        @endif
+
+                        <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+                @endif
+          @endif
+        <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a>
+
+        <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a> --}}
+
+                @if (empty($project->getEstado))
+                    {{-- Si no hay estado definido --}}
+                    {{-- <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a> --}}
+                @else
+                    @if ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
+                        @if (collect($uploadedFiles2)->filter()->isEmpty())
+                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                            </div>
+                        @else
+                            <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                        @endif
+                    @else
+                        {{-- Mostrar CAMBIAR ESTADO para todos los estados excepto el 2 --}}
+                        @if ($project->getEstado->stage_id != 2)
+                            <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                        @endif
+                    @endif
                 @endif
 
-                <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button"  class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
-                    @endif
-            @endif
-            <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a>
+                {{-- Mostrar VOLVER AL ESTADO PENDIENTE DE ENVIO solo si hay un único estado --}}
+                @if ($project->getEstados()->count() <= 1)
+                    <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button" class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
+                @endif
 
-            <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a>
+                <a href="{{ url('admin/projects/'. $project->id .'/notificar') }}" class="btn btn-success">NOTIFICAR A SAT</a>
+                <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a>
+
+
+
     </div>
     @if(session('success'))
     <div class="alert alert-success">

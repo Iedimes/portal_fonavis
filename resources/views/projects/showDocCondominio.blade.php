@@ -149,10 +149,23 @@
                                                 </td>
                                                 <td>
                                                     @if ($project->getEstado)
-                                                    {{-- @if (!$project->getEstado || $project->getEstado) --}}
+                                                        {{-- Si el estado está definido, no mostramos nada --}}
                                                     @else
                                                         @if ($uploadedFiles[$item->document_id])
+                                                            <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
+                                                                @csrf
+                                                                @method('DELETE')
 
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+
+                                                    {{-- Permitir eliminar si el estado es 22 --}}
+                                                    @if (isset($project->getEstado) && $project->getEstado->stage_id == 22)
+                                                        @if ($uploadedFiles[$item->document_id])
                                                             <form action="{{ route('eliminar', ['project_id' => $project->id, 'document_id' => $item->document->id]) }}" method="GET">
                                                                 @csrf
                                                                 @method('DELETE')
