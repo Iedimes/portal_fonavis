@@ -863,7 +863,7 @@ class ProjectsController extends Controller
             if ($item->stage_id == 1) {
                 $state1Count++;
 
-                if ($state1Count == 1) {
+                if ($state1Count == 1 || $item->stage_id == 1) {
                     // Primera vez -> SAT
                     $user = User::find($item->user_id);
                     $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
