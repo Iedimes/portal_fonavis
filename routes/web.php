@@ -568,6 +568,7 @@ Auth::routes();
         Route::get('docObservadosDSGO/{id}', [ProjectController::class, 'DocObservadosDSGO']);
         Route::get('projectsDocNoExcluyentes/{id}', [ProjectController::class, 'showDocNoExcluyentes']);
         Route::get('projectsDocCondominio/{id}', [ProjectController::class, 'showDocCondominio']);
+        Route::get('projectsDocIndi/{id}', [ProjectController::class, 'showDocIndi']);
 
         // Descargar documentos
         Route::get('download/{project}/{document_id}/{file_name}', [ProjectController::class, 'downloadFile'])->name('downloadFile');
@@ -599,6 +600,7 @@ Auth::routes();
     Route::post('levantarObsDSGO', [ProjectController::class, 'uploadObservadoDSGO']);
     Route::post('levantarNoExcluyente', [ProjectController::class, 'uploadNoExcluyente']);
     Route::post('levantarCondominio', [ProjectController::class, 'uploadCondominio']);
+    Route::post('levantarIndi', [ProjectController::class, 'uploadIndi']);
 
     // Imprimir
     Route::get('imprimir/{id}', [PostulantesController::class, 'generatePDF'])->name('imprimir');

@@ -291,6 +291,22 @@
                                             <td></td>
                                         </tr>
 
+                                        <tr>
+                                            <td colspan="2">
+                                                <a href="{{ url('projectsDocIndi/'.$project->id) }}">
+                                                    NO OBJECIÓN DEL INDI
+                                                </a>
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+
 
                                         @if (session('message'))
                                             <div class="alert alert-success" id="success-message">

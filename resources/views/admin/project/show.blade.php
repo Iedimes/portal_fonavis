@@ -91,9 +91,17 @@
                     {{-- <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a> --}}
                 @else
                     @if ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
-                        @if (collect($uploadedFiles2)->filter()->isEmpty())
+                        @if (collect($uploadedFiles2)->filter()->isEmpty() && collect($uploadedFiles3)->filter()->isEmpty())
+                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO Y NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                            </div>
+                        @elseif (collect($uploadedFiles2)->filter()->isEmpty())
                             <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
                                 SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                            </div>
+                        @elseif (collect($uploadedFiles3)->filter()->isEmpty())
+                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                SAT DEBE PRESENTAR NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
                             </div>
                         @else
                             <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
