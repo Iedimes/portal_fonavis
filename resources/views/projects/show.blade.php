@@ -290,7 +290,7 @@
                                             <td></td>
                                             <td></td>
                                         </tr>
-
+                                        @if ($project->modalidad_id == 1)
                                         <tr>
                                             <td colspan="2">
                                                 <a href="{{ url('projectsDocIndi/'.$project->id) }}">
@@ -306,6 +306,7 @@
                                             <td></td>
                                             <td></td>
                                         </tr>
+                                        @endif
 
 
                                         @if (session('message'))

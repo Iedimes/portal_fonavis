@@ -86,25 +86,36 @@
 
         <a href="{{ url('admin/projects/'.$project->id.'/historial') }}" class="btn btn-warning" style="float: right;">HISTORIAL DEL PROYECTO</a> --}}
 
-                @if (empty($project->getEstado))
+               @if (empty($project->getEstado))
                     {{-- Si no hay estado definido --}}
-                    {{-- <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a> --}}
                 @else
                     @if ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
-                        @if (collect($uploadedFiles2)->filter()->isEmpty() && collect($uploadedFiles3)->filter()->isEmpty())
-                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
-                                SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO Y NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
-                            </div>
-                        @elseif (collect($uploadedFiles2)->filter()->isEmpty())
-                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
-                                SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
-                            </div>
-                        @elseif (collect($uploadedFiles3)->filter()->isEmpty())
-                            <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
-                                SAT DEBE PRESENTAR NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
-                            </div>
+                        @if ($project->modalidad_id == 1)
+                            {{-- Modalidad 1: requiere ambos documentos --}}
+                            @if (collect($uploadedFiles2)->filter()->isEmpty() && collect($uploadedFiles3)->filter()->isEmpty())
+                                <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                    SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO Y NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                                </div>
+                            @elseif (collect($uploadedFiles2)->filter()->isEmpty())
+                                <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                    SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                                </div>
+                            @elseif (collect($uploadedFiles3)->filter()->isEmpty())
+                                <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                    SAT DEBE PRESENTAR NO OBJECIÓN DEL INDI PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                                </div>
+                            @else
+                                <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                            @endif
                         @else
-                            <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                            {{-- Modalidad diferente de 1: solo se requiere condición de dominio --}}
+                            @if (collect($uploadedFiles2)->filter()->isEmpty())
+                                <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                    SAT DEBE PRESENTAR INFORME DE CONDICION DE DOMINIO PARA PODER CAMBIAR AL ESTADO REVISION PRELIMINAR!!!
+                                </div>
+                            @else
+                                <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                            @endif
                         @endif
                     @else
                         {{-- Mostrar CAMBIAR ESTADO para todos los estados excepto el 2 --}}
@@ -113,7 +124,6 @@
                         @endif
                     @endif
                 @endif
-
                 {{-- Mostrar VOLVER AL ESTADO PENDIENTE DE ENVIO solo si hay un único estado --}}
                 @if ($project->getEstados()->count() <= 1)
                     <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button" class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
