@@ -321,14 +321,16 @@ class PostulantesController extends Controller
             $projectId = request()->get('project_id');
         }
 
-        $project = Project::with([
-            'getState',
-            'getCity',
-            'getSat',
-            'getModality',
-            'getLand',
-            'getTypology'
-        ])->findOrFail($projectId);
+        // $project = Project::with([
+        //     'getState',
+        //     'getCity',
+        //     'getSat',
+        //     'getModality',
+        //     'getLand',
+        //     'getTypology'
+        // ])->findOrFail($projectId);
+
+        $project = Project::findOrFail($projectId);
 
         $postulantes = ProjectHasPostulantes::with([
             'getPostulante',
@@ -336,7 +338,7 @@ class PostulantesController extends Controller
         ])->where('project_id', $projectId)->get();
 
         return Excel::download(new PostulantesExport($project, $postulantes),
-            'Lista_Postulantes_' . str_replace(' ', '_', $project->name) . '.xlsx');
+            'PLANILLA-' . str_replace(' ', '-', $project->id.'-CH') . '.xlsx');
     }
 
     public function guardarmiembro(Request $request)

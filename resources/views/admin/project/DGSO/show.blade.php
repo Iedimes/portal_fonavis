@@ -68,7 +68,6 @@
                             </address>
                         </div>
                     </div>
-
                     @if (!empty($project->getEstado) && $project->getEstado->stage_id == 8 && Auth::user()->rol_app->dependency_id == 3)
                         <a href="{{ url('admin/projects/' . $project->id . '/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
                     @endif
@@ -99,11 +98,11 @@
         </div>
 
         {{-- <div class="card">
-            <div class="card-header text-center">
-                POSTULANTES
-
-                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-secondary">Exportar a Excel</a>
-
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION HABITACIONAL</h2>
+                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2">
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                </a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -278,8 +277,8 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
-        </div>
+            </div>
+        </div> --}}
     </div>
 </div>
 
