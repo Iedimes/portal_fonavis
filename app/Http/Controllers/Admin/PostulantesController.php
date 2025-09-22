@@ -13,6 +13,9 @@ use App\Models\Project;
 use App\Models\ProjectHasPostulantes;
 use App\Models\PostulanteHasBeneficiary;
 use App\Models\PostulanteHasDiscapacidad;
+use App\Models\SIG005;
+use App\Models\SIG006;
+use App\Models\Usuario;
 use PDF;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
@@ -28,6 +31,7 @@ use Illuminate\Http\Request;
 use App\Exports\PostulantesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class PostulantesController extends Controller
 {
@@ -223,6 +227,15 @@ class PostulantesController extends Controller
 
     public function actualizar(Request $request, $id)
     {
+        $user = Auth::user();
+        $email = $user->email;
+        $username = strtoupper(explode('@', $email)[0]);
+
+        $usuario = Usuario::where('UsuCod', $username)->first();
+
+        $dependencia = $usuario->DepenCod;
+        $nombreusuario = $usuario->UsuNombre;
+
         // Validar la solicitud
         $request->validate([
             'field' => 'required|string',
@@ -235,6 +248,66 @@ class PostulantesController extends Controller
         // Actualizar el campo correspondiente
         $postulante->{$request->field} = $request->value;
         $postulante->save();
+
+        // Inicializar variables para usar en ambos bloques
+        $sig005 = SIG005::where('NroExpPer', $postulante->cedula)
+                        ->where('TexCod', 118)
+                        ->first();
+
+        if ($request->field === 'califica' && $request->value === 'N') {
+            if ($sig005) {
+                // Obtener el NroExp
+                $nroExp = $sig005->NroExp;
+                $detalle = SIG006::where('NroExp', $nroExp)
+                                    ->orderBy('DENroLin', 'desc')
+                                    ->first();
+                $nroLin = $detalle->DENroLin + 1;
+                $date = new \DateTime();
+
+                // Insertar un nuevo registro en SIG006 usando el modelo
+                Sig006::create([
+                    'NroExp' => $nroExp,
+                    'NroExpS' => 'A',
+                    'DENroLin' => $nroLin,
+                    'DEExpEst' => 'N', // Estado 'N'
+                    'DEFecDis' => date_format($date, 'Ymd H:i:s'),
+                    'UsuRcp' => $username,
+                    'DEUnOrHa' => $dependencia,
+                    'DEUnOrDe' => $dependencia,
+                    'DERcpChk' => 1,
+                    'DERcpNam' => $nombreusuario,
+                    'DEExpAcc' => $postulante->observacion_de_consideracion,
+                    // Agrega aquí cualquier otro campo requerido por tu tabla SIG006
+                ]);
+            }
+        } else
+        if ($request->field === 'califica' && $request->value === 'S') {
+            // Si no es N, entonces es un estado 'P'
+            if ($sig005) {
+                $nroExp = $sig005->NroExp;
+                $detalle = SIG006::where('NroExp', $nroExp)
+                                    ->orderBy('DENroLin', 'desc')
+                                    ->first();
+                $nroLin = $detalle ? $detalle->DENroLin + 1 : 1; // Manejar caso si no hay detalle
+                $date = new \DateTime();
+
+                // Insertar un nuevo registro en SIG006 usando el modelo
+                Sig006::create([
+                    'NroExp' => $nroExp,
+                    'NroExpS' => 'A',
+                    'DENroLin' => $nroLin,
+                    'DEExpEst' => 'P', // Estado 'P'
+                    'DEFecDis' => date_format($date, 'Ymd H:i:s'),
+                    'UsuRcp' => $username,
+                    'DEUnOrHa' => $dependencia,
+                    'DEUnOrDe' => $dependencia,
+                    'DERcpChk' => 0,
+                    'DERcpNam' => $nombreusuario,
+                    'DEExpAcc' => $postulante->observacion_de_consideracion,
+                    // Agrega aquí cualquier otro campo requerido por tu tabla SIG006
+                ]);
+            }
+        }
 
         // Retornar una respuesta
         return response()->json(['success' => true]);

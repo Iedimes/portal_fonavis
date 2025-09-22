@@ -10,17 +10,30 @@ class SIG006 extends Model
 
     protected $connection = 'sqlsrvsecond';
 
-    // public function tiposol() {
-    //     return $this->hasOne('App\SIG0001','TexCod','TexCod');
-    // }
+    protected $fillable = [
+        'NroExp',
+        'NroExpS',
+        'DENroLin',
+        'DEFecDis',
+        'UsuRcp',
+        'UsuCod',
+        'DEUnOrHa',
+        'DEExpAcc',
+        'DEExpEst',
+        'DEFecMod',
+        'DEFecRec',
+        'DERecep',
+        'DEUnOrDe',
+        'DEFecRcp',
+        'DERcpChk',
+        'DEFecEnt',
+        'DERcpNam',
+    ];
 
-    //protected $primaryKey = 'SEOBId';
+    public $timestamps = false; // Deshabilitar marcas de tiempo
 
-    /*public function distrito() {
-        return $this->hasOne('App\Distrito','CiuId','CiuId');
-    }
-
-    public function departamento() {
-        return $this->hasOne('App\Departamento','DptoId','DptoId');
-    }*/
+    // Definir los casts
+    protected $casts = [
+        'DEFecDis' => 'datetime:Y-m-d H:i:s', // Formato para DEFecDis
+    ];
 }

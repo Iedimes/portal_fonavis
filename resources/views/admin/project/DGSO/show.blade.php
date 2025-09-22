@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        {{-- <div class="card">
+        <div class="card">
             <div class="card-header text-center">
                 POSTULANTES
 
@@ -132,6 +132,7 @@
                                 <th class="text-center">{{ trans('Documentos Presentados') }}</th>
                                 <th class="text-center">{{ trans('Documentos Faltantes') }}</th>
                                 <th class="text-center">{{ trans('Observaciones de Consideracion') }}</th>
+                                <th class="text-center">{{ trans('Califica') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -207,9 +208,8 @@
                                             <select class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'discapacidad', this.value)"
                                                     style="background-color: #f0f8ff;">
-                                                <option value="" disabled {{ $post->getPostulante->discapacidad === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="N" {{ $post->getPostulante->discapacidad == 'N' || $post->getPostulante->discapacidad === null ? 'selected' : '' }}>N</option>
                                                 <option value="S" {{ $post->getPostulante->discapacidad == 'S' ? 'selected' : '' }}>S</option>
-                                                <option value="N" {{ $post->getPostulante->discapacidad == 'N' ? 'selected' : '' }}>N</option>
                                             </select>
                                         </td>
 
@@ -217,9 +217,8 @@
                                             <select class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'tercera_edad', this.value)"
                                                     style="background-color: #f0f8ff;">
-                                                <option value="" disabled {{ $post->getPostulante->tercera_edad === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="N" {{ $post->getPostulante->tercera_edad == 'N' || $post->getPostulante->tercera_edad === null ? 'selected' : '' }}>N</option>
                                                 <option value="S" {{ $post->getPostulante->tercera_edad == 'S' ? 'selected' : '' }}>S</option>
-                                                <option value="N" {{ $post->getPostulante->tercera_edad == 'N' ? 'selected' : '' }}>N</option>
                                             </select>
                                         </td>
 
@@ -227,18 +226,16 @@
                                             <select class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'hijo_sosten', this.value)"
                                                     style="background-color: #f0f8ff;">
-                                                <option value="" disabled {{ $post->getPostulante->hijo_sosten === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="N" {{ $post->getPostulante->hijo_sosten == 'N' || $post->getPostulante->hijo_sosten === null ? 'selected' : '' }}>N</option>
                                                 <option value="S" {{ $post->getPostulante->hijo_sosten == 'S' ? 'selected' : '' }}>S</option>
-                                                <option value="N" {{ $post->getPostulante->hijo_sosten == 'N' ? 'selected' : '' }}>N</option>
                                             </select>
                                         </td>
                                         <td class="text-center">
                                             <select class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'otra_persona_a_cargo', this.value)"
                                                     style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
-                                                <option value="" disabled {{ $post->getPostulante->otra_persona_a_cargo === null ? 'selected' : '' }}>Selecciona</option>
+                                                <option value="N" {{ $post->getPostulante->otra_persona_a_cargo == 'N' || $post->getPostulante->otra_persona_a_cargo === null ? 'selected' : '' }}>N</option>
                                                 <option value="S" {{ $post->getPostulante->otra_persona_a_cargo == 'S' ? 'selected' : '' }}>S</option>
-                                                <option value="N" {{ $post->getPostulante->otra_persona_a_cargo == 'N' ? 'selected' : '' }}>N</option>
                                             </select>
                                         </td>
                                         <td class="text-center">{{ utf8_encode($project->land_id ? $project->getLand->name : 'N') }}</td>
@@ -263,6 +260,14 @@
                                                       onchange="saveField('{{ $post->getPostulante->id }}', 'observacion_de_consideracion', this.value)"
                                                       style="background-color: #f0f8ff;">{{ $post->getPostulante->observacion_de_consideracion ?? '' }}</textarea>
                                         </td>
+                                        <td class="text-center">
+                                            <select class="form-control"
+                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'califica', this.value)"
+                                                    style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
+                                                <option value="S" {{ $post->getPostulante->califica === 'S' ? 'selected' : '' }}>S</option>
+                                                <option value="N" {{ $post->getPostulante->califica === 'N' ? 'selected' : '' }}>N</option>
+                                            </select>
+                                        </td>
                                     </tr>
                                 @endforeach
                             @else
@@ -274,7 +279,7 @@
                     </table>
                 </div>
             </div>
-        </div> --}}
+        </div>
     </div>
 </div>
 
