@@ -5,6 +5,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PostulantesController;
 use App\Http\Controllers\Admin\ProjectsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DashboardController;
 
 
 /*
@@ -301,6 +302,10 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
             Route::post('{project}/postulante/{postulante}/crearmiembro', 'ProjectsController@crearmiembro')->name('crearmiembro');
 
+            // Route::get('/{id}/postulantes', 'ProjectsController@postulantes')->name('postulantes');
+            Route::get('/{id}/postulantes/{idpostulante}', 'ProjectsController@showpostulantes')->name('showpostulantes');
+
+
         });
     });
 });
@@ -406,6 +411,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             // En tu archivo de rutas (routes/web.php o routes/admin.php)
             Route::get('/exportar/{project_id}',                        'PostulantesController@exportar')->name('exportar');
             Route::post('/miembro/guardar',                             'PostulantesController@guardarmiembro')->name('guardarmiembro');
+            Route::post('/miembro/destroy',                             'PostulantesController@destroyMiembro')->name('destroy-miembro');
+
 
         });
     });
@@ -620,3 +627,8 @@ Auth::routes();
 
     // Validación de código QR
     Route::get('/{key}', [HomeController::class, 'verification']);
+
+
+
+    // routes/web.php
+    Route::get('/dashboard/sessions', [DashboardController::class, 'sessions']);
