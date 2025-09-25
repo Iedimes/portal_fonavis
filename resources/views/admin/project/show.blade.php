@@ -198,6 +198,27 @@
                             </tr>
                         @endif
                     @endforeach
+                    @if($project->land_id == 2)
+                    <tr>
+                        <th colspan="3">NO OBEJECIÓN DEL INDI</th>
+                    </tr>
+                    @foreach ($docproyectoIndi as $key => $item)
+                        @if ($uploadedFiles3[$item->document_id])
+                            <tr>
+                                {{-- <td>{{ $key+1 }}</td> --}}
+                                <td>{{ $item->document->name }}</td>
+                                <td>
+                                    <a href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles3[$item->document_id]]) }}">
+                                        <button class="btn btn-info">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endif
+                    @endforeach
+                    @endif
+
                     @if($project->land_id == 1)
                     <!-- Mostrar documentos no excluyentes existentes -->
                     <tr>

@@ -242,7 +242,7 @@ class ProjectsController extends Controller
         }
     }
 
-    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'uploadedFiles1', 'uploadedFiles2', 'uploadedFiles3', 'missingDocuments'));
+    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'docproyectoIndi', 'uploadedFiles1', 'uploadedFiles2', 'uploadedFiles3', 'missingDocuments'));
 }
 
     public function showDGJN(Project $project)
