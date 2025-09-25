@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION</h2>
                 <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2">
@@ -271,7 +271,7 @@
 
                                         <td class="text-center">
                                             <a class="btn btn-sm btn-outline-primary" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('adminprojectsshowpostulantes', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a>
-                                            {{-- <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal" data-postulante-id="{{ $post->getPostulante->id }}" href="#" onclick="setPostulanteId({{ $post->getPostulante->id }})">Agregar Conyuge</a> --}}
+
                                         </td>
 
 
@@ -285,7 +285,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>
