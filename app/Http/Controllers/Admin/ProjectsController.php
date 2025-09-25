@@ -38,6 +38,7 @@ use App\Models\Postulante;
 use Carbon\Carbon;
 use App\Models\Discapacidad;
 use App\Models\Parentesco;
+use App\Models\PostulanteHasBeneficiary;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -1280,6 +1281,23 @@ class ProjectsController extends Controller
         }
     }
 
+    public function showpostulantes($id,$idpostulante)
+    {
+        // return "Postulantes lado ADM Show";
+        $postulante=Postulante::find($idpostulante);
+        $project = Project::find($id);
+        $title="Resumen Postulante ";
+        //dd($project);
+        $tipoproy = Land_project::where('land_id',$project->land_id)->first();
+        // $documentos = PostulantesDocuments::where('postulante_id',$idpostulante)->get();
+        // $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
+        // ->whereNotIn('document_id', $documentos->pluck('document_id'))
+        // ->where('category_id',2)
+        // ->get();
+        $miembros = PostulanteHasBeneficiary::where('postulante_id',$postulante->id)->get();
+        //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
+        return view('admin.postulante.show',compact('title','project','miembros','postulante'));
+    }
 
 
 }

@@ -166,15 +166,37 @@ class PostulantesController extends Controller
      * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
      */
-    public function destroy(DestroyPostulante $request, Postulante $postulante)
+    // public function destroy(DestroyPostulante $request, Postulante $postulante)
+    // {
+    //     return $request;
+    //     $postulante->delete();
+
+    //     if ($request->ajax()) {
+    //         return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
+    //     }
+
+    //     return redirect()->back();
+    // }
+    public function destroyMiembro(Request $request)
     {
-        $postulante->delete();
 
-        if ($request->ajax()) {
-            return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
-        }
+        // $postulante = ProjectHasPostulantes::where('postulante_id',$request->delete_id)->first();
 
-        return redirect()->back();
+
+        // if ($postulante->getMembers->count() > 0) {
+        //     // return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+        //     return back()->with('status', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
+        // }else{
+        // return $request;
+        ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
+        PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
+        PostulanteHasBeneficiary::where('miembro_id',$request->delete_id)->delete();
+        Postulante::find($request->delete_id)->delete();
+
+        // return back()->with('error', 'Se ha eliminado el Postulante!');
+        return back()->with('status', 'Se ha eliminado el Postulante!');
+        // }
+
     }
 
     /**
@@ -239,7 +261,7 @@ class PostulantesController extends Controller
         // Validar la solicitud
         $request->validate([
             'field' => 'required|string',
-            'value' => 'required|string',
+            // 'value' => 'required|string',
         ]);
 
         // Buscar el postulante
@@ -253,10 +275,10 @@ class PostulantesController extends Controller
         $sig005 = SIG005::where('NroExpPer', $postulante->cedula)
                         ->where('TexCod', 118)
                         ->first();
-
         if ($request->field === 'califica' && $request->value === 'N') {
             if ($sig005) {
                 // Obtener el NroExp
+                // return "No califica";
                 $nroExp = $sig005->NroExp;
                 $detalle = SIG006::where('NroExp', $nroExp)
                                     ->orderBy('DENroLin', 'desc')
@@ -296,12 +318,12 @@ class PostulantesController extends Controller
                     'NroExp' => $nroExp,
                     'NroExpS' => 'A',
                     'DENroLin' => $nroLin,
-                    'DEExpEst' => 'P', // Estado 'P'
+                    'DEExpEst' => 'K', // Estado 'P'
                     'DEFecDis' => date_format($date, 'Ymd H:i:s'),
                     'UsuRcp' => $username,
                     'DEUnOrHa' => $dependencia,
                     'DEUnOrDe' => $dependencia,
-                    'DERcpChk' => 0,
+                    'DERcpChk' => 1,
                     'DERcpNam' => $nombreusuario,
                     'DEExpAcc' => $postulante->observacion_de_consideracion,
                     // Agrega aquí cualquier otro campo requerido por tu tabla SIG006
