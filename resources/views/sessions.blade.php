@@ -1,13 +1,8 @@
-<!-- resources/views/dashboard/sessions.blade.php -->
-
 <h2>Estadísticas de sesiones</h2>
 <ul>
-    <li>Total de sesiones activas: {{ $total }}</li>
-    <li>Sesiones admin (repetidas): {{ count($admins_raw) }}</li>
-    <li>Sesiones SAT (repetidas): {{ count($sat_raw) }}</li>
-    <li>Usuarios admin únicos: {{ count($admins_unique) }}</li>
-    <li>Usuarios SAT únicos: {{ count($sat_unique) }}</li>
-    {{-- <li>Sesiones de invitados: {{ $guest_count }}</li> --}}
+    <li>Total de sesiones admin: {{ $total_admins }}</li>
+    <li>Total de sesiones SAT: {{ $total_sat }}</li>
+    <li>Total de sesiones: {{ $total_sessions }}</li>
 </ul>
 
 <!-- Contenedor para el gráfico -->
@@ -22,15 +17,14 @@ const ctx = document.getElementById('sessionChart').getContext('2d');
 const sessionChart = new Chart(ctx, {
     type: 'pie',
     data: {
-        labels: ['Admin únicos', 'Usuarios SAT únicos', 'Invitados'],
+        labels: ['Admin', 'SAT'],
         datasets: [{
             label: 'Sesiones',
             data: [
-                {{ count($admins_unique) }},
-                {{ count($sat_unique) }},
-                {{ $guest_count }}
+                {{ $total_admins }},
+                {{ $total_sat }}
             ],
-            backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
+            backgroundColor: ['#800000', '#2f4538'],
             borderWidth: 1
         }]
     },

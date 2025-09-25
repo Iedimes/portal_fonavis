@@ -1,5 +1,4 @@
 <?php
-
 // app/Http/Controllers/DashboardController.php
 namespace App\Http\Controllers;
 
@@ -15,28 +14,31 @@ class DashboardController extends Controller
 
         $admins_raw = [];
         $sat_raw = [];
+        $total_admins = 0;
+        $total_sat = 0;
 
         foreach ($files as $file) {
-    $content = File::get($file);
+            $content = File::get($file);
 
-    // Todas las coincidencias admin
-    preg_match_all('/login_admin_[^;]*;i:[0-9]+/', $content, $matches);
-    $admins_raw = array_merge($admins_raw, $matches[0]);
+            // Contar sesiones admin
+            preg_match_all('/login_admin_[^;]*;i:\d+/', $content, $admin_matches);
+            if (!empty($admin_matches[0])) {
+                $total_admins += count($admin_matches[0]);
+                $admins_raw = array_merge($admins_raw, $admin_matches[0]);
+            }
 
-    // Todas las coincidencias SAT
-    preg_match_all('/login_web_[^;]*;i:[0-9]+/', $content, $matches);
-    $sat_raw = array_merge($sat_raw, $matches[0]);
-    }
+            // Contar sesiones SAT
+            preg_match_all('/login_web_[^;]*;i:\d+/', $content, $sat_matches);
+            if (!empty($sat_matches[0])) {
+                $total_sat += count($sat_matches[0]);
+                $sat_raw = array_merge($sat_raw, $sat_matches[0]);
+            }
+        }
 
-
-        $admins_unique = array_unique($admins_raw);
-        $sat_unique = array_unique($sat_raw);
-
-        $total = count($files);
-        $guest_count = $total - count($admins_raw) - count($sat_raw);
+        $total_sessions = $total_admins + $total_sat;
 
         return view('sessions', compact(
-            'total', 'admins_raw', 'admins_unique', 'sat_raw', 'sat_unique', 'guest_count'
+            'total_sessions', 'total_admins', 'total_sat'
         ));
     }
 }
