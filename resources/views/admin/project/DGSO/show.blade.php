@@ -84,6 +84,17 @@
                     </script>
                 @endif
 
+                @if (session('status'))
+                    <div class="alert alert-warning" id="status-message" style="display: block;">
+                        <i class="fa fa-exclamation-triangle"></i> {{ session('status') }}
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            $('.alert').fadeOut('slow');
+                        }, 10000);
+                    </script>
+                @endif
+
                 @if (session('error'))
                     <div class="alert alert-danger" id="error-message" style="display: block;">
                         <i class="fa fa-times-circle"></i> {{ session('error') }}
@@ -271,6 +282,7 @@
 
                                         <td class="text-center">
                                             <a class="btn btn-sm btn-outline-primary" data-postulante-id="{{ $post->postulante_id }}" href="{{ route('adminprojectsshowpostulantes', ['id' => $project->id, 'idpostulante' => $post->postulante_id]) }}">Ver Miembros</a>
+                                            <a class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#modal1" data-postulante-id="{{ $post->getPostulante->id }}" href="#" onclick="setPostulanteIdNc({{ $post->getPostulante->id }})">Agregar Miembro</a>
 
                                         </td>
 
@@ -285,18 +297,19 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
-        </div>
+            </div>
+        </div> --}}
     </div>
 </div>
 
+<!-- Modal para Cónyuge -->
 <div class="modal fade" id="modal" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="miembro-form" action="#" method="POST">
                 {{ csrf_field() }}
                 <div class="modal-header">
-                    <h4 class="modal-title">Ingrese Número de Cédula del Conyuge</h4>
+                    <h4 class="modal-title">Ingrese Número de Cédula del Cónyuge</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -317,11 +330,45 @@
     </div>
 </div>
 
+<!-- Modal para Miembro -->
+<div class="modal fade" id="modal1" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="miembronocge-form" action="#" method="POST">
+                {{ csrf_field() }}
+                <div class="modal-header">
+                    <h4 class="modal-title">Ingrese Número de Cédula del Miembro</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="postulante_id" id="postulante_id_nc" value="">
+                    <div class="form-group {{ $errors->has('cedula') ? 'has-error' : '' }}">
+                        <input type="text" class="form-control" name="cedula" value="" required placeholder="Ingrese número de cédula">
+                        {!! $errors->first('cedula', '<span class="help-block">:message</span>') !!}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 <script type="text/javascript">
     function setPostulanteId(postulanteId) {
         document.getElementById('postulante_id').value = postulanteId;
+        console.log('ID Cónyuge establecido:', postulanteId);
+    }
+
+    function setPostulanteIdNc(postulanteId) {
+        document.getElementById('postulante_id_nc').value = postulanteId;
+        console.log('ID Miembro establecido:', postulanteId);
     }
 
     function saveField(postId, fieldName, value) {
@@ -343,12 +390,36 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('miembro-form');
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Previene el envío del formulario
-            const postulanteId = document.getElementById('postulante_id').value;
-            form.action = '{{ url('admin/projects/'.$project->id.'/postulante/') }}' + '/' + postulanteId + '/crearmiembro';
-            form.submit(); // Ahora envía el formulario
-        });
+        // Form para cónyuge
+        const formConyuge = document.getElementById('miembro-form');
+        if (formConyuge) {
+            formConyuge.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const postulanteId = document.getElementById('postulante_id').value;
+                console.log('Enviando formulario cónyuge con ID:', postulanteId);
+                if (postulanteId) {
+                    formConyuge.action = '{{ url('admin/projects/'.$project->id.'/postulante/') }}' + '/' + postulanteId + '/crearmiembro';
+                    formConyuge.submit();
+                } else {
+                    alert('Error: No se ha seleccionado un postulante válido para el cónyuge.');
+                }
+            });
+        }
+
+        // Form para miembro
+        const formMiembro = document.getElementById('miembronocge-form');
+        if (formMiembro) {
+            formMiembro.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const postulanteId = document.getElementById('postulante_id_nc').value;
+                console.log('Enviando formulario miembro con ID:', postulanteId);
+                if (postulanteId) {
+                    formMiembro.action = '{{ url('admin/projects/'.$project->id.'/postulante/') }}' + '/' + postulanteId + '/crearmiembronocge';
+                    formMiembro.submit();
+                } else {
+                    alert('Error: No se ha seleccionado un postulante válido para el miembro.');
+                }
+            });
+        }
     });
 </script>

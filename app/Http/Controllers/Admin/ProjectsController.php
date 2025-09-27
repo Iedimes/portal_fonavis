@@ -1138,6 +1138,61 @@ class ProjectsController extends Controller
         ));
     }
 
+    public function crearmiembroNoCge(Request $request, $project, $postulante)
+    {
+        // return $request;
+        // Obtener el estado del proyecto
+        $proyectoEstado = ProjectStatus::where('project_id', $project)->latest()->first();
+        // $ultimoEstado = $proyectoEstado->stage_id ?? null;
+
+        // Validar la cédula
+        if (!$request->filled('cedula')) {
+            return redirect()->back()->with('error', 'Ingrese Cédula');
+        }
+
+        $cedula = $request->input('cedula');
+
+        // Verifica restricciones generales
+        if ($msg = $this->verificarRestriccionesGenerales($cedula)) {
+            return redirect()->back()->with('status', $msg);
+        }
+
+        // Consulta datos desde el SII
+        $datosPersona = $this->obtenerDatosPersona($cedula);
+        if (isset($datosPersona['error'])) {
+            return redirect()->back()->with('status', $datosPersona['error']);
+        }
+
+        // Extraer variables individuales
+        $nombre = $datosPersona['nombre'] ?? '';
+        $apellido = $datosPersona['apellido'] ?? '';
+        $fecha = $datosPersona['fecha'] ?? '';
+        $sexo = $datosPersona['sexo'] ?? '';
+        $nac = $datosPersona['nac'] ?? '';
+        $est = $datosPersona['est'] ?? '';
+
+        $title = "Agregar Miembro Familiar";
+        $project_id = Project::find($project);
+        $nroexp = $cedula;
+
+        $par = [1, 8];
+        $parentesco = Parentesco::whereNotIn('id', $par)->orderBy('name', 'asc')->get();
+        // if ($ultimoEstado === null) {
+        //     $parentesco = Parentesco::whereIn('id', $par)->orderBy('name', 'asc')->get();
+        // } else {
+        //     $parentesco = Parentesco::all();
+        // }
+
+        $discapacdad = Discapacidad::all();
+        $idpostulante=$postulante;
+
+        return view('admin.postulante.ficha.createmiembro', compact(
+            'nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo',
+            'nac', 'est', 'title', 'project_id',
+            'discapacdad', 'parentesco', 'idpostulante'
+        ));
+    }
+
     private function verificarRestriccionesGenerales($cedula)
     {
         // Verificar si existe un expediente

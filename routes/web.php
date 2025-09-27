@@ -301,6 +301,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
 
             Route::post('{project}/postulante/{postulante}/crearmiembro', 'ProjectsController@crearmiembro')->name('crearmiembro');
+            Route::post('{project}/postulante/{postulante}/crearmiembronocge', 'ProjectsController@crearmiembroNoCge')->name('crearmiembroNoCge');
 
             // Route::get('/{id}/postulantes', 'ProjectsController@postulantes')->name('postulantes');
             Route::get('/{id}/postulantes/{idpostulante}', 'ProjectsController@showpostulantes')->name('showpostulantes');
