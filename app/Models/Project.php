@@ -20,7 +20,7 @@ class Project extends Model implements AuditableContract
         'fechares', 'coordenadax', 'coordenaday', 'ubicacion'
     ];
 
-    protected $with = ['getState', 'getModality', 'getCity', 'getEstado'];
+    protected $with = ['getState', 'getModality', 'getCity', 'getEstado', 'getSat'];
 
     protected $dates = [
         'created_at',
@@ -40,6 +40,11 @@ class Project extends Model implements AuditableContract
     public function getLand()
     {
         return $this->hasOne('App\Models\Land', 'id', 'land_id');
+    }
+
+    public function getprojectType()
+    {
+        return $this->hasOne('App\Models\LandHasProjectType', 'land_id', 'land_id');
     }
 
     public function getState()
@@ -70,19 +75,6 @@ class Project extends Model implements AuditableContract
     public function getEstados()
     {
         return $this->hasMany('App\Models\ProjectStatus', 'project_id', 'id');
-    }
-
-    /* ************************ EVENTS ************************* */
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::retrieved(function ($model) {
-            if ($model->getSat) {
-                $model->getSat->NucCod = trim($model->getSat->NucCod);
-            }
-        });
     }
 
     /* ************************ ACCESSORS ************************* */

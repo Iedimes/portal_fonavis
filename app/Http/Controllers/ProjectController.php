@@ -18,6 +18,7 @@ use App\Models\Assignment;
 use App\Models\Typology;
 use App\Models\ProjectHasPostulantes;
 use App\Models\Land_project;
+use App\Models\LandHasProjectType;
 use App\Models\ModalityHasLand;
 use App\Models\Project_tipologies;
 use App\Models\ProjectStatusF;
@@ -34,6 +35,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -210,167 +212,189 @@ class ProjectController extends Controller
 
 
 
-public function show($id)
-{
-    // Buscar el proyecto
-    $project = Project::findOrFail($id);
+    public function show($id)
+    {
+        $project = Project::with([
+            'getState',
+            'getModality',
+            'getCity',
+            'getLand',
+            'getTypology',
+            'getEstado.getStage',
+            'getSat',
+            'getprojectType',
+        ])->findOrFail($id);
 
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-    $title = "Resumen Proyecto " . $project->name;
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)
+            ->with([
+                'getPostulante:id,first_name,last_name,cedula,birthdate',
+                'getMembers' => function($query) {
+                    $query->whereIn('parentesco_id', [1, 8])
+                        ->with('getPostulante:id,birthdate');
+                }
+            ])
+            ->get();
 
-    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+        // Traer TODOS los ingresos y niveles en batch
+        $postulanteIds = $postulantes->pluck('postulante_id')->filter();
+        $ingresos = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
 
-    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->where('category_id', 1)
-        ->where('stage_id', 1)
-        ->get();
+        // Preparar datos para la vista
+        $postulantesData = $postulantes->map(function($post) use ($ingresos, $niveles) {
+            $postulante = $post->getPostulante;
+            $postulanteId = $post->postulante_id;
 
-    $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->whereIn('category_id', [2, 3])
-        ->where('stage_id', 1)
-        ->get();
-
-    $documentIds = $datosAdiciones->pluck('document_id');
-
-    $documentos = Documents::where('project_id', $id)
-        ->whereIn('document_id', $documentIds)
-        ->get();
-
-    $claves = $docproyecto->pluck('document_id');
-
-    $history = ProjectStatusF::where('project_id', $project->id)
-        ->orderBy('created_at')
-        ->get();
-
-    $uploadedFiles = [];
-    foreach ($docproyecto as $item) {
-        $uploadedFile = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-        $uploadedFiles[$item->document_id] = $documentExists;
-    }
-
-    $uploadedFiles2 = [];
-    foreach ($documentos as $item) {
-        $uploadedFile2 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
-        $uploadedFiles2[$item->document_id] = $documentExists;
-    }
-
-    // Validación de edades generales
-    $edadesPostulantes = $postulantes->map(function ($post) {
-        return \Carbon\Carbon::parse($post->getPostulante->birthdate)->age;
-    });
-
-    // Validación específica para parentesco 1 (esposo/a) y 8 (concubino/a)
-    $edadesConyuges = $postulantes->flatMap(function ($post) {
-        return $post->getMembers->filter(function ($member) {
-            return in_array((int) $member->parentesco_id, [1, 8]) &&
-                   $member->getPostulante &&
-                   $member->getPostulante->birthdate;
-        })->map(function ($member) {
-            return \Carbon\Carbon::parse($member->getPostulante->birthdate)->age;
+            return [
+                'first_name' => $postulante->first_name ?? '',
+                'last_name' => $postulante->last_name ?? '',
+                'cedula' => $postulante->cedula ?? '',
+                'birthdate' => $postulante->birthdate ?? null,
+                'edad' => $postulante->birthdate ? Carbon::parse($postulante->birthdate)->age : 0,
+                'ingreso' => $ingresos[$postulanteId] ?? 0,
+                'nivel' => $niveles[$postulanteId] ?? 'N/A',
+            ];
         });
-    });
 
+        // Cálculo de edades
+        $edadesPostulantes = [];
+        $edadesConyuges = [];
 
+        foreach ($postulantes as $post) {
+            if ($post->getPostulante && $post->getPostulante->birthdate) {
+                $edadesPostulantes[] = Carbon::parse($post->getPostulante->birthdate)->age;
+            }
 
-    $todosCargados = true;
-    foreach ($docproyecto as $item) {
-        if (!isset($uploadedFiles[$item->document_id])) {
-            $todosCargados = false;
-            break;
+            foreach ($post->getMembers as $member) {
+                if ($member->getPostulante && $member->getPostulante->birthdate) {
+                    $edadesConyuges[] = Carbon::parse($member->getPostulante->birthdate)->age;
+                }
+            }
         }
-    }
 
-    $existenDocumentos = $documentos->isNotEmpty();
+        $title = "Resumen Proyecto " . $project->name;
+        $tipoproy = $project->getProjectType->project_type_id ?? null;
+        $docproyecto = Assignment::where('project_type_id', $tipoproy)
+            ->where('category_id', 1)
+            ->where('stage_id', 1)
+            ->with('document')  // ← Eager loading para evitar N+1
+            ->get();
 
-    return view('projects.show', compact(
-        'title',
-        'project',
-        'docproyecto',
-        'tipoproy',
-        'claves',
-        'history',
-        'postulantes',
-        'uploadedFiles',
-        'todosCargados',
-        'existenDocumentos',
-        'datosAdiciones',
-        'documentos',
-        'uploadedFiles2',
-        'edadesPostulantes',
-        'edadesConyuges'
-    ));
-}
+        $datosAdiciones = Assignment::where('project_type_id', $tipoproy)
+            ->whereIn('category_id', [2, 3])
+            ->where('stage_id', 1)
+            ->get();
 
-public function showEliminados($id)
-{
-    $project = Project::find($id);
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-    $title = "Resumen Proyecto " . $project->name;
+        $documentIds = $datosAdiciones->pluck('document_id');
 
-    $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+        $documentos = Documents::where('project_id', $id)
+            ->whereIn('document_id', $documentIds)
+            ->get();
 
-    $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->where('category_id', 1)
-        ->where('stage_id', 1)
-        ->get();
+        $claves = $docproyecto->pluck('document_id');
 
-    // Documentación técnica
-    $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
-        ->whereIn('category_id', [2,3])
-        ->where('stage_id', 1)
-        ->get();
+        $history = ProjectStatusF::where('project_id', $project->id)
+            ->with('getStage')
+            ->orderBy('created_at')
+            ->get();
 
-    $documentIds = $datosAdiciones->pluck('document_id');
+        $uploadedFiles = Documents::where('project_id', $project->id)
+            ->whereIn('document_id', $claves)
+            ->pluck('file_path', 'document_id')
+            ->toArray();
 
-    $documentos = Documents::where('project_id', $id)
-        ->whereIn('document_id', $documentIds)
-        ->get();
-
-    $claves = $docproyecto->pluck('document_id');
-
-    $history = ProjectStatusF::where('project_id', $project['id'])
-        ->orderBy('created_at')
-        ->get();
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles = [];
-    foreach ($docproyecto as $item) {
-        $uploadedFile = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-        $uploadedFiles[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles2 = [];
-    foreach ($documentos as $item) {
-        $uploadedFile2 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
-        $uploadedFiles2[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si todos los documentos están cargados
-    $todosCargados = true;
-    foreach ($docproyecto as $item) {
-        if (!isset($uploadedFiles[$item->document_id])) {
-            $todosCargados = false;
-            break;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $uploadedFiles[$item->document_id] = false;
+            }
         }
+
+        $uploadedFiles2 = Documents::where('project_id', $project->id)
+            ->whereIn('document_id', $documentIds)
+            ->pluck('file_path', 'document_id')
+            ->toArray();
+
+        foreach ($documentos as $item) {
+            if (!isset($uploadedFiles2[$item->document_id])) {
+                $uploadedFiles2[$item->document_id] = false;
+            }
+        }
+
+        $existenDocumentos = $documentos->isNotEmpty();
+        $todosCargados = !in_array(false, $uploadedFiles, true);
+
+        return view('projects.show', compact(
+            'project', 'postulantes', 'postulantesData',
+            'title', 'docproyecto', 'documentos',
+            'claves', 'history', 'uploadedFiles', 'uploadedFiles2',
+            'edadesPostulantes', 'edadesConyuges', 'existenDocumentos', 'todosCargados'
+        ));
     }
 
-    $existenDocumentos = $documentos->isNotEmpty();
+    public function showEliminados($id)
+    {
+        $project = Project::find($id);
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $title = "Resumen Proyecto " . $project->name;
 
-    return view('projects.showEliminados', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
-}
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
+
+        $docproyecto = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->where('category_id', 1)
+            ->where('stage_id', 1)
+            ->get();
+
+        // Documentación técnica
+        $datosAdiciones = Assignment::where('project_type_id', $tipoproy->project_type_id)
+            ->whereIn('category_id', [2,3])
+            ->where('stage_id', 1)
+            ->get();
+
+        $documentIds = $datosAdiciones->pluck('document_id');
+
+        $documentos = Documents::where('project_id', $id)
+            ->whereIn('document_id', $documentIds)
+            ->get();
+
+        $claves = $docproyecto->pluck('document_id');
+
+        $history = ProjectStatusF::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles2 = [];
+        foreach ($documentos as $item) {
+            $uploadedFile2 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+            $uploadedFiles2[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si todos los documentos están cargados
+        $todosCargados = true;
+        foreach ($docproyecto as $item) {
+            if (!isset($uploadedFiles[$item->document_id])) {
+                $todosCargados = false;
+                break;
+            }
+        }
+
+        $existenDocumentos = $documentos->isNotEmpty();
+
+        return view('projects.showEliminados', compact('title', 'project', 'docproyecto', 'tipoproy', 'claves', 'history', 'postulantes', 'uploadedFiles', 'todosCargados', 'existenDocumentos', 'datosAdiciones', 'documentos', 'uploadedFiles2'));
+    }
 
     public function showDoc($id)
     {
@@ -750,7 +774,7 @@ public function showEliminados($id)
             // Validar edades de postulantes
             $edadesPostulantes = $postulantes->map(function ($post) {
                 return $post->getPostulante && $post->getPostulante->birthdate
-                    ? \Carbon\Carbon::parse($post->getPostulante->birthdate)->age
+                    ? Carbon::parse($post->getPostulante->birthdate)->age
                     : null;
             })->filter();
 
@@ -765,7 +789,7 @@ public function showEliminados($id)
                         $member->getPostulante &&
                         $member->getPostulante->birthdate;
                 })->map(function ($member) {
-                    return \Carbon\Carbon::parse($member->getPostulante->birthdate)->age;
+                    return Carbon::parse($member->getPostulante->birthdate)->age;
                 });
             });
 

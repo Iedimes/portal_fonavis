@@ -102,7 +102,7 @@
 
             <div class="col-sm-4 invoice-col">
                 <address>
-                    <strong>SAT:</strong> {{ $project->sat_id ? $project->getSat->NucNomSat : '' }}<br>
+                    <strong>SAT:</strong> {{ ($project->getSat && $project->getSat->NucNomSat) ? $project->getSat->NucNomSat : 'N/A' }}<br>
                     <strong>Localidad:</strong> {{ $project->localidad }}
                     {{-- <strong>Localidad:</strong> @if ($project->localidad == 123)
     Villa Florida
@@ -462,28 +462,23 @@
                                 <th class="text-center">Nivel</th>
                             </thead>
                             <tbody>
-                                @if (count($postulantes) > 0)
-                                    @foreach ($postulantes as $key => $post)
+                                @if (count($postulantesData) > 0)
+                                    @foreach ($postulantesData as $key => $data)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ $post->postulante_id ? $post->getPostulante->first_name : '' }}
-                                                {{ $post->postulante_id ? $post->getPostulante->last_name : '' }}</td>
-                                            @if (is_numeric($post->postulante_id ? $post->getPostulante->cedula : ''))
+                                            <td>{{ $data['first_name'] }} {{ $data['last_name'] }}</td>
+
+                                            @if (is_numeric($data['cedula']))
                                                 <td class="text-center">
-                                                    {{ number_format($post->postulante_id ? $post->getPostulante->cedula : '', 0, '.', '.') }}
+                                                    {{ number_format($data['cedula'], 0, '.', '.') }}
                                                 </td>
                                             @else
-                                                <td class="text-center">
-                                                    {{ $post->postulante_id ? $post->getPostulante->cedula : '' }} </td>
+                                                <td class="text-center">{{ $data['cedula'] }}</td>
                                             @endif
-                                            <td class="text-center">
-                                                {{ \Carbon\Carbon::parse($post->postulante_id ? $post->getPostulante->birthdate : '')->age }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, '.', '.') }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
+
+                                            <td class="text-center">{{ $data['edad'] }}</td>
+                                            <td class="text-center">{{ number_format($data['ingreso'], 0, '.', '.') }}</td>
+                                            <td class="text-center">{{ $data['nivel'] }}</td>
                                         </tr>
                                     @endforeach
                                 @endif
