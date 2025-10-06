@@ -26,6 +26,7 @@ use App\Http\Requests\StorePostulante;
 use PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 
 class PostulantesController extends Controller
@@ -289,7 +290,7 @@ class PostulantesController extends Controller
             // Verificar que el archivo esté en estado C o H
             $archivo = SIG006::where('NroExp', $expediente->NroExp)
                 ->whereIn('DEExpEst', ['C', 'H'])
-                ->first();
+                ->exists();
 
 
             if (!$archivo) {
@@ -351,123 +352,118 @@ class PostulantesController extends Controller
 
     public function store(StorePostulante $request)
     {
+        $input = $request->except(['_token', 'project_id', 'discapacidad_id']);
 
+        DB::transaction(function () use ($request, $input) {
+            // Crear el postulante
+            $postulante = Postulante::create($input);
 
-        //return $request;
+            // Asociarlo al proyecto
+            ProjectHasPostulantes::create([
+                'project_id'    => $request->project_id,
+                'postulante_id' => $postulante->id,
+            ]);
 
-        $input = $request->except(['_token','project_id','discapacidad_id']);
-        $postulante = Postulante ::create($input);
+            // Asociar discapacidad
+            PostulanteHasDiscapacidad::create([
+                'discapacidad_id' => $request->discapacidad_id,
+                'postulante_id'   => $postulante->id,
+            ]);
+        });
 
-        $proypostulante = new ProjectHasPostulantes();
-        $proypostulante->project_id=$request->project_id;
-        $proypostulante->postulante_id=$postulante->id;
-        $proypostulante->save();
-
-
-
-        $postulantediscapacidad = new PostulanteHasDiscapacidad();
-        $postulantediscapacidad->discapacidad_id=$request->discapacidad_id;
-        $postulantediscapacidad->postulante_id=$postulante->id;
-        $postulantediscapacidad->save();
-        //ProjectHasPostulantes::
-
-        //return $request->all();
-        //Postulante ::create($request->all());
-        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha agregado un nuevo Postulante!');
-        //return $request;
+        return redirect('projects/'.$request->project_id.'/postulantes')
+            ->with('success', 'Se ha agregado un nuevo Postulante!');
     }
 
-    public function storeEditPostulante(StorePostulante $request)
+
+   public function storeEditPostulante(StorePostulante $request)
     {
-        // Encuentra el postulante por ID
-        $postulante = Postulante::findOrFail($request->postulante_id);
+        DB::transaction(function () use ($request) {
+            // Encuentra el postulante por ID
+            $postulante = Postulante::findOrFail($request->postulante_id);
 
-        // Rellena los atributos del postulante con los datos validados
-        $postulante->fill($request->all());
+            // Rellena los atributos validados
+            $postulante->fill($request->except(['_token', 'project_id', 'discapacidad_id']));
+            $postulante->save(); // SoftDeletes y Auditing funcionan automáticamente
 
-        // Guarda los cambios
-        $postulante->save();
+            // Si quieres actualizar discapacidad, ejemplo:
+            if ($request->filled('discapacidad_id')) {
+                PostulanteHasDiscapacidad::updateOrCreate(
+                    ['postulante_id' => $postulante->id],
+                    ['discapacidad_id' => $request->discapacidad_id]
+                );
+            }
+        });
 
-        // Redirige con un mensaje de éxito
-        return redirect('projects/'.$request->project_id.'/postulantes')->with('success', 'Se ha editado correctamente el Postulante!');
+        return redirect('projects/'.$request->project_id.'/postulantes')
+            ->with('success', 'Se ha editado correctamente el Postulante!');
     }
 
     public function storemiembro(Request $request)
     {
-        // Validar los campos esenciales que vienen del formulario
+        // Validación de campos
         $request->validate([
             'cedula' => 'required|string|max:255',
             'parentesco_id' => 'required|integer|exists:parentesco,id',
-            'birthdate' => 'required|date', // Valida 'birthdate'
+            'birthdate' => 'required|date',
             'discapacidad_id' => 'nullable|integer|exists:discapacidad,id',
-            // Agrega aquí otras validaciones si es necesario para los campos del postulante
         ]);
 
         $parentescoId = $request->input('parentesco_id');
-        $fechaNacimiento = $request->input('birthdate'); // Obtenemos 'birthdate' del request
+        $fechaNacimiento = $request->input('birthdate');
 
-        // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
-        \Log::info('storemiembro: Valor de parentesco_id: ' . $parentescoId);
-        \Log::info('storemiembro: Valor de fechaNacimiento (birthdate): ' . $fechaNacimiento);
-        // --- FIN DE LA SECCIÓN DEPURACIÓN ---
-
-        // Aplicar la validación de edad solo para parentesco 1 (Cónyuge) y 8 (Postulante Titular)
+        // Validación de edad para cónyuge o titular
         if (in_array($parentescoId, [1, 8])) {
-            // Llamamos al método auxiliar para validar la edad
             $validacionEdad = $this->validarEdadMinima($fechaNacimiento);
-
-            // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
-            \Log::info('storemiembro: Resultado de validarEdadMinima: ', $validacionEdad);
-            // --- FIN DE LA SECCIÓN DEPURACIÓN ---
-
-            // Si la validación de edad falla, redirigimos con un error
             if (!$validacionEdad['esValido']) {
-                // Se redirige directamente al listado general, no se necesita withInput() aquí
                 return redirect('projects/' . $request->project_id . '/postulantes')
-                                 ->with('error', $validacionEdad['mensaje']);
+                    ->with('error', $validacionEdad['mensaje']);
             }
         }
 
-        // Si la validación de edad pasa (o no aplica), procedemos a guardar los datos
+        DB::transaction(function () use ($request) {
+            // Crear el nuevo miembro
+            $postulante = Postulante::create($request->except(['_token', 'project_id', 'discapacidad_id', 'postulante_id']));
 
-        // Excluimos campos que no van directamente a la tabla 'postulantes'
-        // IMPORTANTE: 'birthdate' ya NO se excluye porque es una columna directa en la tabla 'postulantes'
-        $input = $request->except(['_token', 'project_id', 'discapacidad_id', 'postulante_id']);
+            // Relación con el postulante principal
+            PostulanteHasBeneficiary::create([
+                'postulante_id' => $request->postulante_id,
+                'miembro_id'    => $postulante->id,
+                'parentesco_id' => $request->parentesco_id,
+            ]);
 
-        // No se necesita $input['fecha'] = $request->input('birthdate');
-        // porque 'birthdate' ya está incluido en $input si la columna en la BD se llama 'birthdate'.
-        // Si tu columna en la BD se llama 'fecha', entonces deberías cambiar el nombre del campo en el formulario a 'fecha'
-        // o asegurarte de que 'fecha' se mapee correctamente aquí.
-        // Dado el error, asumimos que la columna es 'birthdate'.
+            // Relación de discapacidad si aplica
+            if ($request->filled('discapacidad_id')) {
+                PostulanteHasDiscapacidad::create([
+                    'postulante_id'   => $postulante->id,
+                    'discapacidad_id' => $request->discapacidad_id,
+                ]);
+            }
+        });
 
-        // Crear el nuevo postulante (miembro familiar)
-        $postulante = Postulante::create($input);
-
-        // Guardar la relación entre el postulante principal y el miembro familiar
-        $miembro = new PostulanteHasBeneficiary();
-        $miembro->postulante_id = $request->postulante_id; // ID del postulante principal
-        $miembro->miembro_id = $postulante->id; // ID del nuevo miembro familiar
-        $miembro->parentesco_id = $request->parentesco_id;
-        $miembro->save();
-
-        // Guardar la relación de discapacidad si se seleccionó una
-        if ($request->filled('discapacidad_id')) {
-            $postulantediscapacidad = new PostulanteHasDiscapacidad();
-            $postulantediscapacidad->discapacidad_id = $request->discapacidad_id;
-            $postulantediscapacidad->postulante_id = $postulante->id;
-            $postulantediscapacidad->save();
-        }
-
-        // Redirigir a la vista de postulantes del proyecto con un mensaje de éxito
-        return redirect('projects/' . $request->project_id . '/postulantes')->with('success', 'Se ha agregado un nuevo Miembro!');
+        return redirect('projects/' . $request->project_id . '/postulantes')
+            ->with('success', 'Se ha agregado un nuevo Miembro!');
     }
 
-    public function storemiembroeditar(Request $request){
-       // return "Guardar Edicion";
-        $postulante = Postulante::findOrFail($request->postulante_id);
-        $postulante->fill($request->all());
-        $postulante->save();
-        return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)->with('success', 'Se ha editado correctamente el Miembro!');
+    public function storemiembroeditar(Request $request)
+    {
+        DB::transaction(function () use ($request) {
+            // Editar los datos del miembro
+            $postulante = Postulante::findOrFail($request->postulante_id);
+            $postulante->fill($request->except(['_token', 'project_id', 'discapacidad_id']));
+            $postulante->save();
+
+            // Actualizar discapacidad si aplica
+            if ($request->filled('discapacidad_id')) {
+                PostulanteHasDiscapacidad::updateOrCreate(
+                    ['postulante_id' => $postulante->id],
+                    ['discapacidad_id' => $request->discapacidad_id]
+                );
+            }
+        });
+
+        return redirect('projects/'.$request->project_id.'/postulantes/'.$request->postulante_id)
+            ->with('success', 'Se ha editado correctamente el Miembro!');
     }
 
     public function show($id,$idpostulante)
@@ -529,36 +525,69 @@ class PostulantesController extends Controller
 
 
 
-    public function editmiembro($id,$idpostulante)
+    public function editmiembro($id, $idpostulante)
     {
-        $title="Editar Miembro";
-        $project=Project::find($id);
-        $postulante=Postulante::find($idpostulante);
-        $nombre = $postulante->first_name;
-        $apellido = $postulante->last_name;
-        $cedula = $postulante->cedula;
-        $sexo = $postulante->gender;
-        $project_id = Project::find($id);
-        $nac = $postulante->nacionalidad;
-        $est = $postulante->marital_status;
-        $fecha = $postulante->birthdate;
+        $title = "Editar Miembro";
+
+        // Obtener el proyecto y postulante (evitando consultas duplicadas)
+        $project = Project::select('id', 'name')->findOrFail($id);
+        $postulante = Postulante::findOrFail($idpostulante);
+
+        // Variables para la vista
+        $nombre    = $postulante->first_name;
+        $apellido  = $postulante->last_name;
+        $cedula    = $postulante->cedula;
+        $sexo      = $postulante->gender;
+        $project_id = $project; // se mantiene para compatibilidad con la vista
+        $nac       = $postulante->nacionalidad;
+        $est       = $postulante->marital_status;
+        $fecha     = $postulante->birthdate;
+
+        // Listado de discapacidades
         $discapacdad = Discapacidad::all();
-        $disc = PostulanteHasDiscapacidad::where('postulante_id',$postulante->id)->first();
-        $estado= ProjectStatus::where('project_id', $id)->first();
-        if (empty($estado)){
-            //return "Vacio";
-            $par = [1,8];
+
+        // Discapacidad actual del postulante (si tiene)
+        $disc = PostulanteHasDiscapacidad::where('postulante_id', $postulante->id)
+            ->select('id', 'discapacidad_id')
+            ->first();
+
+        // Verificar estado del proyecto y cargar los parentescos según corresponda
+        $estado = ProjectStatus::where('project_id', $id)->first();
+
+        if (empty($estado)) {
+            $par = [1, 8];
             $parentesco = Parentesco::whereIn('id', $par)->get();
-        }else{
+        } else {
             $parentesco = Parentesco::all();
         }
 
-        $parent = PostulanteHasBeneficiary::where('miembro_id',$postulante->id)->first();
-        $idpostulante=$parent->postulante_id;
-        $idmiembro=$parent->miembro_id;
+        // Obtener la relación entre el postulante principal y el miembro
+        $parent = PostulanteHasBeneficiary::where('miembro_id', $postulante->id)
+            ->select('postulante_id', 'miembro_id')
+            ->firstOrFail();
 
-        return view('postulantes.ficha.editmiembro',compact('title','project','postulante','apellido','cedula','sexo','project_id',
-                                                'nombre','nac','est','fecha','discapacdad','disc','parentesco','idpostulante', 'idmiembro'));
+        $idpostulante = $parent->postulante_id;
+        $idmiembro    = $parent->miembro_id;
+
+        // Retornar vista con los mismos nombres de variables
+        return view('postulantes.ficha.editmiembro', compact(
+            'title',
+            'project',
+            'postulante',
+            'apellido',
+            'cedula',
+            'sexo',
+            'project_id',
+            'nombre',
+            'nac',
+            'est',
+            'fecha',
+            'discapacdad',
+            'disc',
+            'parentesco',
+            'idpostulante',
+            'idmiembro'
+        ));
     }
 
     public function update(Request $request)
