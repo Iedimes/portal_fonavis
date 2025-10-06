@@ -208,8 +208,8 @@
                 <td class="text-center">{{ $post->postulante_id?$post->getPostulante->cedula:""  }} </td>
                 @endif
               <td class="text-center">{{ \Carbon\Carbon::parse( $post->postulante_id?$post->getPostulante->birthdate:"")->age }} </td>
-              <td class="text-center">{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id),0,".",".") }} </td>
-              <td class="text-center">{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}</td>
+              <td class="text-center">{{ number_format($ingresos[$post->postulante_id] ?? 0,0,".",".") }}</td>
+              <td class="text-center">{{ $niveles[$post->postulante_id] ?? '' }}</td>
               <td class="text-center">{{ $post->getMembers->count() + 1 }}</td>
               <td class="text-center" style="width: 150px;">
                     <div class="btn-group">

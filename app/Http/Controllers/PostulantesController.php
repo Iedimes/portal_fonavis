@@ -41,15 +41,32 @@ class PostulantesController extends Controller
 
     public function index($id)
     {
-        $title="Lista de Postulantes";
-        $project = Project::find($id);
-        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
+        $title = "Lista de Postulantes";
 
-        //return $postulantes;
-        //Mapper::map(-24.3697635, -56.5912129, ['zoom' => 6, 'type' => 'ROADMAP']);
-        return view('postulantes.index',compact('project','title','postulantes'));
-        //return "hola";
+        // Obtener proyecto con relaciones necesarias para la vista
+        $project = Project::with([
+            'getState',
+            'getCity',
+            'getModality',
+            'getSat',
+            'getEstado.stage' // Si necesitás el stage del estado
+        ])->findOrFail($id);
+
+        // Traer todos los postulantes con todos los miembros y datos de postulante
+        $postulantes = ProjectHasPostulantes::with([
+            'getPostulante', // Datos del postulante
+            'getMembers.getPostulante' // Todos los miembros y sus datos
+        ])->where('project_id', $id)->get();
+
+        // Precalcular ingresos y niveles para evitar llamadas repetidas en blade
+        $postulanteIds = $postulantes->pluck('postulante_id')->filter()->toArray();
+
+        $ingresos = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
+
+        return view('postulantes.index', compact('project', 'title', 'postulantes', 'ingresos', 'niveles'));
     }
+
 
     public function create(Request $request, $id)
     {
@@ -273,7 +290,7 @@ class PostulantesController extends Controller
             $archivo = SIG006::where('NroExp', $expediente->NroExp)
                 ->whereIn('DEExpEst', ['C', 'H'])
                 ->first();
-            
+
 
             if (!$archivo) {
                 return 'Ya existe expendiente de FICHA DE PRE-INSCRIPCION FONAVIS-SVS!!!.';
@@ -326,7 +343,7 @@ class PostulantesController extends Controller
         if (IVMSOL::where('SolPerCge', $cedula)->where('SolEtapa', 'B')->exists()) {
             return 'Ya cuenta con Beneficios en la Institución como Conyuge!';
         }
-        
+
 
         return null; // Alta permitida
     }
