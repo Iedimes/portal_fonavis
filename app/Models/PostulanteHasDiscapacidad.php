@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class PostulanteHasDiscapacidad extends Model
 {
-    //
-
-    /*public function getDateFormat()
-    {
-        return 'Y-d-m H:i:s.v';
-    }*/
-
     protected $table = 'postulante_has_discapacidad';
+
+    protected $fillable = [
+        'discapacidad_id',
+        'postulante_id',
+    ];
+
+    // public $timestamps = false; // si no tienes columnas created_at/updated_at
 }
