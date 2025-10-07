@@ -208,7 +208,10 @@
                 <td class="text-center">{{ $post->postulante_id?$post->getPostulante->cedula:""  }} </td>
                 @endif
               <td class="text-center">{{ \Carbon\Carbon::parse( $post->postulante_id?$post->getPostulante->birthdate:"")->age }} </td>
-              <td class="text-center">{{ number_format($ingresos[$post->postulante_id] ?? 0,0,".",".") }}</td>
+              {{-- Muestra ingreso total del grupo familiar --}}
+              {{-- <td class="text-center">{{ number_format($ingresos[$post->postulante_id] ?? 0,0,".",".") }}</td> --}}
+              {{-- Muestra ingreso del titular --}}
+             <td class="text-center">{{ number_format($post->getPostulante->ingreso ?? 0, 0, ".", ".") }}</td>
               <td class="text-center">{{ $niveles[$post->postulante_id] ?? '' }}</td>
               <td class="text-center">{{ $post->getMembers->count() + 1 }}</td>
               <td class="text-center" style="width: 150px;">
