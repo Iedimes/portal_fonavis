@@ -45,6 +45,7 @@
 
             <form class="form-horizontal form-create" method="post" @submit.prevent="onSubmit" :action="action" novalidate>
 
+                 <input type="hidden" name="dependencia" value="{{ $dependencia }}">
 
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
