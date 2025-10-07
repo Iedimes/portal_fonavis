@@ -50,7 +50,7 @@ class PostulantesController extends Controller
             'getCity',
             'getModality',
             'getSat',
-            'getEstado.stage' // Si necesitás el stage del estado
+            'getEstado.getStage' // Si necesitás el stage del estado
         ])->findOrFail($id);
 
         // Traer todos los postulantes con todos los miembros y datos de postulante
