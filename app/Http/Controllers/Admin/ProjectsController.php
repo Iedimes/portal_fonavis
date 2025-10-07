@@ -1063,7 +1063,15 @@ class ProjectsController extends Controller
 
     public function project($id)
     {
-        $project = Project::find($id);
+        $project = Project::with([
+            'getState',
+            'getModality',
+            'getCity',
+            'getLand',
+            'getTypology',
+            'getEstado.getStage',
+            'getSat',
+        ])->findOrFail($id);
 
         if (!$project) {
             return view('admin.project.project', [
@@ -1072,15 +1080,51 @@ class ProjectsController extends Controller
                 'title' => 'Proyecto no encontrado',
                 'tipoproy' => null,
                 'postulantes' => collect(),
+                'postulantesData' => collect(),
             ]);
         }
 
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        // Query optimizada con eager loading
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)
+            ->with([
+                'getPostulante:id,first_name,last_name,cedula,birthdate,ingreso',
+            ])
+            ->get();
+
+        // Preparar datos precalculados para la vista
+        $postulantesData = $postulantes->map(function($post) {
+            $postulante = $post->getPostulante;
+
+            if (!$postulante) {
+                return null;
+            }
+
+            $ingreso = $postulante->ingreso ?? 0;
+            $edad = $postulante->birthdate
+                ? \Carbon\Carbon::parse($postulante->birthdate)->age
+                : 0;
+
+            return [
+                'id' => $postulante->id,
+                'first_name' => $postulante->first_name ?? '',
+                'last_name' => $postulante->last_name ?? '',
+                'cedula' => $postulante->cedula ?? '',
+                'edad' => $edad,
+                'ingreso' => $ingreso,
+                'nivel' => ProjectHasPostulantes::calcularNivel($ingreso),
+            ];
+        })->filter(); // Eliminar nulls
+
         $title = "Resumen Proyecto " . ($project->name ?? 'SIN NOMBRE');
         $tipoproy = Land_project::where('land_id', $project->land_id)->first();
 
-        return view('admin.project.project', compact('project', 'title', 'tipoproy', 'postulantes'))
-            ->with('projectNotFound', false);
+        return view('admin.project.project', compact(
+            'project',
+            'title',
+            'tipoproy',
+            'postulantes',
+            'postulantesData'
+        ))->with('projectNotFound', false);
     }
 
     public function crearmiembro(Request $request, $project, $postulante)

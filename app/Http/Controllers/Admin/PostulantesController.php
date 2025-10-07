@@ -239,10 +239,51 @@ class PostulantesController extends Controller
 
     public function imprimir($id)
     {
-        $project=Project::find($id);
-        $postulantes = ProjectHasPostulantes::where('project_id',$id)->get();
-        $contar = count($postulantes);
-        $pdf = PDF::loadView('postulantesPDF', compact('project','postulantes', 'contar'))->setPaper('a4', 'landscape');
+        // Eager loading de todas las relaciones necesarias
+        $project = Project::with([
+            'getState',
+            'getModality',
+            'getCity',
+            'getLand',
+            'getTypology',
+            'getEstado.getStage',
+            'getSat',
+        ])->findOrFail($id);
+
+        // Query optimizada con eager loading
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)
+            ->with([
+                'getPostulante:id,first_name,last_name,cedula,birthdate,ingreso',
+            ])
+            ->get();
+
+        // Preparar datos precalculados para el PDF
+        $postulantesData = $postulantes->map(function($post) {
+            $postulante = $post->getPostulante;
+
+            if (!$postulante) {
+                return null;
+            }
+
+            $ingreso = $postulante->ingreso ?? 0;
+            $edad = $postulante->birthdate
+                ? \Carbon\Carbon::parse($postulante->birthdate)->age
+                : 0;
+
+            return [
+                'first_name' => $postulante->first_name ?? '',
+                'last_name' => $postulante->last_name ?? '',
+                'cedula' => $postulante->cedula ?? '',
+                'edad' => $edad,
+                'ingreso' => $ingreso,
+                'nivel' => ProjectHasPostulantes::calcularNivel($ingreso),
+            ];
+        })->filter();
+
+        $contar = $postulantesData->count();
+
+        $pdf = PDF::loadView('postulantesPDF', compact('project', 'postulantesData', 'contar'))
+            ->setPaper('a4', 'landscape');
 
         return $pdf->download('Listadopostulantes.pdf');
     }

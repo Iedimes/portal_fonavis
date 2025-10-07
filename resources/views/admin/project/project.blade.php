@@ -1,6 +1,6 @@
 @extends('brackets/admin-ui::admin.layout.default')
 
-@section('title', trans('IMPRIMIR LISTADO DE POSTULANTES'))
+@section('title', trans('VER LISTADO DE POSTULANTES'))
 
 @section('body')
 <div class="row">
@@ -14,14 +14,12 @@
 
         <div class="card">
             <div class="card-header d-flex align-items-center">
-            <span>
-                {{ trans('CODIGO: ') . ($project->id ?? '') }}
-                <br>
-                {{ trans('PROYECTO: ') . ($project->name ?? '') }}
-            </span>
-        </div>
-
-
+                <span>
+                    {{ trans('CODIGO: ') . ($project->id ?? '') }}
+                    <br>
+                    {{ trans('PROYECTO: ') . ($project->name ?? '') }}
+                </span>
+            </div>
 
             <div class="card-body">
                 <div class="row invoice-info">
@@ -39,7 +37,7 @@
                             <strong>{{ trans('Teléfono:') }}</strong> {{ $project->phone }}<br>
                             <strong>{{ trans('Distrito:') }}</strong> {{ $project->city_id ? strtoupper($project->getCity->CiuNom) : '' }}<br>
                             <strong>{{ trans('Tipo de Terreno:') }}</strong> {{ $project->land_id ? $project->getLand->name : '' }}<br>
-                            <strong>{{ trans('Cantidad de Viviendas:') }}</strong> {{ $postulantes->count() }}<br>
+                            <strong>{{ trans('Cantidad de Viviendas:') }}</strong> {{ $postulantesData->count() }}<br>
                         </address>
                     </div>
                     <div class="col-sm-4 invoice-col">
@@ -50,11 +48,11 @@
                         </address>
                     </div>
                 </div>
-              {{-- Botón para imprimir listado --}}
-              <a href="{{ url('admin/postulantes/' . $project->id . '/imprimir') }}" class="btn bg-primary text-white btn-block btn-lg">
-                {{ trans('Imprimir Listado de Postulantes') }}
-            </a>
 
+                {{-- Botón para imprimir listado --}}
+                <a href="{{ url('admin/postulantes/' . $project->id . '/imprimir') }}" class="btn bg-primary text-white btn-block btn-lg">
+                    {{ trans('LISTADO DE POSTULANTES PARA IMPRIMIR') }}
+                </a>
 
                 <br><br>
 
@@ -71,32 +69,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (count($postulantes) > 0)
-                            @foreach ($postulantes as $key => $post)
-                                <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $post->postulante_id ? $post->getPostulante->first_name . ' ' . $post->getPostulante->last_name : '' }}</td>
-                                    <td class="text-center">
-                                        {{ is_numeric($post->postulante_id ? $post->getPostulante->cedula : '')
-                                            ? number_format($post->getPostulante->cedula, 0, '.', '.')
-                                            : $post->getPostulante->cedula }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ \Carbon\Carbon::parse($post->postulante_id ? $post->getPostulante->birthdate : '')->age }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, '.', '.') }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @else
+                        @forelse ($postulantesData as $key => $postulante)
+                            <tr>
+                                <td>{{ $key + 1 }}</td>
+                                <td>{{ $postulante['first_name'] ?? '' }} {{ $postulante['last_name'] ?? '' }}</td>
+                                <td class="text-center">
+                                    {{ is_numeric($postulante['cedula'] ?? '')
+                                        ? number_format($postulante['cedula'], 0, '.', '.')
+                                        : ($postulante['cedula'] ?? '') }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $postulante['edad'] ?? 0 }}
+                                </td>
+                                <td class="text-center">
+                                    {{ number_format($postulante['ingreso'] ?? 0, 0, '.', '.') }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $postulante['nivel'] ?? 'N/A' }}
+                                </td>
+                            </tr>
+                        @empty
                             <tr>
                                 <td colspan="6" class="text-center">{{ trans('admin.project.messages.no_applicants') }}</td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>

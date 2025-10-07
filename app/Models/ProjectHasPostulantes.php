@@ -147,7 +147,7 @@ class ProjectHasPostulantes extends Model implements AuditableContract
      * @param float $ingreso
      * @return string|null
      */
-    private static function calcularNivel($ingreso)
+    public static function calcularNivel($ingreso)
     {
         if ($ingreso <= 2798309) return '4';
         if ($ingreso <= 5316789) return '3';
