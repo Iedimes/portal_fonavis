@@ -40,7 +40,7 @@ class StoreProjectStatus extends FormRequest
     // dd($stageId, $dependencia, gettype($stageId), gettype($dependencia));
 
         // Validación para requerir 'gallery' según condiciones
-        if ($stageId === 3 || $stageId === 5 || ($stageId === 13 && $dependencia === 4) || $stageId === 17) {
+        if ($stageId === 3 || $stageId === 5 || $stageId === 9 || ($stageId === 13 && $dependencia === 4) || $stageId === 17) {
             $rules['gallery'] = ['required'];
         }
 
