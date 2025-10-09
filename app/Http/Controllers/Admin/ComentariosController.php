@@ -76,32 +76,44 @@ class ComentariosController extends Controller
      * @param StoreComentario $request
      * @return array|RedirectResponse|Redirector
      */
+
     public function store(StoreComentario $request)
     {
-        // Sanitizar la entrada
         $sanitized = $request->getSanitized();
-
-        // Almacenar el Comentario
         $comentario = Comentario::create($sanitized);
 
-        // Obtener el postulante_id desde el request
         $postulanteId = $request->input('postulante_id');
 
-        // Si el postulante_id está presente, proceder a eliminar el Postulante y sus relaciones
         if ($postulanteId) {
-            // Buscar el postulante
-            $postulante = Postulante::find($postulanteId);
+            DB::transaction(function () use ($postulanteId) {
 
-            if ($postulante) {
-                // Eliminar el registro de ProjectHasPostulantes relacionado
-                ProjectHasPostulantes::where('postulante_id', $postulanteId)->delete(); // Soft delete
+                $postulante = Postulante::find($postulanteId);
 
-                // Eliminar el registro de PostulanteHasBeneficiary si existe
-                PostulanteHasBeneficiary::where('miembro_id', $postulanteId)->delete();
+                if ($postulante) {
 
-                // Realizar el soft delete del postulante
-                $postulante->delete();
-            }
+                    // Buscar miembros (beneficiarios) vinculados a este postulante
+                    $miembros = PostulanteHasBeneficiary::where('postulante_id', $postulanteId)->get();
+
+                    foreach ($miembros as $miembro) {
+                        // Buscar el postulante correspondiente al miembro
+                        $beneficiario = Postulante::find($miembro->miembro_id);
+                        if ($beneficiario && !$beneficiario->deleted_at) {
+                            $beneficiario->delete(); // Soft delete del miembro
+                        }
+
+                        // Soft delete de la relación
+                        if (!$miembro->deleted_at) {
+                            $miembro->delete();
+                        }
+                    }
+
+                    // Eliminar relación con el proyecto (soft delete)
+                    ProjectHasPostulantes::where('postulante_id', $postulanteId)->delete();
+
+                    // Soft delete del postulante principal
+                    $postulante->delete();
+                }
+            });
         }
 
         if ($request->ajax()) {
@@ -113,6 +125,7 @@ class ComentariosController extends Controller
 
         return redirect('admin/postulantes');
     }
+
 
     /**
      * Display the specified resource.
