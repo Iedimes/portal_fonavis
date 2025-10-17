@@ -1708,50 +1708,56 @@ public function showTecnico($id)
 
     public function send(Request $request, $id)
     {
+        // Verificar si ya existe un estado "enviado" (stage_id = 1)
+        $existe = ProjectStatusF::where('project_id', $id)
+            ->where('stage_id', '1')
+            ->exists();
 
-            $state = new ProjectStatusF();
-            $state->project_id = $id;
-            $state->stage_id = '1';
-            $state->user_id = Auth::user()->id;
-            $state->record = 'Proyecto Enviado!';
-            $state->save();
-            try {
-            // // Enviar correo electrónico
+        if ($existe) {
+            return response()->json(['message' => 'already_sent'], 200);
+        }
+
+        // Crear nuevo estado
+        $state = new ProjectStatusF();
+        $state->project_id = $id;
+        $state->stage_id = '1';
+        $state->user_id = Auth::user()->id;
+        $state->record = 'Proyecto Enviado!';
+        $state->save();
+
+        try {
+            // Enviar correo electrónico
             $project = Project::find($id);
-            $sat_id = $project->sat_id;
-            $sat_nombre = Sat::where('NucCod', $sat_id)->first();
-            $nombre_sat = $sat_nombre->NucNomSat;
-            $nombre = $project->name;
-            $lider = $project->leader_name;
-            $modalidad = Modality::where('id', $project->modalidad_id)->first();
-            $modalidad_nombre = $modalidad->name;
-            $tipo_terreno = Land::where('id', $project->land_id)->first();
-            $terreno = $tipo_terreno->name;
-            $departamento = Departamento::where('DptoId', $project->state_id)->first();
-            $dto = $departamento->DptoNom;
-            $ciudad = Distrito::where('CiuId', $project->city_id)->first();
-            $destrito = $ciudad->CiuNom;
+            $sat_nombre = Sat::where('NucCod', $project->sat_id)->first();
+            $modalidad = Modality::find($project->modalidad_id);
+            $tipo_terreno = Land::find($project->land_id);
+            $departamento = Departamento::find($project->state_id);
+            $ciudad = Distrito::find($project->city_id);
+
             $email = 'proyectos_ingresados@muvh.gov.py';
             $subject = 'PROYECTO INGRESADO';
 
-            Mail::send('admin.project-status.emailDGF', ['nombre' => $nombre, 'lider' => $lider, 'sat' => $nombre_sat, 'modalidad' => $modalidad_nombre, 'terreno' => $terreno, 'departamento' => $dto, 'project' => $project, 'distrito' => $destrito], function ($message) use ($email, $subject) {
-                    $message->to($email);
-                    $message->subject($subject);
-                    $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
-                });
+            Mail::send('admin.project-status.emailDGF', [
+                'nombre' => $project->name,
+                'lider' => $project->leader_name,
+                'sat' => $sat_nombre->NucNomSat ?? '',
+                'modalidad' => $modalidad->name ?? '',
+                'terreno' => $tipo_terreno->name ?? '',
+                'departamento' => $departamento->DptoNom ?? '',
+                'distrito' => $ciudad->CiuNom ?? '',
+                'project' => $project
+            ], function ($message) use ($email, $subject) {
+                $message->to($email);
+                $message->subject($subject);
+                $message->from('sistema_fonavis@muvh.gov.py', 'DGTIC - MUVH');
+            });
 
-            return [
-                    'message' => 'success'
-                ];
-            } catch (\Exception $e) {
-                throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
-            }
-
-        //  return [
-        //               'message' => 'success'
-        //           ];
-
+            return response()->json(['message' => 'success'], 200);
+        } catch (\Exception $e) {
+            throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+        }
     }
+
 
     public function destroyfile(Request $request)
     {

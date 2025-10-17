@@ -557,79 +557,99 @@
         return new Promise(resolve => setTimeout(resolve, time));
     }
 
-    function allchecked() {
-        var sites = {!! json_encode($project['id']) !!};
-        var keys = {!! json_encode($claves) !!};
-        var applicants = {!! $postulantes->count() !!};
-        var edades = {!! json_encode($edadesPostulantes) !!};
-        var edadesConyuges = {!! json_encode($edadesConyuges) !!};
+    async function allchecked() {
+        const enviarBtn = document.getElementById('enviarBtn'); // 🔹 agrega id="enviarBtn" al botón en tu vista
+        enviarBtn.disabled = true;
+        enviarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Enviando...';
 
-        // 🚫 Verificar si algún postulante es menor de 18
+        const sites = {!! json_encode($project['id']) !!};
+        const keys = {!! json_encode($claves) !!};
+        const applicants = {!! $postulantes->count() !!};
+        const edades = {!! json_encode($edadesPostulantes) !!};
+        const edadesConyuges = {!! json_encode($edadesConyuges) !!};
+
+        // 🚫 Verificar si algún postulante o cónyuge es menor de edad
         const menorEdad = edades.some(edad => edad < 18);
-        if (menorEdad) {
-            alert('Existe al menos un postulante menor de 18 años. No se puede enviar el proyecto al MUVH.');
-            return;
-        }
-
-        // 🚫 Verificar si algún cónyuge es menor de 18
         const menorConyuge = edadesConyuges.some(edad => edad < 18);
-        if (menorConyuge) {
-            alert('Existe al menos un cónyuge menor de 18 años. No se puede enviar el proyecto al MUVH.');
+        if (menorEdad || menorConyuge) {
+            alert('Existe un postulante o cónyuge menor de 18 años. No se puede enviar el proyecto al MUVH.');
+            enviarBtn.disabled = false;
+            enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
             return;
         }
 
-        if (applicants >= 4) {
-            let todosCargados = true;
-
-            const rows = document.querySelectorAll('tr');
-            rows.forEach(row => {
-                const uploadForm = row.querySelector('form[action="/levantar"]');
-                if (uploadForm) {
-                    todosCargados = false;
-                }
-            });
-
-            if (todosCargados) {
-                console.log('Puede Enviar al MUVH');
-
-                $.ajax({
-                    url: '{{ URL::to('/projects/send') }}/' + sites,
-                    type: "GET",
-                    dataType: "json",
-                    success: async function(data) {
-                        if (data.message == 'success') {
-                            $(document).Toasts('create', {
-                                icon: 'fas fa-exclamation',
-                                class: 'bg-success m-1',
-                                autohide: true,
-                                delay: 5000,
-                                title: 'Importante!',
-                                body: 'El proyecto ha cambiado de estado'
-                            });
-                            await delay(3000);
-                            location.reload();
-                            console.log('refrescar');
-                        } else {
-                            console.log('no hace nada');
-                        }
-                    }
-                });
-            } else {
-                alert('Debe adjuntar y cargar todos los documentos para enviar al MUVH.');
-            }
-        } else {
+        // 🚫 Verificar cantidad mínima de postulantes
+        if (applicants < 4) {
             alert('Debe tener al menos 4 (cuatro) postulantes para enviar el proyecto al MUVH.');
+            enviarBtn.disabled = false;
+            enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
+            return;
         }
+
+        // 🚫 Verificar documentos cargados
+        let todosCargados = true;
+        const rows = document.querySelectorAll('tr');
+        rows.forEach(row => {
+            const uploadForm = row.querySelector('form[action="/levantar"]');
+            if (uploadForm) {
+                todosCargados = false;
+            }
+        });
+
+        if (!todosCargados) {
+            alert('Debe adjuntar y cargar todos los documentos para enviar al MUVH.');
+            enviarBtn.disabled = false;
+            enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
+            return;
+        }
+
+        // ✅ Enviar la solicitud AJAX
+        $.ajax({
+            url: '{{ URL::to('/projects/send') }}/' + sites,
+            type: "GET",
+            dataType: "json",
+            success: async function(data) {
+                if (data.message === 'success') {
+                    $(document).Toasts('create', {
+                        icon: 'fas fa-check-circle',
+                        class: 'bg-success m-1',
+                        autohide: true,
+                        delay: 4000,
+                        title: 'Importante!',
+                        body: 'El proyecto ha sido enviado correctamente al MUVH.'
+                    });
+                    await delay(3000);
+                    location.reload();
+                } else if (data.message === 'duplicate') {
+                    $(document).Toasts('create', {
+                        icon: 'fas fa-exclamation-triangle',
+                        class: 'bg-warning m-1',
+                        autohide: true,
+                        delay: 5000,
+                        title: 'Atención!',
+                        body: 'El proyecto ya fue enviado anteriormente.'
+                    });
+                    enviarBtn.disabled = false;
+                    enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
+                } else {
+                    alert('No se pudo procesar el envío.');
+                    enviarBtn.disabled = false;
+                    enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
+                }
+            },
+            error: function() {
+                alert('Error al enviar el proyecto. Verifique su conexión e intente nuevamente.');
+                enviarBtn.disabled = false;
+                enviarBtn.innerHTML = '<i class="fa fa-plus-circle"></i> Enviar al MUVH';
+            }
+        });
     }
 
-    // Obtén las referencias a los elementos de mensaje
-    var successMessage = document.getElementById('success-message');
-    var errorMessage = document.getElementById('error-message');
+    // 💬 Manejo visual de mensajes de éxito y error
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+    const tiempoDesaparicion = 5000;
 
-    // Establece el tiempo de desaparición en milisegundos (5 segundos en este caso)
-    var tiempoDesaparicion = 5000;
-
-    // Cambia el color de fondo y establece la opacidad para los mensajes de éxito y error
     if (successMessage) {
         successMessage.style.backgroundColor = 'lightgreen';
         successMessage.style.opacity = 1;
@@ -642,34 +662,24 @@
         errorMessage.style.border = 'none';
     }
 
-    // Función para desvanecer y ocultar los mensajes después del tiempo de desaparición
-    function ocultarMensajes() {
-        if (successMessage) {
-            successMessage.style.opacity = 0;
-        }
+    setTimeout(() => {
+        if (successMessage) successMessage.style.opacity = 0;
+        if (errorMessage) errorMessage.style.opacity = 0;
+    }, tiempoDesaparicion);
 
-        if (errorMessage) {
-            errorMessage.style.opacity = 0;
-        }
-    }
-
-    // Inicia el temporizador para ocultar los mensajes después del tiempo de desaparición
-    setTimeout(ocultarMensajes, tiempoDesaparicion);
-
+    // 🔄 Habilita el botón solo cuando todos los archivos estén cargados
     function todos() {
-        var fileInputs = document.querySelectorAll('input[type="file"]');
-        var allFilesUploaded = true;
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        let allFilesUploaded = true;
 
-        fileInputs.forEach(function(input) {
-            if (!input.files.length) {
-                allFilesUploaded = false;
-                return;
-            }
+        fileInputs.forEach(input => {
+            if (!input.files.length) allFilesUploaded = false;
         });
 
-        var enviarBtn = document.querySelector('.btn-success');
-        enviarBtn.disabled = !allFilesUploaded;
+        const enviarBtn = document.querySelector('.btn-success');
+        if (enviarBtn) enviarBtn.disabled = !allFilesUploaded;
     }
 </script>
+
 
 @endsection
