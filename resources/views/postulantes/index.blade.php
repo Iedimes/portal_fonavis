@@ -43,7 +43,7 @@
                         ($project->getEstado->stage_id == 7 && !(($project->modalidad_id == 2 && $project->land_id == 8) ||
                         ($project->modalidad_id == 3 && $project->land_id == 11))) ||
                         $project->getEstado->stage_id == 22)
-                        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
+                        <button id="agregarPostulante" type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-default">
                             <i class="fa fa-plus-circle"></i> Agregar Postulante
                         </button>
                     @endif
@@ -412,12 +412,24 @@
             let projectId = {{ $project->id }};
             $('#loader').show(); // ⏳ Mostrar spinner
 
+            // Deshabilitar el botón
+            $(this).prop('disabled', true);
+            // Deshabilitar el botón agrgar postulante
+            $('#agregarPostulante').hide();
+
             $.ajax({
                 url: '/projectsMiembros/' + projectId,
                 type: 'GET',
                 success: function (response) {
                     $('#loader').hide(); // ✅ Ocultar spinner
                     showToast(response.message, 'success');
+
+                    // Ocultar el botón después de un envío exitoso
+                    $('#enviarGrupoFamiliarBtn').hide();
+
+                    // Ocultar el botón "Agregar Postulante"
+                    $('#agregarPostulante').hide();
+
                     setTimeout(() => location.reload(), 5000);
                 },
                 error: function (xhr) {
@@ -425,6 +437,10 @@
                     let errorMessage = xhr.responseJSON?.message || 'Ocurrió un error inesperado.';
                     showToast(errorMessage, 'error');
                     setTimeout(() => location.reload(), 5000);
+                },
+                complete: function () {
+                    // Volver a habilitar el botón en caso de error
+                    $('#enviarGrupoFamiliarBtn').prop('disabled', false);
                 }
             });
         });
