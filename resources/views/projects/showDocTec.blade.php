@@ -239,6 +239,8 @@
                     console.log('Puede Enviar al MUVH');
                     // Mostrar mensaje de éxito o realizar cualquier acción adicional
                     //alert('Todos los documentos están adjuntos y cargados. Puede enviar al MUVH.');
+                    // Deshabilitar el botón para evitar múltiples clics
+                    $('#enviarDocumentosBtn').prop('disabled', true);
 
                     // Realizar la llamada AJAX solo si todos los documentos están adjuntos
                     var projectId = {{ $project->id }};
@@ -256,11 +258,17 @@
                                     title: 'Importante!',
                                     body: 'Los documentos han sido enviados'
                                 });
+
+                                 // Ocultar el botón después de un envío exitoso
+                                $('#enviarDocumentosBtn').hide();
+
                                 await delay(3000);
                                 location.reload();
                                 console.log('refrescar');
                             } else {
                                 console.log('no hace nada');
+                                // Volver a habilitar el botón si hay un error
+                                $('#enviarDocumentosBtn').prop('disabled', false);
                             }
                         }
                     });
