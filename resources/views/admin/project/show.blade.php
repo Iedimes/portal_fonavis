@@ -124,6 +124,20 @@
                         @endif
                     @endif
                 @endif
+
+
+                @if (!empty($project->getEstado))
+                        @if ($project->modalidad_id == 3 && $project->land_id == 1)
+                             @if (collect($uploadedFiles4)->filter()->isEmpty())
+                                <div class="alert alert-danger text-center" role="alert" style="font-weight: bold; font-size: 1.5rem;">
+                                    SAT DEBE PRESENTAR RESOLUCION INDERT QUE AUTORIZA CONSTRUCCION Y LISTA DE BENEFICIARIOS!!!
+                                </div>
+                            @endif
+                        @endif
+                @endif
+
+
+
                 {{-- Mostrar VOLVER AL ESTADO PENDIENTE DE ENVIO solo si hay un único estado --}}
                 @if ($project->getEstados()->count() <= 1)
                     <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button" class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
