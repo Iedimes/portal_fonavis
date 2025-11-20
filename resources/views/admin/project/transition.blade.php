@@ -55,15 +55,23 @@
                     @elseif($estado==8 && $dependencia == 1)
 
                     @elseif ($estado==11 && $dependencia == 4 )
+                        @php
+                            $collection = app(App\Models\ProjectStatus::class)->getMediaCollection('gallery');
+                            $collection->maxFilesize(1024 * 1024 * 30); // Forzar 30MB aquí
+                        @endphp
+
                         @include('brackets/admin-ui::admin.includes.media-uploader', [
-                        'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),
-                        //'media' => $call->getThumbs200ForCollection('gallery'),
-                        'label' => 'Documentos Adjuntos'
-                    ])
+                            'mediaCollection' => $collection,
+                            'label' => 'Documentos Adjuntos'
+                        ])
                     @else
+                    @php
+                        $collection = app(App\Models\ProjectStatus::class)->getMediaCollection('gallery');
+                        $collection->maxFilesize(1024 * 1024 * 30); // Forzar 30MB aquí
+                    @endphp
+
                     @include('brackets/admin-ui::admin.includes.media-uploader', [
-                        'mediaCollection' => app(App\Models\ProjectStatus::class)->getMediaCollection('gallery'),
-                        //'media' => $call->getThumbs200ForCollection('gallery'),
+                        'mediaCollection' => $collection,
                         'label' => 'Documentos Adjuntos'
                     ])
                     @endif
