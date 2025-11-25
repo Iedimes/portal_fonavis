@@ -97,6 +97,19 @@ class ProjectStatusController extends Controller
         $sanitized['stage_id'] = $request->getStageId();
         $dependencia = $sanitized['dependencia'];
 
+        // Obtener el último estado del proyecto
+        $ultimoEstado = ProjectStatus::where('project_id', $request->project_id)
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+
+        if ($ultimoEstado && $ultimoEstado->stage_id == $sanitized['stage_id']) {
+            return response()->json([
+                'success' => false,
+                'redirect' => route('adminprojectsindex'),
+                'message' => 'No se puede registrar el mismo estado consecutivo.'
+            ]);
+        }
+
         // Variable para controlar envío de correos
         $mailEnabled = env('MAIL_ENABLED', true);
 
