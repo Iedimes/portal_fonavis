@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Project\BulkDestroyProject;
 use App\Http\Requests\Admin\Project\DestroyProject;
@@ -51,6 +53,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 use Illuminate\Http\Request;
 
 class ProjectsController extends Controller
