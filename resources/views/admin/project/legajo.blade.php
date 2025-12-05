@@ -6,7 +6,7 @@
 
     <div class="card">
         <div class="card-header text-center">
-            DATOS {{ utf8_encode($project->name) }}
+            DATOS {{ $project->name }}
             <a href="{{ route('adminprojectslegajo.descargar', ['project' => $project->id]) }}" class="btn btn-success"
                 style="float: right;">
                 <i class="fa fa-download"></i> Descargar Legajo Completo (ZIP)
@@ -33,8 +33,8 @@
 
                 <div class="col-sm-4 invoice-col">
                     <address>
-                        <strong>Telefono:</strong> {{ utf8_encode($project->phone) }}<br>
-                        <strong>Distrito:</strong> {{ utf8_encode($project->getCity->CiuNom) }}<br>
+                        <strong>Telefono:</strong> {{ $project->phone }}<br>
+                        <strong>Distrito:</strong> {{ $project->getCity->CiuNom }}<br>
                         <strong>Tipo de Terreno:</strong>
                         {{ utf8_encode($project->land_id ? $project->getLand->name : '') }}<br>
                         <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
@@ -68,97 +68,50 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($docproyecto as $key => $item)
-                                <tr>
-                                    <td>{{ $item->document->name }}</td>
-                                    <td>
-                                        @if ($uploadedFiles[$item->document_id])
-                                            <a
-                                                href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles[$item->document_id]]) }}">
-                                                <button class="btn btn-info">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
-                                            </a>
+                            @foreach ($groupedAssignments as $categoryName => $assignments)
+                                @php
+                                    // Verificar si hay archivos subidos para esta categoría
+                                    $hasUploadedFiles = $assignments->contains(function ($assignment) use (
+                                        $uploadedDocs,
+                                    ) {
+                                        return $uploadedDocs->has($assignment->document_id) &&
+                                            $uploadedDocs[$assignment->document_id]->file_path;
+                                    });
+                                @endphp
+
+                                @if ($hasUploadedFiles)
+                                    {{-- Encabezado de categoría eliminado por solicitud del usuario --}}
+                                    {{-- <tr><th colspan="3">{{ strtoupper($categoryName) }}</th></tr> --}}
+
+                                    @foreach ($assignments as $assignment)
+                                        @php
+                                            $docId = $assignment->document_id;
+                                            $uploadedDoc = $uploadedDocs->get($docId);
+                                        @endphp
+                                        @if ($uploadedDoc && $uploadedDoc->file_path)
+                                            <tr>
+                                                <td>
+                                                    <i class="fa fa-file-text-o mr-2" aria-hidden="true"
+                                                        style="margin-right: 5px;"></i>
+                                                    {{ $assignment->document->name }}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group-custom">
+                                                        <a class="btn btn-sm btn-info"
+                                                            href="{{ route('adminprojectsviewFileDoc', ['project' => $project->id, 'document_id' => $docId, 'file_name' => $uploadedDoc->file_path]) }}"
+                                                            target="_blank" title="Ver">
+                                                            <i class="fa fa-eye"></i>
+                                                        </a>
+                                                        <a class="btn btn-sm btn-success"
+                                                            href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $docId, 'file_name' => $uploadedDoc->file_path]) }}"
+                                                            title="Descargar">
+                                                            <i class="fa fa-download"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                            <tr>
-                                <th colspan="3">INFORME DE CONDICION DE DOMINIO</th>
-                            </tr>
-                            @foreach ($docproyectoCondominio as $key => $item)
-                                @if ($uploadedFiles2[$item->document_id])
-                                    <tr>
-                                        <td>{{ $item->document->name }}</td>
-                                        <td>
-                                            <a
-                                                href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles2[$item->document_id]]) }}">
-                                                <button class="btn btn-info">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endif
-                            @endforeach
-                            @if ($project->land_id == 2)
-                                <tr>
-                                    <th colspan="3">NO OBEJECIÓN DEL INDI</th>
-                                </tr>
-                                @foreach ($docproyectoIndi as $key => $item)
-                                    @if ($uploadedFiles3[$item->document_id])
-                                        <tr>
-                                            <td>{{ $item->document->name }}</td>
-                                            <td>
-                                                <a
-                                                    href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles3[$item->document_id]]) }}">
-                                                    <button class="btn btn-info">
-                                                        <i class="fa fa-search"></i>
-                                                    </button>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                            @endif
-
-                            @if ($project->land_id == 1)
-                                <tr>
-                                    <th colspan="3">Documentos No Excluyentes Cargados</th>
-                                </tr>
-                                @foreach ($docproyectoNoExcluyentes as $key => $item)
-                                    @if ($uploadedFiles1[$item->document_id])
-                                        <tr>
-                                            <td>{{ $item->document->name }}</td>
-                                            <td>
-                                                <a
-                                                    href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $item->document_id, 'file_name' => $uploadedFiles1[$item->document_id]]) }}">
-                                                    <button class="btn btn-info">
-                                                        <i class="fa fa-search"></i>
-                                                    </button>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                            @endif
-
-                            <tr>
-                                <th colspan="3">RESOLUCION INDERT (Si aplica)</th>
-                            </tr>
-                            @foreach ($uploadedFiles4 as $docId => $fileName)
-                                @if ($fileName)
-                                    <tr>
-                                        <td>Resolución INDERT</td>
-                                        <td>
-                                            <a
-                                                href="{{ route('adminprojectsdownloadFileDoc', ['project' => $project->id, 'document_id' => $docId, 'file_name' => $fileName]) }}">
-                                                <button class="btn btn-info">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    @endforeach
                                 @endif
                             @endforeach
 
@@ -188,15 +141,25 @@
                             @foreach ($proyectoEstado as $status)
                                 @foreach ($status->imagen as $imagen)
                                     <tr>
-                                        <td>{{ $status->getStage ? $status->getStage->name : 'Estado ' . $status->stage_id }}
+                                        <td>
+                                            <i class="fa fa-file-pdf-o mr-2" aria-hidden="true"
+                                                style="margin-right: 5px;"></i>
+                                            {{ $status->getStage ? $status->getStage->name : 'Estado ' . $status->stage_id }}
                                         </td>
                                         <td>{{ $imagen->file_name }}</td>
                                         <td>
-                                            <a class="btn btn-sm btn-danger"
-                                                href="/media/{{ $imagen->id }}/{{ $imagen->file_name }}" target="_blank"
-                                                title="{{ trans('brackets/admin-ui::admin.btn.show') }}" role="button">
-                                                <i class="fa fa-file-pdf-o"></i> PDF
-                                            </a>
+                                            <div class="btn-group-custom">
+                                                <a class="btn btn-sm btn-info"
+                                                    href="/media/{{ $imagen->id }}/{{ $imagen->file_name }}"
+                                                    target="_blank" title="Ver">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a class="btn btn-sm btn-success"
+                                                    href="/media/{{ $imagen->id }}/{{ $imagen->file_name }}" download
+                                                    title="Descargar">
+                                                    <i class="fa fa-download"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

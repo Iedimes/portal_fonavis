@@ -298,8 +298,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/{project}/save-digh-observation', 'ProjectsController@saveDIGHObservation')->name('saveDIGHObservation');
             Route::post('/{project}/save-dsgo-observation', 'ProjectsController@saveDSGOObservation')->name('saveDSGOObservation');
 
-            Route::get('ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
-            Route::get('ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
             Route::get('ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
 
             Route::post('{project}/postulante/{postulante}/crearmiembro', 'ProjectsController@crearmiembro')->name('crearmiembro');
@@ -308,7 +306,9 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             // Route::get('/{id}/postulantes', 'ProjectsController@postulantes')->name('postulantes');
             Route::get('/{id}/postulantes/{idpostulante}', 'ProjectsController@showpostulantes')->name('showpostulantes');
 
-
+            // Documentos View/Download Routes
+            Route::get('/{project}/legajo/view/{document_id}/{file_name}', 'ProjectsController@viewFileDoc')->name('viewFileDoc')->where('file_name', '(.*)');
+            Route::get('/{project}/download/{document_id}/{file_name}', 'ProjectsController@downloadFile')->name('downloadFileDoc')->where('file_name', '(.*)');
         });
     });
 });
@@ -350,8 +350,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('dependencies')->name('dependencies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('dependencies')->name('dependencies/')->group(static function () {
             Route::get('/',                                             'DependenciesController@index')->name('index');
             Route::get('/create',                                       'DependenciesController@create')->name('create');
             Route::post('/',                                            'DependenciesController@store')->name('store');
@@ -365,8 +365,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function () {
             Route::get('/',                                             'AdminUsersDependenciesController@index')->name('index');
             Route::get('/create',                                       'AdminUsersDependenciesController@create')->name('create');
             Route::post('/',                                            'AdminUsersDependenciesController@store')->name('store');
@@ -381,8 +381,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('media')->name('media/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('media')->name('media/')->group(static function () {
             Route::get('/',                                             'MediaController@index')->name('index');
             Route::get('/create',                                       'MediaController@create')->name('create');
             Route::post('/',                                            'MediaController@store')->name('store');
@@ -398,8 +398,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('postulantes')->name('postulantes/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('postulantes')->name('postulantes/')->group(static function () {
             Route::get('/',                                             'PostulantesController@index')->name('index');
             Route::get('/create',                                       'PostulantesController@create')->name('create');
             Route::post('/',                                            'PostulantesController@store')->name('store');
@@ -415,8 +415,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/exportar/{project_id}',                        'PostulantesController@exportar')->name('exportar');
             Route::post('/miembro/guardar',                             'PostulantesController@guardarmiembro')->name('guardarmiembro');
             Route::post('/miembro/destroy',                             'PostulantesController@destroyMiembro')->name('destroy-miembro');
-
-
         });
     });
 });
@@ -425,8 +423,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('comentarios')->name('comentarios/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('comentarios')->name('comentarios/')->group(static function () {
             Route::get('/',                                             'ComentariosController@index')->name('index');
             // Route::get('/create',                                       'ComentariosController@create')->name('create');
             Route::get('{postulante_id}/create/{cedula}', 'ComentariosController@create')->name('comentarios.create');
@@ -442,8 +440,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('motivos')->name('motivos/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('motivos')->name('motivos/')->group(static function () {
             Route::get('/',                                             'MotivosController@index')->name('index');
             // Route::get('/create',                                       'MotivosController@create')->name('create');
             Route::get('{project_id}/create',                           'MotivosController@create')->name('motivos.create');
@@ -459,8 +457,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('admin-users-dependencies')->name('admin-users-dependencies/')->group(static function () {
             Route::get('/',                                             'AdminUsersDependenciesController@index')->name('index');
             Route::get('/create',                                       'AdminUsersDependenciesController@create')->name('create');
             Route::post('/',                                            'AdminUsersDependenciesController@store')->name('store');
@@ -476,8 +474,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('dependencies')->name('dependencies/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('dependencies')->name('dependencies/')->group(static function () {
             Route::get('/',                                             'DependenciesController@index')->name('index');
             Route::get('/create',                                       'DependenciesController@create')->name('create');
             Route::post('/',                                            'DependenciesController@store')->name('store');
@@ -491,8 +489,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('reportes')->name('reportes/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('reportes')->name('reportes/')->group(static function () {
             Route::get('/',                                             'ReporteController@index')->name('index');
             Route::get('/create',                                       'ReporteController@create')->name('create');
             Route::post('/',                                            'ReporteController@store')->name('store');
@@ -505,7 +503,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             // Route::get('/exportar',                                     'ReporteController@exportar')->name('exportar');
             // Route::get('/exportar/{inicio?}/{fin?}/{proyecto_id?}/{sat_id?}/{state_id?}/{city_id?}/{modalidad_id?}/{stage_id?}', [ReporteController::class, 'exportar'])->name('exportar');
             Route::get('/exportar-resultados', 'ReporteController@exportarExcel')->name('exportar.excel');
-
         });
     });
 });
@@ -513,8 +510,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('project-has-expedientes')->name('project-has-expedientes/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('project-has-expedientes')->name('project-has-expedientes/')->group(static function () {
             Route::get('/',                                             'ProjectHasExpedientesController@index')->name('index');
             Route::get('/create',                                       'ProjectHasExpedientesController@create')->name('create');
             Route::post('/',                                            'ProjectHasExpedientesController@store')->name('store');
@@ -528,8 +525,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
-    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function() {
-        Route::prefix('project-olds')->name('project-olds/')->group(static function() {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::prefix('project-olds')->name('project-olds/')->group(static function () {
             Route::get('/',                                             'ProjectOldsController@index')->name('index');
             Route::get('/create',                                       'ProjectOldsController@create')->name('create');
             Route::post('/',                                            'ProjectOldsController@store')->name('store');
@@ -544,94 +541,94 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 Auth::routes();
 
-    // Página principal
-    Route::get('/', [ProjectController::class, 'index']);
-    Route::get('/home', [ProjectController::class, 'index'])->name('home');
+// Página principal
+Route::get('/', [ProjectController::class, 'index']);
+Route::get('/home', [ProjectController::class, 'index'])->name('home');
 
-    // AJAX públicos
-    Route::get('projects/ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
-    Route::get('projects/ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
-    Route::get('projects/ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
-    Route::resource('projects', ProjectController::class);
-
-
-
-
-        Route::get('projects/{id}/eliminados', [ProjectController::class, 'showEliminados']);
-        Route::get('generate-pdf/{id}', [ProjectController::class, 'generatePDF'])->name('generate-pdf');
-        Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [ProjectController::class, 'checkdocuments']);
-
-        // Postulantes
-        Route::get('projects/{id}/postulantes', [PostulantesController::class, 'index']);
-        Route::get('projects/{id}/postulantes/{idpostulante}', [PostulantesController::class, 'show'])->name('projects.postulantes.show');
-        Route::get('/postulantes/edit/{id}/{idpostulante}', [PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
-        Route::get('/miembros/edit/{id}/{idpostulante}', [PostulantesController::class, 'editmiembro'])->name('miembros.edit');
-
-        // Mostrar documentos
-        Route::get('projectsDoc/{id}', [ProjectController::class, 'showDoc']);
-        Route::get('projectsMiembros/{id}', [ProjectController::class, 'showProyMiembros']);
-        Route::get('projectsTecnico/{id}', [ProjectController::class, 'showTecnico']);
-        Route::get('projectsTecnicoDSGO/{id}', [ProjectController::class, 'showTecnicoDSGO']);
-        Route::get('projectsDocTec/{id}', [ProjectController::class, 'showDocTec']);
-        Route::get('projectsDocTecDSGO/{id}', [ProjectController::class, 'showDocTecDSGO']);
-        Route::get('docObservados/{id}', [ProjectController::class, 'DocObservados']);
-        Route::get('docObservadosDSGO/{id}', [ProjectController::class, 'DocObservadosDSGO']);
-        Route::get('projectsDocNoExcluyentes/{id}', [ProjectController::class, 'showDocNoExcluyentes']);
-        Route::get('projectsDocCondominio/{id}', [ProjectController::class, 'showDocCondominio']);
-        Route::get('projectsDocIndi/{id}', [ProjectController::class, 'showDocIndi']);
-
-        // Descargar documentos
-        Route::get('download/{project}/{document_id}/{file_name}', [ProjectController::class, 'downloadFile'])->name('downloadFile');
-        Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
-
-        // Eliminar documentos
-        Route::get('documents/eliminar/{project_id}/{document_id}', [ProjectController::class, 'eliminar'])->name('eliminar');
-        Route::get('documents/eliminardocumento/{project_id}/{document_id}', [ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
-
-
-    // POST públicas
-    Route::get('projects/send/{id}', [ProjectController::class, 'send']);
-    Route::post('projects/{id}/postulantes/create', [PostulantesController::class, 'create']);
-    // Route::post('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
-    Route::get('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
-    Route::post('postulantes/destroy', [PostulantesController::class, 'destroy']);
-    Route::post('postulantes/destroymiembro', [PostulantesController::class, 'destroymiembro']);
-    Route::post('savepostulante', [PostulantesController::class, 'store']);
-    Route::post('savepostulanteEdit', [PostulantesController::class, 'storeEditPostulante']);
-    Route::post('savemiembro', [PostulantesController::class, 'storemiembro']);
-    Route::post('savemiembroeditar', [PostulantesController::class, 'updatemiembro']);
-
-    // Adjuntar documentos
-    Route::post('levantar', [ProjectController::class, 'upload']);
-    Route::post('levantarDocumento', [ProjectController::class, 'uploadDocumento']);
-    Route::post('levantarTecnico', [ProjectController::class, 'uploadTecnico']);
-    Route::post('levantarTecnicoDSGO', [ProjectController::class, 'uploadTecnicoDSGO']);
-    Route::post('levantarObs', [ProjectController::class, 'uploadObservado']);
-    Route::post('levantarObsDSGO', [ProjectController::class, 'uploadObservadoDSGO']);
-    Route::post('levantarNoExcluyente', [ProjectController::class, 'uploadNoExcluyente']);
-    Route::post('levantarCondominio', [ProjectController::class, 'uploadCondominio']);
-    Route::post('levantarIndi', [ProjectController::class, 'uploadIndi']);
-
-    // Imprimir
-    Route::get('imprimir/{id}', [PostulantesController::class, 'generatePDF'])->name('imprimir');
-
-    // Enviar documentos faltantes
-    Route::post('/enviar-documentos-faltantes', [ProjectController::class, 'enviarDocumentosFaltantes'])->name('enviarDocumentosFaltantes');
-
-    // Ver archivos almacenados
-    Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
-        $path = storage_path("app/{$folder}/{$filename}");
-        if (file_exists($path)) {
-            return response()->file($path);
-        } else {
-            abort(404);
-        }
-    })->where('filename', '(.*)');
-
-    // Validación de código QR
-    Route::get('/{key}', [HomeController::class, 'verification']);
+// AJAX públicos
+Route::get('projects/ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
+Route::get('projects/ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
+Route::get('projects/ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
+Route::resource('projects', ProjectController::class);
 
 
 
-    // routes/web.php
-    Route::get('/dashboard/sessions', [DashboardController::class, 'sessions']);
+
+Route::get('projects/{id}/eliminados', [ProjectController::class, 'showEliminados']);
+Route::get('generate-pdf/{id}', [ProjectController::class, 'generatePDF'])->name('generate-pdf');
+Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [ProjectController::class, 'checkdocuments']);
+
+// Postulantes
+Route::get('projects/{id}/postulantes', [PostulantesController::class, 'index']);
+Route::get('projects/{id}/postulantes/{idpostulante}', [PostulantesController::class, 'show'])->name('projects.postulantes.show');
+Route::get('/postulantes/edit/{id}/{idpostulante}', [PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
+Route::get('/miembros/edit/{id}/{idpostulante}', [PostulantesController::class, 'editmiembro'])->name('miembros.edit');
+
+// Mostrar documentos
+Route::get('projectsDoc/{id}', [ProjectController::class, 'showDoc']);
+Route::get('projectsMiembros/{id}', [ProjectController::class, 'showProyMiembros']);
+Route::get('projectsTecnico/{id}', [ProjectController::class, 'showTecnico']);
+Route::get('projectsTecnicoDSGO/{id}', [ProjectController::class, 'showTecnicoDSGO']);
+Route::get('projectsDocTec/{id}', [ProjectController::class, 'showDocTec']);
+Route::get('projectsDocTecDSGO/{id}', [ProjectController::class, 'showDocTecDSGO']);
+Route::get('docObservados/{id}', [ProjectController::class, 'DocObservados']);
+Route::get('docObservadosDSGO/{id}', [ProjectController::class, 'DocObservadosDSGO']);
+Route::get('projectsDocNoExcluyentes/{id}', [ProjectController::class, 'showDocNoExcluyentes']);
+Route::get('projectsDocCondominio/{id}', [ProjectController::class, 'showDocCondominio']);
+Route::get('projectsDocIndi/{id}', [ProjectController::class, 'showDocIndi']);
+
+// Descargar documentos
+Route::get('download/{project}/{document_id}/{file_name}', [ProjectController::class, 'downloadFile'])->name('downloadFile');
+Route::get('bajarDocumento/{project}/faltantes/{document_id}/{file_name}', [ProjectController::class, 'bajarDocumento'])->name('bajarDocumento');
+
+// Eliminar documentos
+Route::get('documents/eliminar/{project_id}/{document_id}', [ProjectController::class, 'eliminar'])->name('eliminar');
+Route::get('documents/eliminardocumento/{project_id}/{document_id}', [ProjectController::class, 'eliminarDocumento'])->name('eliminarDocumento');
+
+
+// POST públicas
+Route::get('projects/send/{id}', [ProjectController::class, 'send']);
+Route::post('projects/{id}/postulantes/create', [PostulantesController::class, 'create']);
+// Route::post('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
+Route::get('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
+Route::post('postulantes/destroy', [PostulantesController::class, 'destroy']);
+Route::post('postulantes/destroymiembro', [PostulantesController::class, 'destroymiembro']);
+Route::post('savepostulante', [PostulantesController::class, 'store']);
+Route::post('savepostulanteEdit', [PostulantesController::class, 'storeEditPostulante']);
+Route::post('savemiembro', [PostulantesController::class, 'storemiembro']);
+Route::post('savemiembroeditar', [PostulantesController::class, 'updatemiembro']);
+
+// Adjuntar documentos
+Route::post('levantar', [ProjectController::class, 'upload']);
+Route::post('levantarDocumento', [ProjectController::class, 'uploadDocumento']);
+Route::post('levantarTecnico', [ProjectController::class, 'uploadTecnico']);
+Route::post('levantarTecnicoDSGO', [ProjectController::class, 'uploadTecnicoDSGO']);
+Route::post('levantarObs', [ProjectController::class, 'uploadObservado']);
+Route::post('levantarObsDSGO', [ProjectController::class, 'uploadObservadoDSGO']);
+Route::post('levantarNoExcluyente', [ProjectController::class, 'uploadNoExcluyente']);
+Route::post('levantarCondominio', [ProjectController::class, 'uploadCondominio']);
+Route::post('levantarIndi', [ProjectController::class, 'uploadIndi']);
+
+// Imprimir
+Route::get('imprimir/{id}', [PostulantesController::class, 'generatePDF'])->name('imprimir');
+
+// Enviar documentos faltantes
+Route::post('/enviar-documentos-faltantes', [ProjectController::class, 'enviarDocumentosFaltantes'])->name('enviarDocumentosFaltantes');
+
+// Ver archivos almacenados
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+    $path = storage_path("app/{$folder}/{$filename}");
+    if (file_exists($path)) {
+        return response()->file($path);
+    } else {
+        abort(404);
+    }
+})->where('filename', '(.*)');
+
+// Validación de código QR
+Route::get('/{key}', [HomeController::class, 'verification']);
+
+
+
+// routes/web.php
+Route::get('/dashboard/sessions', [DashboardController::class, 'sessions']);

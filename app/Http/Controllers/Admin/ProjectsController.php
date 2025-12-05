@@ -68,7 +68,7 @@ class ProjectsController extends Controller
     public function index(IndexProject $request)
     {
         // Obtener el rol del usuario
-        $usuario=Auth::user()->id;
+        $usuario = Auth::user()->id;
         $usuarioRol = Auth::user()->rol_app->dependency_id;
         $dependencia = Dependency::where('id', $usuarioRol)->first();
 
@@ -95,7 +95,7 @@ class ProjectsController extends Controller
 
         // Retornar la vista con los datos (sin filtro en el backend)
         return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol, 'dependencia' => $dependencia]);
-}
+    }
 
 
 
@@ -126,8 +126,8 @@ class ProjectsController extends Controller
 
         // Solo departamentos, sin localidades
         $departamentos = Departamento::whereNotIn('DptoId', $dep)
-                        ->orderBy('DptoNom', 'asc')
-                        ->get();
+            ->orderBy('DptoNom', 'asc')
+            ->get();
 
         return view('admin.project.create', compact('sat', 'modalidad', 'departamentos'));
     }
@@ -172,153 +172,153 @@ class ProjectsController extends Controller
      * @return void
      */
     public function show(Project $project)
-{
-    $this->authorize('admin.project.show', $project);
-    $id = $project->id;
-    $project_type = Land_project::where('land_id', $project->land_id)->first();
-    $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-    $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 1)
-        ->get();
+    {
+        $this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 1)
+            ->get();
 
-    $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 4)
-        ->get();
+        $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 4)
+            ->get();
 
-    $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
-       ->where('category_id', 5)
-       ->get();
+        $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 5)
+            ->get();
 
-    $docproyectoIndi = Assignment::where('project_type_id', $project_type->project_type_id)
-       ->where('category_id', 6)
-       ->get();
+        $docproyectoIndi = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 6)
+            ->get();
 
-    $docproyectoResolucion = Assignment::where('project_type_id', $project_type->project_type_id)
-                                                //  ->where('category_id', 4)
-                                                 ->where('document_id', 11)
-                                                   ->get();
+        $docproyectoResolucion = Assignment::where('project_type_id', $project_type->project_type_id)
+            //  ->where('category_id', 4)
+            ->where('document_id', 11)
+            ->get();
 
 
 
-    $history = ProjectStatus::where('project_id', $project['id'])
-        ->orderBy('created_at')
-        ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles = [];
-    foreach ($docproyecto as $item) {
-        $uploadedFile = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-        $uploadedFiles[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles1 = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        $uploadedFile1 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
-        $uploadedFiles1[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles2 = [];
-    foreach ($docproyectoCondominio as $item) {
-        $uploadedFile2 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
-        $uploadedFiles2[$item->document_id] = $documentExists;
-    }
-
-    // Verificar si se ha cargado un archivo para cada elemento
-    $uploadedFiles3 = [];
-    foreach ($docproyectoIndi as $item) {
-        $uploadedFile3 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile3 ? $uploadedFile3->file_path : false;
-        $uploadedFiles3[$item->document_id] = $documentExists;
-    }
-
-    $uploadedFiles4 = [];
-    foreach ($docproyectoResolucion as $item) {
-        $uploadedFile4 = Documents::where('project_id', $project->id)
-            ->where('document_id', $item->document_id)
-            ->first();
-        $documentExists = $uploadedFile4 ? $uploadedFile4->file_path : false;
-        $uploadedFiles4[$item->document_id] = $documentExists;
-    }
-
-    // Obtener los documentos no excluyentes faltantes
-    $missingDocuments = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-            $missingDocuments[] = $item->document->name;
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+            $uploadedFiles[$item->document_id] = $documentExists;
         }
-    }
 
-    return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'docproyectoIndi', 'uploadedFiles1', 'uploadedFiles2', 'uploadedFiles3', 'uploadedFiles4', 'missingDocuments'));
-}
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles1 = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            $uploadedFile1 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
+            $uploadedFiles1[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles2 = [];
+        foreach ($docproyectoCondominio as $item) {
+            $uploadedFile2 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+            $uploadedFiles2[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles3 = [];
+        foreach ($docproyectoIndi as $item) {
+            $uploadedFile3 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile3 ? $uploadedFile3->file_path : false;
+            $uploadedFiles3[$item->document_id] = $documentExists;
+        }
+
+        $uploadedFiles4 = [];
+        foreach ($docproyectoResolucion as $item) {
+            $uploadedFile4 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile4 ? $uploadedFile4->file_path : false;
+            $uploadedFiles4[$item->document_id] = $documentExists;
+        }
+
+        // Obtener los documentos no excluyentes faltantes
+        $missingDocuments = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
+                $missingDocuments[] = $item->document->name;
+            }
+        }
+
+        return view('admin.project.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'docproyectoNoExcluyentes', 'docproyectoCondominio', 'docproyectoIndi', 'uploadedFiles1', 'uploadedFiles2', 'uploadedFiles3', 'uploadedFiles4', 'missingDocuments'));
+    }
 
     public function showDGJN(Project $project)
     {
         $this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-        ->where('category_id',1)
-        ->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 1)
+            ->get();
         $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 4)
-        ->get();
+            ->where('category_id', 4)
+            ->get();
 
         $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 5)
-        ->get();
+            ->where('category_id', 5)
+            ->get();
 
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-                    $uploadedFiles = [];
-                    foreach ($docproyecto as $item) {
-                        $uploadedFile = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-                        $uploadedFiles[$item->document_id] = $documentExists;
-                    }
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-                    $uploadedFiles1 = [];
-                    foreach ($docproyectoNoExcluyentes as $item) {
-                        $uploadedFile1 = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
-                        $uploadedFiles1[$item->document_id] = $documentExists;
-                    }
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-                    $uploadedFiles2 = [];
-                    foreach ($docproyectoCondominio as $item) {
-                        $uploadedFile2 = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
-                        $uploadedFiles2[$item->document_id] = $documentExists;
-                    }
-        // Obtener los documentos no excluyentes faltantes
-    $missingDocuments = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-            $missingDocuments[] = $item->document->name;
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+            $uploadedFiles[$item->document_id] = $documentExists;
         }
-    }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles1 = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            $uploadedFile1 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
+            $uploadedFiles1[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles2 = [];
+        foreach ($docproyectoCondominio as $item) {
+            $uploadedFile2 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+            $uploadedFiles2[$item->document_id] = $documentExists;
+        }
+        // Obtener los documentos no excluyentes faltantes
+        $missingDocuments = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
+                $missingDocuments[] = $item->document->name;
+            }
+        }
 
         //return $history;
 
@@ -329,15 +329,15 @@ class ProjectsController extends Controller
     {
         // $this->authorize('admin.project.show', $project);
         //return "DOCUMENTO FALTANTE";
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $documentos = Documentsmissing::where('project_id',$id)->get();
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
+        $documentos = Documentsmissing::where('project_id', $id)->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                    // Verificar si se ha cargado un archivo para cada elemento
+        // Verificar si se ha cargado un archivo para cada elemento
         $uploadedFiles = [];
         foreach ($documentos as $item) {
             $uploadedFile = Documentsmissing::where('project_id', $project->id)
@@ -351,7 +351,7 @@ class ProjectsController extends Controller
 
         //return $history;
 
-        return view('admin.project.DGJN.showFaltante', compact('project','history', 'postulantes','uploadedFiles', 'documentos'));
+        return view('admin.project.DGJN.showFaltante', compact('project', 'history', 'postulantes', 'uploadedFiles', 'documentos'));
     }
 
     public function showFONAVIS(Project $project)
@@ -362,10 +362,10 @@ class ProjectsController extends Controller
 
         // Modificar esta línea para incluir los nuevos estados 4 y 6
         if ($stageId == 3 || $stageId == 4 || $stageId == 6 || $stageId == 13 || $stageId == 18) {
-           // Aquí se obtiene el estado del proyecto con la relación a la imagen
-           $proyectoEstado = ProjectStatus::with('imagen')->where('project_id', $id)
-               ->where('stage_id', $stageId)
-               ->get();
+            // Aquí se obtiene el estado del proyecto con la relación a la imagen
+            $proyectoEstado = ProjectStatus::with('imagen')->where('project_id', $id)
+                ->where('stage_id', $stageId)
+                ->get();
         } else {
             $proyectoEstado = collect();
         }
@@ -379,58 +379,58 @@ class ProjectsController extends Controller
     public function showVERDOCFONAVIS(Project $project)
     {
         $this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-        ->where('category_id',1)
-        ->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 1)
+            ->get();
         $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 4)
-        ->get();
+            ->where('category_id', 4)
+            ->get();
 
         $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
-        ->where('category_id', 5)
-        ->get();
+            ->where('category_id', 5)
+            ->get();
 
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
-                    $uploadedFiles = [];
-                    foreach ($docproyecto as $item) {
-                        $uploadedFile = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
-                        $uploadedFiles[$item->document_id] = $documentExists;
-                    }
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-                    $uploadedFiles1 = [];
-                    foreach ($docproyectoNoExcluyentes as $item) {
-                        $uploadedFile1 = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
-                        $uploadedFiles1[$item->document_id] = $documentExists;
-                    }
-
-                    // Verificar si se ha cargado un archivo para cada elemento
-                    $uploadedFiles2 = [];
-                    foreach ($docproyectoCondominio as $item) {
-                        $uploadedFile2 = Documents::where('project_id', $project->id)
-                            ->where('document_id', $item->document_id)
-                            ->first();
-                        $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
-                        $uploadedFiles2[$item->document_id] = $documentExists;
-                    }
-        // Obtener los documentos no excluyentes faltantes
-    $missingDocuments = [];
-    foreach ($docproyectoNoExcluyentes as $item) {
-        if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-            $missingDocuments[] = $item->document->name;
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile ? $uploadedFile->file_path : false;
+            $uploadedFiles[$item->document_id] = $documentExists;
         }
-    }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles1 = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            $uploadedFile1 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile1 ? $uploadedFile1->file_path : false;
+            $uploadedFiles1[$item->document_id] = $documentExists;
+        }
+
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles2 = [];
+        foreach ($docproyectoCondominio as $item) {
+            $uploadedFile2 = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            $documentExists = $uploadedFile2 ? $uploadedFile2->file_path : false;
+            $uploadedFiles2[$item->document_id] = $documentExists;
+        }
+        // Obtener los documentos no excluyentes faltantes
+        $missingDocuments = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
+                $missingDocuments[] = $item->document->name;
+            }
+        }
 
         //return $history;
 
@@ -441,9 +441,9 @@ class ProjectsController extends Controller
     public function showFONAVISSOCIAL(Project $project)
     {
         // $this->authorize('admin.project.show', $project);
-        $id=$project->id;
+        $id = $project->id;
         $proyectoEstado = ProjectStatus::where('project_id', $id)->where('stage_id', 9)->get();
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
 
 
@@ -458,17 +458,17 @@ class ProjectsController extends Controller
     public function showDGSO(Project $project)
     {
         //$this->authorize('admin.project.show', $project);
-        $id=$project->id;
-        $project_type= Land_project::where('land_id',$project->land_id)->first();
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-        $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-        ->where('category_id',1)
-        ->get();
-        $history = ProjectStatus::where('project_id',$project['id'])
-                    ->orderBy('created_at')
-                    ->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 1)
+            ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                    // Verificar si se ha cargado un archivo para cada elemento
+        // Verificar si se ha cargado un archivo para cada elemento
         $uploadedFiles = [];
         foreach ($docproyecto as $item) {
             $uploadedFile = Documents::where('project_id', $project->id)
@@ -482,100 +482,100 @@ class ProjectsController extends Controller
 
         //return $history;
 
-        return view('admin.project.DGSO.show', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+        return view('admin.project.DGSO.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles'));
     }
 
     public function showFONAVISTECNICO(Project $project)
     {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->whereIn('category_id',[2])
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
+        //$this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->whereIn('category_id', [2])
+            ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
 
-       //return $history;
+        //return $history;
 
-       return view('admin.project.FONAVIS.showFonavisTecnico', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+        return view('admin.project.FONAVIS.showFonavisTecnico', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles'));
     }
 
     public function showFONAVISTECNICODOS(Project $project)
     {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->whereIn('category_id',[3])
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
+        //$this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->whereIn('category_id', [3])
+            ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
 
-       //return $history;
+        //return $history;
 
-       return view('admin.project.FONAVIS.showFonavisTecnicoDos', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+        return view('admin.project.FONAVIS.showFonavisTecnicoDos', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles'));
     }
 
     public function showDIGH(Project $project)
     {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->where('category_id',2)
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
+        //$this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 2)
+            ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
 
-       $observations = DighObservation::where('project_id', $project->id)
-                                        ->pluck('observation', 'document_id'); // [document_id => 'observación']
+        $observations = DighObservation::where('project_id', $project->id)
+            ->pluck('observation', 'document_id'); // [document_id => 'observación']
 
-       //return $history;
+        //return $history;
 
-       return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles', 'observations'));
+        return view('admin.project.DIGH.showDIGH', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles', 'observations'));
     }
 
     public function saveDIGHObservation(Request $request, Project $project)
@@ -602,8 +602,8 @@ class ProjectsController extends Controller
 
         // Verificar si ya existe un estado 14 para este proyecto
         $hasStage14 = ProjectStatus::where('project_id', $project->id)
-                        ->where('stage_id', 14)
-                        ->exists();
+            ->where('stage_id', 14)
+            ->exists();
 
         if (!$hasStage14) {
             ProjectStatus::create([
@@ -641,8 +641,8 @@ class ProjectsController extends Controller
         );
 
         $hasStage17 = ProjectStatus::where('project_id', $project->id)
-                        ->where('stage_id', 17)
-                        ->exists();
+            ->where('stage_id', 17)
+            ->exists();
 
         if (!$hasStage17) {
             ProjectStatus::create([
@@ -741,39 +741,39 @@ class ProjectsController extends Controller
 
     public function showFONAVISADJ(Project $project)
     {
-       //$this->authorize('admin.project.show', $project);
-       $id=$project->id;
-       $project_type= Land_project::where('land_id',$project->land_id)->first();
-       $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
-       $docproyecto = Assignment::where('project_type_id',$project_type->project_type_id)
-       ->where('category_id',3)
-       ->get();
-       $history = ProjectStatus::where('project_id',$project['id'])
-                   ->orderBy('created_at')
-                   ->get();
+        //$this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 3)
+            ->get();
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
 
-                   // Verificar si se ha cargado un archivo para cada elemento
-       $uploadedFiles = [];
-       foreach ($docproyecto as $item) {
-           $uploadedFile = Documents::where('project_id', $project->id)
-               ->where('document_id', $item->document_id)
-               ->first();
-           //return $uploadedFile;
-           $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-           //return $documentExists;
-           $uploadedFiles[$item->document_id] = $documentExists;
-       }
+        // Verificar si se ha cargado un archivo para cada elemento
+        $uploadedFiles = [];
+        foreach ($docproyecto as $item) {
+            $uploadedFile = Documents::where('project_id', $project->id)
+                ->where('document_id', $item->document_id)
+                ->first();
+            //return $uploadedFile;
+            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
+            //return $documentExists;
+            $uploadedFiles[$item->document_id] = $documentExists;
+        }
 
-       //return $history;
+        //return $history;
 
-       return view('admin.project.FONAVIS.showFonavisAdj', compact('project', 'docproyecto','history', 'postulantes','uploadedFiles'));
+        return view('admin.project.FONAVIS.showFonavisAdj', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles'));
     }
 
 
     public function transition(Project $project)
     {
         $project->getEstado->getStage->id;
-        $estado=$project->getEstado->getStage->id;
+        $estado = $project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $dependencia = Auth::user()->rol_app->dependency_id;
         $email = Auth::user()->email;
@@ -782,7 +782,7 @@ class ProjectsController extends Controller
         switch ($estado) {
             case 1:
                 // Lógica específica para el estado 1
-                $stages = Stage::whereIn('id',[2])->get();
+                $stages = Stage::whereIn('id', [2])->get();
                 // $opcion = 2;
                 break;
             case 2:
@@ -790,67 +790,65 @@ class ProjectsController extends Controller
                 $stages = Stage::whereIn('id', [3, 4, 6, 21])->get();
                 break;
             case 3:
-                    // Lógica específica para el estado 3
-                    $stages = Stage::whereIn('id', [2, 7, 8])->get();
-                    break;
+                // Lógica específica para el estado 3
+                $stages = Stage::whereIn('id', [2, 7, 8])->get();
+                break;
             case 4:
-                    // Lógica específica para el estado 3
-                    $stages = Stage::whereIn('id', [3,21])->get();
-                    break;
+                // Lógica específica para el estado 3
+                $stages = Stage::whereIn('id', [3, 21])->get();
+                break;
             case 5:
-                 // Lógica específica para el estado 5
-                 $stages = Stage::whereIn('id', [3, 4, 6])->get();
-                 break;
+                // Lógica específica para el estado 5
+                $stages = Stage::whereIn('id', [3, 4, 6])->get();
+                break;
 
             case 6:
-            // Lógica específica para el estado 6
-            $stages = Stage::whereIn('id', [3, 4])->get();
-            break;
+                // Lógica específica para el estado 6
+                $stages = Stage::whereIn('id', [3, 4])->get();
+                break;
 
             case 8:
-                 // Lógica específica para el estado 8
-                 $stages = Stage::whereIn('id', [2, 9])->get();
-                 break;
+                // Lógica específica para el estado 8
+                $stages = Stage::whereIn('id', [2, 9])->get();
+                break;
             case 9:
-                 // Lógica específica para el estado 9
-                 $stages = Stage::whereIn('id', [10])->get();
-                 break;
+                // Lógica específica para el estado 9
+                $stages = Stage::whereIn('id', [10])->get();
+                break;
             case 11:
-                 // Lógica específica para el estado 11
-                 if ($dependencia==1){
+                // Lógica específica para el estado 11
+                if ($dependencia == 1) {
                     $stages = Stage::whereIn('id', [12])->get();
-                 break;
-                 }
-
-                 $stages = Stage::whereIn('id', [13])->get();
-                 break;
-            case 12:
-                 // Lógica específica para el estado 12
-                 $stages = Stage::whereIn('id', [13,14,15])->get();
-                 break;
-            case 13:
-                    // Lógica específica para el estado 13
-                    $stages = Stage::whereIn('id', [16])->get();
                     break;
-            case 16:
-                     // Lógica específica para el estado 16
-                     $stages = Stage::whereIn('id', [18,19])->get();
-                     break;
-            case 17:
-                     // Lógica específica para el estado 17
-                     $stages = Stage::whereIn('id', [18])->get();
-                     break;
-            case 21:
-                     // Lógica específica para el estado 17
-                     $stages = Stage::whereIn('id', [22])->get();
-                     break;
+                }
 
+                $stages = Stage::whereIn('id', [13])->get();
+                break;
+            case 12:
+                // Lógica específica para el estado 12
+                $stages = Stage::whereIn('id', [13, 14, 15])->get();
+                break;
+            case 13:
+                // Lógica específica para el estado 13
+                $stages = Stage::whereIn('id', [16])->get();
+                break;
+            case 16:
+                // Lógica específica para el estado 16
+                $stages = Stage::whereIn('id', [18, 19])->get();
+                break;
+            case 17:
+                // Lógica específica para el estado 17
+                $stages = Stage::whereIn('id', [18])->get();
+                break;
+            case 21:
+                // Lógica específica para el estado 17
+                $stages = Stage::whereIn('id', [22])->get();
+                break;
         }
 
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
-        return view('admin.project.transition', compact('project', 'user','mensaje','stages','email', 'estado', 'dependencia'));
-
+        return view('admin.project.transition', compact('project', 'user', 'mensaje', 'stages', 'email', 'estado', 'dependencia'));
     }
 
     public function transitionEliminar(Project $project)
@@ -858,7 +856,7 @@ class ProjectsController extends Controller
         $project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $email = Auth::user()->email;
-        $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
+        $stages = Stage::where('id', '!=', $project->getEstado->getStage->id)->get();
 
         /*if ($workflowState->id == 26) {
             $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
@@ -867,22 +865,20 @@ class ProjectsController extends Controller
         }*/
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
-        return view('admin.project.transitionEliminar', compact('project', 'user','mensaje','stages','email'));
-
+        return view('admin.project.transitionEliminar', compact('project', 'user', 'mensaje', 'stages', 'email'));
     }
 
     public function notificar(Project $project)
     {
         $project->getEstado->getStage->id;
-        $estado=$project->getEstado->getStage->id;
+        $estado = $project->getEstado->getStage->id;
         $user = Auth::user()->id;
         $email = Auth::user()->email;
         // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
         $mensaje = 'Esta notificacion quedara registrada en el historial del Proyecto';
 
-        return view('admin.project.notificar', compact('project', 'user','mensaje','email', 'estado'));
-
+        return view('admin.project.notificar', compact('project', 'user', 'mensaje', 'email', 'estado'));
     }
 
     public function historial($id)
@@ -941,9 +937,9 @@ class ProjectsController extends Controller
         $this->authorize('admin.project.edit', $project);
 
         $sat = Sat::whereNotNull('NucRuc')
-                    ->where('NucEst', '=', 'H')
-                    ->select('NucNomSat', DB::raw('LTRIM(RTRIM(NucCod)) as NucCod'), 'NucCont')
-                    ->get();
+            ->where('NucEst', '=', 'H')
+            ->select('NucNomSat', DB::raw('LTRIM(RTRIM(NucCod)) as NucCod'), 'NucCont')
+            ->get();
 
 
 
@@ -955,8 +951,8 @@ class ProjectsController extends Controller
 
         // Solo departamentos, sin localidades
         $departamentos = Departamento::whereNotIn('DptoId', $dep)
-                        ->orderBy('DptoNom', 'asc')
-                        ->get();
+            ->orderBy('DptoNom', 'asc')
+            ->get();
 
         return view('admin.project.edit', [
             'project' => $project,
@@ -980,7 +976,7 @@ class ProjectsController extends Controller
         // Sanitize input
         $sanitized = $request->getSanitized();
 
-         // Reemplazar sat_id con el código real
+        // Reemplazar sat_id con el código real
         $sanitized['sat_id'] = $request->getSatId();
         $sanitized['modalidad_id'] = $request->getModalidadId();
         $sanitized['land_id'] = $request->getLandId();
@@ -1023,7 +1019,7 @@ class ProjectsController extends Controller
 
     function downloadFile($project, $document_id, $file_name)
     {
-       // return "Bajar archivos";
+        // return "Bajar archivos";
         //Esto es para descargar del disco remoto
         // return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
         return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
@@ -1037,6 +1033,12 @@ class ProjectsController extends Controller
         //return Storage::disk('remote')->download($file_name);
         return (new Response($file, 200))
             ->header('Content-Type', '*');*/
+    }
+
+    function viewFileDoc($project, $document_id, $file_name)
+    {
+        // Usa 'response' para intentar abrir en el navegador en lugar de forzar descarga
+        return Storage::disk('local')->response('uploads/' . $project . "/" . $document_id . "/" . $file_name);
     }
 
     /**
@@ -1065,7 +1067,7 @@ class ProjectsController extends Controller
      * @throws Exception
      * @return Response|bool
      */
-    public function bulkDestroy(BulkDestroyProject $request) : Response
+    public function bulkDestroy(BulkDestroyProject $request): Response
     {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
@@ -1111,7 +1113,7 @@ class ProjectsController extends Controller
             ->get();
 
         // Preparar datos precalculados para la vista
-        $postulantesData = $postulantes->map(function($post) {
+        $postulantesData = $postulantes->map(function ($post) {
             $postulante = $post->getPostulante;
 
             if (!$postulante) {
@@ -1192,12 +1194,22 @@ class ProjectsController extends Controller
         // }
 
         $discapacdad = Discapacidad::all();
-        $idpostulante=$postulante;
+        $idpostulante = $postulante;
 
         return view('admin.postulante.ficha.createmiembro', compact(
-            'nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo',
-            'nac', 'est', 'title', 'project_id',
-            'discapacdad', 'parentesco', 'idpostulante'
+            'nroexp',
+            'cedula',
+            'nombre',
+            'apellido',
+            'fecha',
+            'sexo',
+            'nac',
+            'est',
+            'title',
+            'project_id',
+            'discapacdad',
+            'parentesco',
+            'idpostulante'
         ));
     }
 
@@ -1247,12 +1259,22 @@ class ProjectsController extends Controller
         // }
 
         $discapacdad = Discapacidad::all();
-        $idpostulante=$postulante;
+        $idpostulante = $postulante;
 
         return view('admin.postulante.ficha.createmiembro', compact(
-            'nroexp', 'cedula', 'nombre', 'apellido', 'fecha', 'sexo',
-            'nac', 'est', 'title', 'project_id',
-            'discapacdad', 'parentesco', 'idpostulante'
+            'nroexp',
+            'cedula',
+            'nombre',
+            'apellido',
+            'fecha',
+            'sexo',
+            'nac',
+            'est',
+            'title',
+            'project_id',
+            'discapacdad',
+            'parentesco',
+            'idpostulante'
         ));
     }
 
@@ -1403,22 +1425,22 @@ class ProjectsController extends Controller
         }
     }
 
-    public function showpostulantes($id,$idpostulante)
+    public function showpostulantes($id, $idpostulante)
     {
         // return "Postulantes lado ADM Show";
-        $postulante=Postulante::find($idpostulante);
+        $postulante = Postulante::find($idpostulante);
         $project = Project::find($id);
-        $title="Resumen Postulante ";
+        $title = "Resumen Postulante ";
         //dd($project);
-        $tipoproy = Land_project::where('land_id',$project->land_id)->first();
+        $tipoproy = Land_project::where('land_id', $project->land_id)->first();
         // $documentos = PostulantesDocuments::where('postulante_id',$idpostulante)->get();
         // $docproyecto = Assignment::where('project_type_id',$tipoproy->project_type_id)
         // ->whereNotIn('document_id', $documentos->pluck('document_id'))
         // ->where('category_id',2)
         // ->get();
-        $miembros = PostulanteHasBeneficiary::where('postulante_id',$postulante->id)->get();
+        $miembros = PostulanteHasBeneficiary::where('postulante_id', $postulante->id)->get();
         //$docproyecto = $docproyecto->whereNotIn('document_id', $documentos->pluck('document_id'));
-        return view('admin.postulante.show',compact('title','project','miembros','postulante'));
+        return view('admin.postulante.show', compact('title', 'project', 'miembros', 'postulante'));
     }
 
     public function legajo(Project $project)
@@ -1428,78 +1450,41 @@ class ProjectsController extends Controller
         $project_type = Land_project::where('land_id', $project->land_id)->first();
         $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
 
-        // Documentos de 'show'
-        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
-            ->where('category_id', 1)
+        // Obtener todos los documentos asignados al tipo de proyecto
+        $assignments = Assignment::with(['document', 'category'])
+            ->where('project_type_id', $project_type->project_type_id)
             ->get();
 
-        $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
-            ->where('category_id', 4)
-            ->get();
+        // Agrupar por nombre de categoría
+        // Ordenamos las categorías si es necesario, por defecto por orden de aparición o nombre
+        $groupedAssignments = $assignments->groupBy(function ($item) {
+            return $item->category ? $item->category->name : 'Otros';
+        })->sortKeys();
 
-        $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
-            ->where('category_id', 5)
-            ->get();
+        // Obtener archivos subidos (Documents)
+        // Mapeamos por document_id para acceso rápido
+        $uploadedDocs = Documents::where('project_id', $id)
+            ->get()
+            ->keyBy('document_id');
 
-        $docproyectoIndi = Assignment::where('project_type_id', $project_type->project_type_id)
-            ->where('category_id', 6)
-            ->get();
-
-        $docproyectoResolucion = Assignment::where('project_type_id', $project_type->project_type_id)
-            ->where('document_id', 11)
-            ->get();
+        // Helper simplificado en array (ya no funcion closure) o simplemente usaremos $uploadedDocs en la vista
+        // Enviamos $uploadedDocs directamente.
 
         $history = ProjectStatus::where('project_id', $project['id'])
             ->orderBy('created_at')
             ->get();
 
-        // Helper para verificar archivos
-        $checkFiles = function ($assignments) use ($project) {
-            $files = [];
-            foreach ($assignments as $item) {
-                $uploadedFile = Documents::where('project_id', $project->id)
-                    ->where('document_id', $item->document_id)
-                    ->first();
-                $files[$item->document_id] = $uploadedFile ? $uploadedFile->file_path : false;
-            }
-            return $files;
-        };
-
-        $uploadedFiles = $checkFiles($docproyecto);
-        $uploadedFiles1 = $checkFiles($docproyectoNoExcluyentes);
-        $uploadedFiles2 = $checkFiles($docproyectoCondominio);
-        $uploadedFiles3 = $checkFiles($docproyectoIndi);
-        $uploadedFiles4 = $checkFiles($docproyectoResolucion);
-
-        $missingDocuments = [];
-        foreach ($docproyectoNoExcluyentes as $item) {
-            if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
-                $missingDocuments[] = $item->document->name;
-            }
-        }
-
         // Datos de 'showFonavis' (Dictámenes y Resoluciones)
-        $stageId = $project->getestado->stage_id;
-        // Incluir estados relevantes para dictámenes/resoluciones
-        // Se agregan más estados si es necesario, basado en showFonavis
+        // Se muestran todos los estados que tengan imagenes/documentos
         $proyectoEstado = ProjectStatus::with('imagen')->where('project_id', $id)
-            ->whereIn('stage_id', [3, 4, 6, 13, 18])
             ->get();
 
         return view('admin.project.legajo', compact(
             'project',
-            'docproyecto',
+            'groupedAssignments',
+            'uploadedDocs',
             'history',
             'postulantes',
-            'uploadedFiles',
-            'docproyectoNoExcluyentes',
-            'docproyectoCondominio',
-            'docproyectoIndi',
-            'uploadedFiles1',
-            'uploadedFiles2',
-            'uploadedFiles3',
-            'uploadedFiles4',
-            'missingDocuments',
             'proyectoEstado'
         ));
     }
@@ -1523,14 +1508,10 @@ class ProjectsController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | 1) DOCUMENTOS (storage/app/uploads/{project_id}/{document_id}/...)
-    |--------------------------------------------------------------------------
-    */
-
-        /*-----------------------------------------------------------------------------
-| 1) DOCUMENTOS (storage/app/uploads/{project_id}/{document_id}/...)
------------------------------------------------------------------------------*/
+        |--------------------------------------------------------------------------
+        | 1) DOCUMENTOS (storage/app/uploads/{project_id}/{document_id}/...)
+        |--------------------------------------------------------------------------
+        */
 
         $documents = Documents::where('project_id', $project->id)->get();
         $baseProjectFolder = storage_path("app/uploads/{$project->id}");
@@ -1584,14 +1565,13 @@ class ProjectsController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | 2) DICTÁMENES / RESOLUCIONES (Spatie Media Library)
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | 2) DICTÁMENES / RESOLUCIONES (Spatie Media Library)
+        |--------------------------------------------------------------------------
+        */
 
         $statuses = ProjectStatus::with('media')
             ->where('project_id', $project->id)
-            ->whereIn('stage_id', [3, 4, 6, 13, 18])
             ->get();
 
         foreach ($statuses as $status) {
@@ -1623,7 +1603,4 @@ class ProjectsController extends Controller
 
         return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
-
 }
-
-
