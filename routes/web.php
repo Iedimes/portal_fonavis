@@ -291,6 +291,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::delete('/{project}',                                 'ProjectsController@destroy')->name('destroy');
             Route::get('/{project}/project',                            'ProjectsController@project')->name('project');
             //DESCARGAR DOCUMENTOS LADO ADM
+            Route::get('/{project}/legajo',                             'ProjectsController@legajo')->name('legajo');
+            Route::get('/{project}/legajo/descargar',                   'ProjectsController@descargarLegajo')->name('legajo.descargar');
             Route::get('descargarDocumento/{project}/faltantes/{document_id}/{file_name}', 'ProjectsController@descargarDocumento')->name('descargarDocumento');
             Route::get('downloadfileDoc/{project}/{document_id}/{file_name}', 'ProjectsController@downloadFile')->name('downloadFileDoc');
             Route::post('/{project}/save-digh-observation', 'ProjectsController@saveDIGHObservation')->name('saveDIGHObservation');

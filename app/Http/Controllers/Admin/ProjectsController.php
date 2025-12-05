@@ -1418,6 +1418,208 @@ class ProjectsController extends Controller
         return view('admin.postulante.show',compact('title','project','miembros','postulante'));
     }
 
+    public function legajo(Project $project)
+    {
+        $this->authorize('admin.project.show', $project);
+        $id = $project->id;
+        $project_type = Land_project::where('land_id', $project->land_id)->first();
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+        // Documentos de 'show'
+        $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 1)
+            ->get();
+
+        $docproyectoNoExcluyentes = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 4)
+            ->get();
+
+        $docproyectoCondominio = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 5)
+            ->get();
+
+        $docproyectoIndi = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('category_id', 6)
+            ->get();
+
+        $docproyectoResolucion = Assignment::where('project_type_id', $project_type->project_type_id)
+            ->where('document_id', 11)
+            ->get();
+
+        $history = ProjectStatus::where('project_id', $project['id'])
+            ->orderBy('created_at')
+            ->get();
+
+        // Helper para verificar archivos
+        $checkFiles = function ($assignments) use ($project) {
+            $files = [];
+            foreach ($assignments as $item) {
+                $uploadedFile = Documents::where('project_id', $project->id)
+                    ->where('document_id', $item->document_id)
+                    ->first();
+                $files[$item->document_id] = $uploadedFile ? $uploadedFile->file_path : false;
+            }
+            return $files;
+        };
+
+        $uploadedFiles = $checkFiles($docproyecto);
+        $uploadedFiles1 = $checkFiles($docproyectoNoExcluyentes);
+        $uploadedFiles2 = $checkFiles($docproyectoCondominio);
+        $uploadedFiles3 = $checkFiles($docproyectoIndi);
+        $uploadedFiles4 = $checkFiles($docproyectoResolucion);
+
+        $missingDocuments = [];
+        foreach ($docproyectoNoExcluyentes as $item) {
+            if (!isset($uploadedFiles1[$item->document_id]) || !$uploadedFiles1[$item->document_id]) {
+                $missingDocuments[] = $item->document->name;
+            }
+        }
+
+        // Datos de 'showFonavis' (Dictámenes y Resoluciones)
+        $stageId = $project->getestado->stage_id;
+        // Incluir estados relevantes para dictámenes/resoluciones
+        // Se agregan más estados si es necesario, basado en showFonavis
+        $proyectoEstado = ProjectStatus::with('imagen')->where('project_id', $id)
+            ->whereIn('stage_id', [3, 4, 6, 13, 18])
+            ->get();
+
+        return view('admin.project.legajo', compact(
+            'project',
+            'docproyecto',
+            'history',
+            'postulantes',
+            'uploadedFiles',
+            'docproyectoNoExcluyentes',
+            'docproyectoCondominio',
+            'docproyectoIndi',
+            'uploadedFiles1',
+            'uploadedFiles2',
+            'uploadedFiles3',
+            'uploadedFiles4',
+            'missingDocuments',
+            'proyectoEstado'
+        ));
+    }
+
+    public function descargarLegajo(Project $project)
+    {
+        $zipFileName = 'legajo_proyecto_' . $project->id . '.zip';
+        $directory = storage_path('app/uploads');
+
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $zipFilePath = $directory . '/' . $zipFileName;
+
+        $zip = new ZipArchive;
+        $res = $zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if ($res !== TRUE) {
+            return redirect()->back()->with('error', 'No se pudo crear el archivo ZIP.');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | 1) DOCUMENTOS (storage/app/uploads/{project_id}/{document_id}/...)
+    |--------------------------------------------------------------------------
+    */
+
+        /*-----------------------------------------------------------------------------
+| 1) DOCUMENTOS (storage/app/uploads/{project_id}/{document_id}/...)
+-----------------------------------------------------------------------------*/
+
+        $documents = Documents::where('project_id', $project->id)->get();
+        $baseProjectFolder = storage_path("app/uploads/{$project->id}");
+
+        if (!is_dir($baseProjectFolder)) {
+            \Log::warning("descargarLegajo: carpeta del proyecto no existe: {$baseProjectFolder}");
+        } else {
+
+            foreach ($documents as $doc) {
+
+                // Crear slug del título (nombre de la carpeta)
+                $safeTitle = preg_replace('/[^A-Za-z0-9_\-]/', '_', strtoupper($doc->title));
+                $folderName = "{$doc->document_id}-{$safeTitle}";
+
+                // Primera opción: document_id
+                $docFolder = $baseProjectFolder . '/' . $doc->document_id;
+
+                // Alternativa: id del documento
+                if (!is_dir($docFolder)) {
+                    $altDocFolder = $baseProjectFolder . '/' . $doc->id;
+
+                    if (is_dir($altDocFolder)) {
+                        $docFolder = $altDocFolder;
+                    } else {
+                        \Log::warning("descargarLegajo: no existe carpeta para doc={$doc->document_id} ni id={$doc->id}");
+                        continue;
+                    }
+                }
+
+                // Recorrer recursivamente la carpeta y agregar al ZIP
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($docFolder, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+
+                foreach ($iterator as $file) {
+                    if ($file->isFile()) {
+
+                        $filePath = $file->getRealPath();
+                        $relative = substr($filePath, strlen($docFolder) + 1);
+
+                        // Documentos/{documento-nombre}/archivo.pdf
+                        $zip->addFile(
+                            $filePath,
+                            'Documentos/' . $folderName . '/' . $relative
+                        );
+                    }
+                }
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 2) DICTÁMENES / RESOLUCIONES (Spatie Media Library)
+    |--------------------------------------------------------------------------
+    */
+
+        $statuses = ProjectStatus::with('media')
+            ->where('project_id', $project->id)
+            ->whereIn('stage_id', [3, 4, 6, 13, 18])
+            ->get();
+
+        foreach ($statuses as $status) {
+
+            $stageName = $status->getStage ? $status->getStage->name : 'Estado_' . $status->stage_id;
+            $stageName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $stageName);
+
+            foreach ($status->getMedia('gallery') as $media) {
+
+                $path = $media->getPath();
+
+                if (file_exists($path)) {
+                    $zip->addFile(
+                        $path,
+                        'Dictamenes_Resoluciones/' . $stageName . '/' . $media->file_name
+                    );
+                } else {
+                    \Log::warning("descargarLegajo: archivo de media no encontrado: {$path}");
+                }
+            }
+        }
+
+        // Cerrar ZIP
+        $zip->close();
+
+        if (!file_exists($zipFilePath)) {
+            return redirect()->back()->with('error', 'No se pudo generar el archivo ZIP.');
+        }
+
+        return response()->download($zipFilePath)->deleteFileAfterSend(true);
+    }
 
 }
 
