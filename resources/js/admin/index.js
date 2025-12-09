@@ -26,3 +26,4 @@ import './dependency';
 import './reporte';
 import './project-has-expediente';
 import './project-old';
+import './legajo-masivo';

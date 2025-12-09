@@ -291,6 +291,10 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/{project}',                                   'ProjectsController@update')->name('update');
             Route::delete('/{project}',                                 'ProjectsController@destroy')->name('destroy');
             Route::get('/{project}/project',                            'ProjectsController@project')->name('project');
+            // Legajo Masivo
+            Route::get('legajo-masivo/create', 'LegajoMasivoController@create')->name('legajo-masivo.create');
+            Route::post('legajo-masivo/generar', 'LegajoMasivoController@generar')->name('legajo-masivo.generar');
+
             //DESCARGAR DOCUMENTOS LADO ADM
             Route::get('/{project}/legajo',                             'ProjectsController@legajo')->name('legajo');
             Route::get('/{project}/legajo/descargar',                   'ProjectsController@descargarLegajo')->name('legajo.descargar');

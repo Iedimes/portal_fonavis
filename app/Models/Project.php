@@ -14,13 +14,30 @@ class Project extends Model implements AuditableContract
     use AuditableTrait;        // Auditoría compatible
 
     protected $fillable = [
-        'name', 'phone', 'sat_id', 'state_id', 'city_id', 'land_id', 'modalidad_id',
-        'localidad', 'leader_name', 'typology_id', 'expsocial', 'exptecnico',
-        'action', 'households', 'certificate_pin', 'res_nro', 'finca_nro',
-        'fechares', 'coordenadax', 'coordenaday', 'ubicacion'
+        'name',
+        'phone',
+        'sat_id',
+        'state_id',
+        'city_id',
+        'land_id',
+        'modalidad_id',
+        'localidad',
+        'leader_name',
+        'typology_id',
+        'expsocial',
+        'exptecnico',
+        'action',
+        'households',
+        'certificate_pin',
+        'res_nro',
+        'finca_nro',
+        'fechares',
+        'coordenadax',
+        'coordenaday',
+        'ubicacion'
     ];
 
-    protected $with = ['getState', 'getModality', 'getCity', 'getEstado', 'getSat'];
+    protected $with = ['getState', 'getModality', 'getCity', 'getEstado', 'getSat', 'documents', 'statuses'];
 
     protected $dates = [
         'created_at',
@@ -76,6 +93,25 @@ class Project extends Model implements AuditableContract
     {
         return $this->hasMany('App\Models\ProjectStatus', 'project_id', 'id');
     }
+
+    /* ************************ RELACIONES ADICIONALES PARA ZIP ************************* */
+
+    /**
+     * Relación con los documentos del proyecto
+     */
+    public function documents()
+    {
+        return $this->hasMany('App\Models\Documents', 'project_id', 'id');
+    }
+
+    /**
+     * Relación con los estados y sus medios (dictámenes/resoluciones)
+     */
+    public function statuses()
+    {
+        return $this->hasMany('App\Models\ProjectStatus', 'project_id', 'id');
+    }
+
 
     /* ************************ ACCESSORS ************************* */
 
