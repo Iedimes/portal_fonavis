@@ -476,12 +476,12 @@
                                                 </div>
 
                                                 <div class="p-1">
-                                                    <a class="btn btn-sm"
+                                                    {{-- <a class="btn btn-sm"
                                                         style="background-color: #0787db; color: #b5bbbb;"
                                                         :href="item.resource_url + '/legajo'" title="VER LEGAJO"
                                                         role="button">
                                                         <i class="fa fa-search"></i>
-                                                    </a>
+                                                    </a> --}}
                                                 </div>
 
                                             </div>
