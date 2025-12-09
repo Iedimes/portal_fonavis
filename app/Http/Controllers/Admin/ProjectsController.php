@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Project\BulkDestroyProject;
 use App\Http\Requests\Admin\Project\DestroyProject;
@@ -53,6 +51,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use ZipArchive;
 use Illuminate\Http\Request;
 
@@ -1004,7 +1003,7 @@ class ProjectsController extends Controller
         //dd($project, $document_id, $file_name);
         //Esto es para descargar del disco remoto
         // return Storage::disk('remote')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
-        return Storage::disk('local')->download('uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name);
+        return response()->download(storage_path('app/uploads/' . $project . "/faltantes/" . $document_id . "/" . $file_name));
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
@@ -1022,7 +1021,7 @@ class ProjectsController extends Controller
         // return "Bajar archivos";
         //Esto es para descargar del disco remoto
         // return Storage::disk('remote')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
-        return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        return response()->download(storage_path('app/uploads/' . $project . "/" . $document_id . "/" . $file_name));
 
         //Esto es para descargar del disco local
         // return Storage::disk('local')->download('uploads/' . $project . "/" . $document_id . "/" . $file_name);
@@ -1038,7 +1037,7 @@ class ProjectsController extends Controller
     function viewFileDoc($project, $document_id, $file_name)
     {
         // Usa 'response' para intentar abrir en el navegador en lugar de forzar descarga
-        return Storage::disk('local')->response('uploads/' . $project . "/" . $document_id . "/" . $file_name);
+        return response()->file(storage_path('app/uploads/' . $project . "/" . $document_id . "/" . $file_name));
     }
 
     /**
@@ -1380,7 +1379,7 @@ class ProjectsController extends Controller
             $persona = json_decode($response->getBody()->getContents());
 
             if (!isset($persona->obtenerPersonaPorNroCedulaResponse->return)) {
-                \Log::warning('API respondió pero sin datos válidos', ['cedula' => $cedula, 'respuesta' => $persona]);
+                Log::warning('API respondió pero sin datos válidos', ['cedula' => $cedula, 'respuesta' => $persona]);
                 return null;
             }
 
@@ -1401,7 +1400,7 @@ class ProjectsController extends Controller
             ];
         } catch (\Exception $e) {
             // Solo error de la API, no incluye fallo en BD
-            \Log::warning('Error al obtener datos desde la API, intento con BD local', [
+            Log::warning('Error al obtener datos desde la API, intento con BD local', [
                 'cedula' => $cedula,
                 'mensaje' => $e->getMessage()
             ]);
@@ -1409,7 +1408,7 @@ class ProjectsController extends Controller
             $persona = \App\Models\Persona::where('BDICed', $cedula)->first();
 
             if (!$persona) {
-                \Log::error('No se encontró la persona en la BD local', ['cedula' => $cedula]);
+                Log::error('No se encontró la persona en la BD local', ['cedula' => $cedula]);
                 return null;
             }
 
@@ -1517,7 +1516,7 @@ class ProjectsController extends Controller
         $baseProjectFolder = storage_path("app/uploads/{$project->id}");
 
         if (!is_dir($baseProjectFolder)) {
-            \Log::warning("descargarLegajo: carpeta del proyecto no existe: {$baseProjectFolder}");
+            Log::warning("descargarLegajo: carpeta del proyecto no existe: {$baseProjectFolder}");
         } else {
 
             foreach ($documents as $doc) {
@@ -1536,7 +1535,7 @@ class ProjectsController extends Controller
                     if (is_dir($altDocFolder)) {
                         $docFolder = $altDocFolder;
                     } else {
-                        \Log::warning("descargarLegajo: no existe carpeta para doc={$doc->document_id} ni id={$doc->id}");
+                        Log::warning("descargarLegajo: no existe carpeta para doc={$doc->document_id} ni id={$doc->id}");
                         continue;
                     }
                 }
@@ -1589,7 +1588,7 @@ class ProjectsController extends Controller
                         'Dictamenes_Resoluciones/' . $stageName . '/' . $media->file_name
                     );
                 } else {
-                    \Log::warning("descargarLegajo: archivo de media no encontrado: {$path}");
+                    Log::warning("descargarLegajo: archivo de media no encontrado: {$path}");
                 }
             }
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\PostulantesController;
 use App\Http\Controllers\Admin\ProjectsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
