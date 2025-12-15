@@ -28,7 +28,6 @@ class StoreAdminUsersDependency extends FormRequest
         return [
             'admin_user_id' => ['required', 'integer'],
             'dependency_id' => ['required', 'integer'],
-            
         ];
     }
 
@@ -44,5 +43,15 @@ class StoreAdminUsersDependency extends FormRequest
         //Add your code for manipulation with request data here
 
         return $sanitized;
+    }
+
+    public function getAdminUserId()
+    {
+        return $this->get('admin_user_id');
+    }
+
+    public function getDependencyId()
+    {
+        return $this->get('dependency_id');
     }
 }

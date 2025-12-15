@@ -9,6 +9,8 @@ use App\Http\Requests\Admin\AdminUsersDependency\IndexAdminUsersDependency;
 use App\Http\Requests\Admin\AdminUsersDependency\StoreAdminUsersDependency;
 use App\Http\Requests\Admin\AdminUsersDependency\UpdateAdminUsersDependency;
 use App\Models\AdminUsersDependency;
+use App\Models\AdminUser;
+use App\Models\Dependency;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -65,7 +67,10 @@ class AdminUsersDependenciesController extends Controller
     {
         $this->authorize('admin.admin-users-dependency.create');
 
-        return view('admin.admin-users-dependency.create');
+        $admin_user = AdminUser::all();
+        $dependency = Dependency::all();
+
+        return view('admin.admin-users-dependency.create', compact('admin_user', 'dependency'));
     }
 
     /**
@@ -114,10 +119,10 @@ class AdminUsersDependenciesController extends Controller
     {
         $this->authorize('admin.admin-users-dependency.edit', $adminUsersDependency);
 
+        $admin_user = AdminUser::all();
+        $dependency = Dependency::all();
 
-        return view('admin.admin-users-dependency.edit', [
-            'adminUsersDependency' => $adminUsersDependency,
-        ]);
+        return view('admin.admin-users-dependency.edit', compact('adminUsersDependency', 'admin_user', 'dependency'));
     }
 
     /**

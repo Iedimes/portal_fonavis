@@ -28,7 +28,6 @@ class UpdateAdminUsersDependency extends FormRequest
         return [
             'admin_user_id' => ['sometimes', 'integer'],
             'dependency_id' => ['sometimes', 'integer'],
-            
         ];
     }
 
@@ -39,11 +38,16 @@ class UpdateAdminUsersDependency extends FormRequest
      */
     public function getSanitized(): array
     {
-        $sanitized = $this->validated();
+        return $this->validated();
+    }
 
+    public function getAdminUserId()
+    {
+        return $this->get('admin_user_id');
+    }
 
-        //Add your code for manipulation with request data here
-
-        return $sanitized;
+    public function getDependencyId()
+    {
+        return $this->get('dependency_id');
     }
 }
