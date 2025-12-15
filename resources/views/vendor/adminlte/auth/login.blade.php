@@ -22,18 +22,21 @@
 
 @section('auth_body')
 
-<img src="/img/logofonavis.png" width="300px;" class="img-responsive">
-<h3 class="card-title float-none text-center">INGRESE LOS DATOS SOLICITADOS</h3>
-<hr>
+<div class="login-header text-center mb-4">
+    <img src="/img/logofonavis.png" width="280px;" class="img-responsive" alt="Logo Fonavis">
+    <h2 class="text-dark font-weight-bold mt-3 mb-0">Acceso Portal</h2>
+    <p class="text-muted small mt-2">Ingrese sus credenciales para continuar</p>
+</div>
 
 <style>
 .login-page, .register-page {
     -ms-flex-align: center;
     align-items: center;
     background-repeat: no-repeat;
-    background-position: -2em;
+    background-position: center;
     background-image: url("/img/fondo.PNG") !important;
     -webkit-background-size: cover;
+    background-size: cover;
     display: -ms-flexbox;
     display: flex;
     -ms-flex-direction: column;
@@ -41,19 +44,155 @@
     height: 100vh;
     -ms-flex-pack: center;
     justify-content: center;
-    background-color: #fff;
-    box-shadow: 0 0 50px 5px rgb(0 0 0 / 30%), 0 0 5px -1px white;
+    background-color: #f5f5f5;
 }
 
 .login-box, .register-box {
-    width: 360px;
+    width: 400px;
     position: relative;
-    top: -31px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: white;
+    overflow: hidden;
+}
+
+.login-card-body, .register-card-body {
+    padding: 2.5rem;
 }
 
 .fonavis {
-    background-color: #fff;
-    margin-top: 16px;
+    background-color: transparent;
+    margin-top: 0;
+}
+
+.login-header {
+    margin-bottom: 1.5rem;
+}
+
+.login-header img {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.login-header h2 {
+    font-size: 1.75rem;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
+
+.login-header p {
+    font-size: 0.95rem;
+    color: #7f8c8d;
+}
+
+/* Estilos para los labels */
+.login-card-body label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    display: block;
+    letter-spacing: 0.3px;
+}
+
+/* Estilos para los inputs */
+.login-card-body .form-control {
+    border: 1.5px solid #e0e6ed;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+.login-card-body .form-control:focus {
+    border-color: #3498db;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.login-card-body .form-control::placeholder {
+    color: #bdc3c7;
+}
+
+/* Estilos para el icono dentro del input */
+.login-card-body .input-group-text {
+    background-color: transparent;
+    border: none;
+    color: #95a5a6;
+    padding: 0 0.75rem;
+}
+
+/* Espaciado entre campos */
+.mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+/* Botón de login */
+.btn-block {
+    border-radius: 6px;
+    padding: 0.9rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.4px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #21618c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Alerta de cambio de contraseña */
+.alert-danger {
+    border: none;
+    border-radius: 6px;
+    background-color: #ffe5e5;
+    border-left: 4px solid #e74c3c;
+    margin-bottom: 1.5rem;
+}
+
+.alert-danger a.btn {
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Link al sitio web */
+.login-footer-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.login-footer-link a {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.login-footer-link a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Error messages */
+.invalid-feedback {
+    font-size: 0.85rem;
+    color: #e74c3c;
+    font-weight: 500;
 }
 </style>
 
@@ -61,68 +200,73 @@
     @csrf
 
     {{-- Email field --}}
-    <label>CORREO ELECTRONICO</label>
-    <div class="input-group mb-3">
-        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-               value="{{ old('email') }}" placeholder="{{ __('Ingrese su correo Electronico') }}" autofocus>
+    <div class="form-group">
+        <label for="email">Correo Electrónico</label>
+        <div class="input-group">
+            <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                   value="{{ old('email') }}" placeholder="correo@ejemplo.com" autofocus>
 
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                </div>
             </div>
-        </div>
 
-        @error('email')
-            <span class="invalid-feedback d-block text-center" role="alert">
-                <strong>{!! $message !!}</strong>
-            </span>
-        @enderror
+            @error('email')
+                <span class="invalid-feedback d-block" role="alert">
+                    <strong>{!! $message !!}</strong>
+                </span>
+            @enderror
+        </div>
     </div>
 
     {{-- Password field --}}
-    <label>CONTRASEÑA</label>
-    <div class="input-group mb-3">
-        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-               placeholder="{{ __('Ingrese su contraseña') }}">
+    <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="input-group">
+            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                   placeholder="Ingrese su contraseña">
 
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                </div>
             </div>
-        </div>
 
-        @error('password')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
+            @error('password')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
+        </div>
     </div>
 
     @if(session('force_password_email'))
-        <div class="alert alert-danger text-center" style="font-size: 1.1em;">
-            ⚠️ Por seguridad, debes cambiar tu contraseña antes de ingresar.
-            <br><br>
-            <a href="{{ route('password.request') }}" class="btn btn-warning font-weight-bold" style="color: #212529;">
-                Click aqui para cambiar la contraseña
-            </a>
+        <div class="alert alert-danger" role="alert">
+            <div class="text-center">
+                <strong class="d-block mb-2">⚠️ Por seguridad, debes cambiar tu contraseña</strong>
+                <p class="small mb-3">Por favor, actualiza tu contraseña antes de acceder al portal.</p>
+                <a href="{{ route('password.request') }}" class="btn btn-sm btn-warning font-weight-bold">
+                    Cambiar contraseña
+                </a>
+            </div>
         </div>
     @endif
 
-
-
-
-
     {{-- Login button --}}
-    <div class="row">
-        <div class="col-12">
-            <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
-                <span class="fas fa-sign-in-alt"></span>
-                {{ __('Acceder') }}
-            </button>
-        </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
+            <span class="fas fa-sign-in-alt mr-2"></span>
+            Acceder
+        </button>
     </div>
 
-    <a href="https://www.muvh.gov.py" style="float: right; margin-top: 18px;">ir a la página web</a>
+    <div class="login-footer-link">
+        <a href="https://www.muvh.gov.py" target="_blank">
+            <span class="fas fa-external-link-alt mr-1"></span>
+            Ir a página web
+        </a>
+    </div>
 </form>
 @stop
 
