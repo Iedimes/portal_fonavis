@@ -465,6 +465,20 @@
                                                     </div>
                                                 @endif
 
+                                                {{-- DEPENDENCY 7 DGTI--}}
+                                                @if (Auth::user()->rol_app->dependency_id == 7)
+
+                                                    <div class="p-1">
+                                                    <a class="btn btn-sm"
+                                                        style="background-color: #0787db; color: #b5bbbb;"
+                                                        :href="item.resource_url + '/legajo'" title="VER LEGAJO"
+                                                        role="button">
+                                                        <i class="fa fa-search"></i>
+                                                    </a>
+                                                </div>
+
+                                                @endif
+
                                                 {{-- Historial (Común a todos) --}}
                                                 <div class="p-1">
                                                     <a class="btn btn-sm"
@@ -472,15 +486,6 @@
                                                         :href="item.resource_url + '/historial'" title="VER HISTORIAL"
                                                         role="button">
                                                         <i class="fa fa-history"></i>
-                                                    </a>
-                                                </div>
-
-                                                <div class="p-1">
-                                                    <a class="btn btn-sm"
-                                                        style="background-color: #0787db; color: #b5bbbb;"
-                                                        :href="item.resource_url + '/legajo'" title="VER LEGAJO"
-                                                        role="button">
-                                                        <i class="fa fa-search"></i>
                                                     </a>
                                                 </div>
 
