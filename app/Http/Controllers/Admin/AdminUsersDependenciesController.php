@@ -67,8 +67,13 @@ class AdminUsersDependenciesController extends Controller
     {
         $this->authorize('admin.admin-users-dependency.create');
 
-        $admin_user = AdminUser::all();
-        $dependency = Dependency::all();
+        $admin_user = AdminUser::select('id', 'email', 'first_name', 'last_name')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+        $dependency = Dependency::select('id', 'name')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.admin-users-dependency.create', compact('admin_user', 'dependency'));
     }
@@ -119,8 +124,13 @@ class AdminUsersDependenciesController extends Controller
     {
         $this->authorize('admin.admin-users-dependency.edit', $adminUsersDependency);
 
-        $admin_user = AdminUser::all();
-        $dependency = Dependency::all();
+        $admin_user = AdminUser::select('id', 'email', 'first_name', 'last_name')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+        $dependency = Dependency::select('id', 'name')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.admin-users-dependency.edit', compact('adminUsersDependency', 'admin_user', 'dependency'));
     }

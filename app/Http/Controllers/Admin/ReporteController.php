@@ -77,26 +77,37 @@ class ReporteController extends Controller
     {
         $this->authorize('admin.reporte.create');
 
-        $proyecto = Project::where('created_at','>=', '2024-07-13')
-                            ->OrWhere('updated_at', '>=', '2024-07-13')
+        $proyecto = Project::select('id', 'name', 'created_at', 'updated_at')
+                            ->where('created_at','>=', '2024-07-13')
+                            ->orWhere('updated_at', '>=', '2024-07-13')
+                            ->orderBy('name')
                             ->get();
 
-        $sat = Sat::where('NucRuc','!=', null)
-        ->where('NucEst','=', 'H')
-        ->select('NucNomSat','NucCod','NucCont')
-        ->get();
+        $sat = Sat::select('NucNomSat', 'NucCod', 'NucCont')
+                    ->where('NucRuc', '!=', null)
+                    ->where('NucEst', '=', 'H')
+                    ->orderBy('NucNomSat')
+                    ->get();
 
         $dep = [18, 19, 20, 21, 999];
-        $departamento = Departamento::whereNotIn('DptoId', $dep)
-                          ->orderBy('DptoNom', 'asc')->get();
+        $departamento = Departamento::select('DptoId', 'DptoNom')
+                            ->whereNotIn('DptoId', $dep)
+                            ->orderBy('DptoNom', 'asc')
+                            ->get();
 
         $dis = [0, 900, 998];
-        $distrito = Distrito::whereNotIn('CiuId', $dis)
-            ->orderBy('CiuNom', 'asc')->get();
+        $distrito = Distrito::select('CiuId', 'CiuNom', 'CiuDptoID')
+                        ->whereNotIn('CiuId', $dis)
+                        ->orderBy('CiuNom', 'asc')
+                        ->get();
 
-        $modalidad = Modality::all();
+        $modalidad = Modality::select('id', 'name')
+                        ->orderBy('name')
+                        ->get();
 
-        $estado=Stage::all();
+        $estado = Stage::select('id', 'name')
+                        ->orderBy('name')
+                        ->get();
 
         return view('admin.reporte.create', compact('proyecto', 'sat', 'departamento', 'distrito', 'modalidad', 'estado'));
     }
