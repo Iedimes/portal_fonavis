@@ -19,7 +19,6 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Departamento;
@@ -78,50 +77,26 @@ class ReporteController extends Controller
     {
         $this->authorize('admin.reporte.create');
 
-        // Cache por 24 horas
-        $proyecto = Cache::remember('reporte_proyectos', 86400, function () {
-            return Project::select('id', 'name', 'created_at', 'updated_at')
-                            ->where('created_at','>=', '2024-07-13')
-                            ->orWhere('updated_at', '>=', '2024-07-13')
-                            ->orderBy('name')
+        $proyecto = Project::where('created_at','>=', '2024-07-13')
+                            ->OrWhere('updated_at', '>=', '2024-07-13')
                             ->get();
-        });
 
-        $sat = Cache::remember('reporte_sat', 86400, function () {
-            return Sat::select('NucNomSat', 'NucCod', 'NucCont')
-                        ->where('NucRuc', '!=', null)
-                        ->where('NucEst', '=', 'H')
-                        ->orderBy('NucNomSat')
-                        ->get();
-        });
+        $sat = Sat::where('NucRuc','!=', null)
+        ->where('NucEst','=', 'H')
+        ->select('NucNomSat','NucCod','NucCont')
+        ->get();
 
         $dep = [18, 19, 20, 21, 999];
-        $departamento = Cache::remember('reporte_departamentos', 86400, function () use ($dep) {
-            return Departamento::select('DptoId', 'DptoNom')
-                                ->whereNotIn('DptoId', $dep)
-                                ->orderBy('DptoNom', 'asc')
-                                ->get();
-        });
+        $departamento = Departamento::whereNotIn('DptoId', $dep)
+                          ->orderBy('DptoNom', 'asc')->get();
 
         $dis = [0, 900, 998];
-        $distrito = Cache::remember('reporte_distritos', 86400, function () use ($dis) {
-            return Distrito::select('CiuId', 'CiuNom', 'CiuDptoID')
-                            ->whereNotIn('CiuId', $dis)
-                            ->orderBy('CiuNom', 'asc')
-                            ->get();
-        });
+        $distrito = Distrito::whereNotIn('CiuId', $dis)
+            ->orderBy('CiuNom', 'asc')->get();
 
-        $modalidad = Cache::remember('reporte_modalidades', 86400, function () {
-            return Modality::select('id', 'name')
-                            ->orderBy('name')
-                            ->get();
-        });
+        $modalidad = Modality::all();
 
-        $estado = Cache::remember('reporte_estados', 86400, function () {
-            return Stage::select('id', 'name')
-                            ->orderBy('name')
-                            ->get();
-        });
+        $estado=Stage::all();
 
         return view('admin.reporte.create', compact('proyecto', 'sat', 'departamento', 'distrito', 'modalidad', 'estado'));
     }
@@ -191,56 +166,54 @@ class ReporteController extends Controller
         // Definir la fecha de referencia
         $fechaReferencia = '2024-07-13';
 
-        // Construir la consulta inicial con select específico y eager loading
-        $query = Project::select('id', 'name', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'created_at', 'updated_at')
-                        ->with(['getEstado' => function ($q) {
-                            $q->select('id', 'project_id', 'stage_id', 'updated_at')
-                              ->orderBy('updated_at', 'desc')
-                              ->limit(1);
-                        }])
-                        ->where(function ($q) use ($fechaReferencia) {
-                            $q->where('created_at', '>=', $fechaReferencia)
-                              ->orWhere('updated_at', '>=', $fechaReferencia);
-                        });
+        // Construir la consulta inicial
+        $query = Project::where(function ($q) use ($fechaReferencia) {
+            $q->where('created_at', '>=', $fechaReferencia)
+              ->orWhere('updated_at', '>=', $fechaReferencia);
+        });
 
         if (!empty($inicio) && !empty($fin)) {
             // Aplicar filtros adicionales a la consulta
-            $query->where(function ($q) use ($inicio, $fin) {
-                $q->whereBetween('created_at', [$inicio, $fin])
+            $query->whereBetween('created_at', [$inicio, $fin])
                   ->orWhereBetween('updated_at', [$inicio, $fin]);
-            });
         }
 
         // Agregar filtros basados en los IDs
-        if (!empty($proyecto_id) && $proyecto_id > 0) {
+        if ($proyecto_id && $proyecto_id > 0) {
             $query->where('id', $proyecto_id);
         }
 
-        if (!empty($sat_id) && $sat_id > 0) {
+        if ($sat_id && $sat_id > 0) {
             $query->where('sat_id', $sat_id);
         }
 
-        if (!empty($state_id) && $state_id > 0) {
+        if ($state_id && $state_id > 0) {
             $query->where('state_id', $state_id);
         }
 
-        if (!empty($city_id) && $city_id > 0) {
+        if ($city_id && $city_id > 0) {
             $query->where('city_id', $city_id);
         }
 
-        if (!empty($modalidad_id) && $modalidad_id > 0) {
+        if ($modalidad_id && $modalidad_id > 0) {
             $query->where('modalidad_id', $modalidad_id);
         }
+    // Filtrar por stage_id en el último estado del modelo ProjectStatus
+    if ($stage_id && $stage_id > 0) {
+        $query->whereHas('getEstado', function ($q) use ($stage_id) {
+            $q->where('stage_id', $stage_id)
+              ->where('id', function($subQuery) {
+                  $subQuery->select('id')
+                      ->from('project_status') // Asegúrate de que este es el nombre correcto de la tabla
+                      ->whereColumn('project_status.project_id', 'projects.id') // Asegúrate de que 'projects.id' es la clave foránea
+                      ->orderBy('updated_at', 'desc') // Ordena para obtener el más reciente
+                      ->limit(1);
+              });
+        });
+    }
 
-        // Filtrar por stage_id en el último estado del modelo ProjectStatus
-        if (!empty($stage_id) && $stage_id > 0) {
-            $query->whereHas('getEstado', function ($q) use ($stage_id) {
-                $q->where('stage_id', $stage_id);
-            });
-        }
-
-        // Obtener los resultados con limit para evitar N+1
-        $results = $query->paginate(50);
+        // Obtener los resultados
+       $results = $query->get();
 
         // Retornar los resultados a la vista correspondiente
         return view('admin.reporte.resultados', compact('results'));
