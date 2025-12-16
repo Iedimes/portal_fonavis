@@ -32,6 +32,7 @@ use App\Exports\PostulantesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PostulantesController extends Controller
 {
@@ -53,7 +54,12 @@ class PostulantesController extends Controller
             ['id', 'first_name', 'last_name', 'cedula', 'marital_status', 'nacionalidad', 'gender', 'birthdate', 'localidad', 'asentamiento', 'ingreso', 'address', 'grupo', 'phone', 'mobile', 'nexp'],
 
             // set columns to searchIn
-            ['id', 'first_name', 'last_name', 'cedula', 'marital_status', 'nacionalidad', 'gender', 'birthdate', 'localidad', 'asentamiento', 'address', 'grupo', 'phone', 'mobile', 'nexp']
+            ['id', 'first_name', 'last_name', 'cedula', 'marital_status', 'nacionalidad', 'gender', 'birthdate', 'localidad', 'asentamiento', 'address', 'grupo', 'phone', 'mobile', 'nexp'],
+
+            // modifyQuery callback
+            function($query) {
+                return $query->withRelationsOptimized();
+            }
         );
 
         if ($request->ajax()) {

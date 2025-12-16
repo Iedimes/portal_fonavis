@@ -53,10 +53,14 @@
                                         <th is='sortable' :column="'cedula'">{{ trans('admin.postulante.columns.cedula') }}</th>
                                         <th is='sortable' :column="'first_name'">{{ trans('admin.postulante.columns.first_name') }}</th>
                                         <th is='sortable' :column="'last_name'">{{ trans('admin.postulante.columns.last_name') }}</th>
+                                        <th>{{ trans('Tipo') }}</th>
                                         <th is='sortable' :column="'project'">{{ trans('Proyecto_id') }}</th>
                                         <th is='sortable' :column="'projectd'">{{ trans('Proyecto') }}</th>
                                         <th is='sortable' :column="'sat_cod'">{{ trans('Codigo SAT') }}</th>
                                         <th is='sortable' :column="'sat'">{{ trans('SAT') }}</th>
+                                        <th>{{ trans('Titular Vinculado') }}</th>
+                                        <th>{{ trans('Cédula Titular') }}</th>
+                                        <th>{{ trans('Parentesco') }}</th>
                                         {{-- <th is='sortable' :column="'marital_status'">{{ trans('admin.postulante.columns.marital_status') }}</th> --}}
                                         {{-- <th is='sortable' :column="'nacionalidad'">{{ trans('admin.postulante.columns.nacionalidad') }}</th> --}}
                                         {{-- <th is='sortable' :column="'gender'">{{ trans('admin.postulante.columns.gender') }}</th> --}}
@@ -96,10 +100,65 @@
                                         <td>@{{ item.cedula }}</td>
                                         <td>@{{ item.first_name }}</td>
                                         <td>@{{ item.last_name }}</td>
-                                        <td>@{{ item.get_project_has_postulante?.project_id ?? 'N/A' }}</td>
-                                        <td>@{{ item.get_project_has_postulante?.project?.name ?? 'N/A' }}</td>
-                                        <td>@{{ item.get_project_has_postulante?.project?.get_sat?.NucCod ?? 'N/A' }}</td>
-                                        <td>@{{ item.get_project_has_postulante?.project?.get_sat?.NucNomSat ?? 'N/A' }}</td>
+                                        <td>
+                                            <span v-if="item.get_project_has_postulante" class="badge badge-success">Titular</span>
+                                            <span v-else-if="item.get_beneficiary_relation" class="badge badge-warning">Miembro</span>
+                                            <span v-else class="badge badge-secondary">Sin Clasificar</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_project_has_postulante">
+                                                @{{ item.get_project_has_postulante?.project_id ?? 'N/A' }}
+                                            </span>
+                                            <span v-else-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.get_project_has_postulante?.project_id ?? 'N/A' }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_project_has_postulante">
+                                                @{{ item.get_project_has_postulante?.project?.name ?? 'N/A' }}
+                                            </span>
+                                            <span v-else-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.get_project_has_postulante?.project?.name ?? 'N/A' }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_project_has_postulante">
+                                                @{{ item.get_project_has_postulante?.project?.get_sat?.NucCod ?? 'N/A' }}
+                                            </span>
+                                            <span v-else-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.get_project_has_postulante?.project?.get_sat?.NucCod ?? 'N/A' }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_project_has_postulante">
+                                                @{{ item.get_project_has_postulante?.project?.get_sat?.NucNomSat ?? 'N/A' }}
+                                            </span>
+                                            <span v-else-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.get_project_has_postulante?.project?.get_sat?.NucNomSat ?? 'N/A' }}
+                                            </span>
+                                            <span v-else>N/A</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.first_name }} @{{ item.get_titular_postulante[0]?.last_name }}
+                                            </span>
+                                            <span v-else>-</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_beneficiary_relation && item.get_titular_postulante && item.get_titular_postulante.length">
+                                                @{{ item.get_titular_postulante[0]?.cedula }}
+                                            </span>
+                                            <span v-else>-</span>
+                                        </td>
+                                        <td>
+                                            <span v-if="item.get_beneficiary_relation && item.get_beneficiary_relation.get_parentesco">
+                                                @{{ item.get_beneficiary_relation.get_parentesco.name }}
+                                            </span>
+                                            <span v-else>-</span>
+                                        </td>
 
                                         {{-- <td>@{{ item.marital_status }}</td>
                                         <td>@{{ item.nacionalidad }}</td>
