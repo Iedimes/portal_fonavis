@@ -47,7 +47,7 @@
                                         <th>Estado</th>
                                         <th>Fecha de Creación</th>
                                         <th>Última Actualización</th>
-                                        
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -55,15 +55,15 @@
                                         <tr>
                                             <td>{{ $item->id }}</td>
                                             <td>{{ $item->name }}</td>
-                                            <td>{{ $item->getEstado->record ?? 'Sin Descripcion' }}</td>
+                                            <td>{{ $item->getestado->record ?? 'Sin Descripcion' }}</td>
                                             <td>{{ $item->getsat->NucNomSat }}</td>
                                             <td>{{ $item->getstate->DptoNom }}</td>
                                             <td>{{ $item->getcity->CiuNom }}</td>
                                             <td>{{ $item->getmodality->name }}</td>
-                                            <td>{{ $item->getEstado->getstage->name ?? 'Sin Estado'}}</td>
+                                            <td>{{ $item->getestado->getstage->name ?? 'Sin Estado'}}</td>
                                             <td>{{ $item->created_at }}</td>
                                             <td><small>Última actualización: {{ $item->updated_at }}</small></td>
-                                        
+
                                         </tr>
                                     @endforeach
                                 </tbody>
