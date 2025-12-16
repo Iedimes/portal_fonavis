@@ -14,33 +14,56 @@ use App\Models\Stage;
 use Illuminate\Http\Request;
 use ZipArchive;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class LegajoMasivoController extends Controller
 {
     public function create()
     {
-        $proyecto = Project::where('created_at', '>=', '2024-07-13')
-            ->orWhere('updated_at', '>=', '2024-07-13')
-            ->get();
+        // Cache por 24 horas
+        $proyecto = Cache::remember('legajo_masivo_proyectos', 86400, function () {
+            return Project::select('id', 'name', 'created_at', 'updated_at')
+                ->where('created_at', '>=', '2024-07-13')
+                ->orWhere('updated_at', '>=', '2024-07-13')
+                ->orderBy('name')
+                ->get();
+        });
 
-        $sats = Sat::whereNotNull('NucRuc')
-            ->where('NucEst', 'H')
-            ->select('NucNomSat', 'NucCod', 'NucCont')
-            ->get();
+        $sats = Cache::remember('legajo_masivo_sats', 86400, function () {
+            return Sat::select('NucNomSat', 'NucCod', 'NucCont')
+                ->whereNotNull('NucRuc')
+                ->where('NucEst', 'H')
+                ->orderBy('NucNomSat')
+                ->get();
+        });
 
         $dep = [18, 19, 20, 21, 999];
-        $states = Departamento::whereNotIn('DptoId', $dep)
-            ->orderBy('DptoNom', 'asc')
-            ->get();
+        $states = Cache::remember('legajo_masivo_departamentos', 86400, function () use ($dep) {
+            return Departamento::select('DptoId', 'DptoNom')
+                ->whereNotIn('DptoId', $dep)
+                ->orderBy('DptoNom', 'asc')
+                ->get();
+        });
 
         $dis = [0, 900, 998];
-        $distrito = Distrito::whereNotIn('CiuId', $dis)
-            ->orderBy('CiuNom', 'asc')
-            ->get();
+        $distrito = Cache::remember('legajo_masivo_distritos', 86400, function () use ($dis) {
+            return Distrito::select('CiuId', 'CiuNom', 'CiuDptoID')
+                ->whereNotIn('CiuId', $dis)
+                ->orderBy('CiuNom', 'asc')
+                ->get();
+        });
 
-        $modalities = Modality::all();
-        $estado = Stage::all();
+        $modalities = Cache::remember('legajo_masivo_modalidades', 86400, function () {
+            return Modality::select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        });
+
+        $estado = Cache::remember('legajo_masivo_estados', 86400, function () {
+            return Stage::select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        });
 
         return view('admin.legajo-masivo.create', compact(
             'proyecto',
