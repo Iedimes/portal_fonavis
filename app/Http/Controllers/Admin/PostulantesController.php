@@ -185,24 +185,46 @@ class PostulantesController extends Controller
     // }
     public function destroyMiembro(Request $request)
     {
+        $postulante = Postulante::find($request->delete_id);
 
-        // $postulante = ProjectHasPostulantes::where('postulante_id',$request->delete_id)->first();
+        if (!$postulante) {
+            return back()->with('error', 'Postulante no encontrado');
+        }
 
+        // Verificar si es un TITULAR
+        $isTitular = ProjectHasPostulantes::where('postulante_id', $postulante->id)->exists();
 
-        // if ($postulante->getMembers->count() > 0) {
-        //     // return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
-        //     return back()->with('status', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
-        // }else{
-        // return $request;
-        ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
-        PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
-        PostulanteHasBeneficiary::where('miembro_id',$request->delete_id)->delete();
-        Postulante::find($request->delete_id)->delete();
+        if ($isTitular) {
+            // Si es TITULAR: Eliminar grupo familiar completo
 
-        // return back()->with('error', 'Se ha eliminado el Postulante!');
-        return back()->with('status', 'Se ha eliminado el Postulante!');
-        // }
+            // 1. Obtener todos los miembros del titular
+            $miembros = PostulanteHasBeneficiary::where('postulante_id', $postulante->id)->pluck('miembro_id');
 
+            // 2. Eliminar miembros y sus relaciones
+            foreach ($miembros as $miembroId) {
+                PostulanteHasDiscapacidad::where('postulante_id', $miembroId)->delete();
+                PostulanteHasBeneficiary::where('miembro_id', $miembroId)->delete();
+                Postulante::find($miembroId)->delete();
+            }
+
+            // 3. Eliminar relaciones del titular
+            ProjectHasPostulantes::where('postulante_id', $postulante->id)->delete();
+            PostulanteHasDiscapacidad::where('postulante_id', $postulante->id)->delete();
+            PostulanteHasBeneficiary::where('miembro_id', $postulante->id)->delete();
+
+            // 4. Eliminar el titular
+            $postulante->delete();
+
+            return back()->with('status', 'Se ha eliminado el titular y su grupo familiar!');
+        } else {
+            // Si es MIEMBRO: Eliminar solo el miembro
+
+            PostulanteHasDiscapacidad::where('postulante_id', $postulante->id)->delete();
+            PostulanteHasBeneficiary::where('miembro_id', $postulante->id)->delete();
+            $postulante->delete();
+
+            return back()->with('status', 'Se ha eliminado el miembro del grupo familiar!');
+        }
     }
 
     /**
