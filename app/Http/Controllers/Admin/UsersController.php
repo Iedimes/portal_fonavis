@@ -65,13 +65,13 @@ class UsersController extends Controller
     public function create()
     {
         $this->authorize('admin.user.create');
-        $sat = Sat::where('NucRuc','!=', null)
-        ->where('NucEst','=', 'H')
-        ->select('NucNomSat','NucCod','NucCont')
-        ->get();
+        $sat = Sat::where('NucRuc', '!=', null)
+            ->where('NucEst', '=', 'H')
+            ->select('NucNomSat', 'NucCod', 'NucCont')
+            ->get();
 
         //return $sat;
-        return view('admin.user.create',compact('sat'));
+        return view('admin.user.create', compact('sat'));
     }
 
     /**
@@ -85,8 +85,8 @@ class UsersController extends Controller
         //return $request;
         // Sanitize input
         $sanitized = $request->getSanitized();
-        $sanitized ['sat_ruc'] =  $request->getSatId();
-        $sanitized ['password'] = bcrypt($request['password']);
+        $sanitized['sat_ruc'] =  $request->getSatId();
+        $sanitized['password'] = bcrypt($request['password']);
 
         //return $sanitized;
         // Store the User
@@ -123,11 +123,13 @@ class UsersController extends Controller
     public function edit(User $user)
     {
         $this->authorize('admin.user.edit', $user);
-        $sat = Sat::where('NucRuc','!=', null)
-        ->where('NucEst','=', 'H')
-        ->select('NucNomSat','NucCod','NucCont')
-        ->get();
+        $sat = Sat::where('NucRuc', '!=', null)
+            ->where('NucEst', '=', 'H')
+            ->select('NucNomSat', 'NucCod', 'NucCont')
+            ->get();
 
+
+        $user->setRelation('sat', $user->getsat);
 
         return view('admin.user.edit', [
             'user' => $user,
@@ -148,11 +150,11 @@ class UsersController extends Controller
         $sanitized = $request->getSanitized();
 
         if ($request['password']) {
-            $sanitized ['password'] = bcrypt($request['password']);
+            $sanitized['password'] = bcrypt($request['password']);
         }
 
         if ($request['sat_ruc']) {
-            $sanitized ['sat_ruc'] =  $request->getSatId();
+            $sanitized['sat_ruc'] =  $request->getSatId();
         }
 
 
@@ -196,7 +198,7 @@ class UsersController extends Controller
      * @throws Exception
      * @return Response|bool
      */
-    public function bulkDestroy(BulkDestroyUser $request) : Response
+    public function bulkDestroy(BulkDestroyUser $request): Response
     {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
