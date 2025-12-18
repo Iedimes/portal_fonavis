@@ -57,7 +57,7 @@ class PostulantesController extends Controller
             ['id', 'first_name', 'last_name', 'cedula', 'marital_status', 'nacionalidad', 'gender', 'birthdate', 'localidad', 'asentamiento', 'address', 'grupo', 'phone', 'mobile', 'nexp'],
 
             // modifyQuery callback
-            function($query) {
+            function ($query) {
                 return $query->withRelationsOptimized();
             }
         );
@@ -234,7 +234,7 @@ class PostulantesController extends Controller
      * @throws Exception
      * @return Response|bool
      */
-    public function bulkDestroy(BulkDestroyPostulante $request) : Response
+    public function bulkDestroy(BulkDestroyPostulante $request): Response
     {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
@@ -286,7 +286,7 @@ class PostulantesController extends Controller
             ->get();
 
         // Preparar datos precalculados para el PDF
-        $postulantesData = $postulantes->map(function($post) {
+        $postulantesData = $postulantes->map(function ($post) {
             $postulante = $post->getPostulante;
 
             if (!$postulante) {
@@ -318,90 +318,82 @@ class PostulantesController extends Controller
 
     public function actualizar(Request $request, $id)
     {
-        $user = Auth::user();
-        $email = $user->email;
-        $username = strtoupper(explode('@', $email)[0]);
+        return DB::transaction(function () use ($request, $id) {
+            $user = Auth::user();
+            $email = $user->email;
+            $username = strtoupper(explode('@', $email)[0]);
 
-        $usuario = Usuario::where('UsuCod', $username)->first();
+            $usuario = Usuario::where('UsuCod', $username)->first();
+            $dependencia = $usuario->DepenCod;
+            $nombreusuario = $usuario->UsuNombre;
 
-        $dependencia = $usuario->DepenCod;
-        $nombreusuario = $usuario->UsuNombre;
+            // Validar la solicitud
+            $request->validate([
+                'field' => 'required|string',
+            ]);
 
-        // Validar la solicitud
-        $request->validate([
-            'field' => 'required|string',
-            // 'value' => 'required|string',
-        ]);
+            // Buscar el postulante
+            $postulante = Postulante::findOrFail($id);
 
-        // Buscar el postulante
-        $postulante = Postulante::findOrFail($id);
+            // Actualizar el campo correspondiente
+            $postulante->{$request->field} = $request->value;
+            $postulante->save();
 
-        // Actualizar el campo correspondiente
-        $postulante->{$request->field} = $request->value;
-        $postulante->save();
+            // Solo procedemos con SIG005/SIG006 si el campo actualizado es 'califica'
+            if ($request->field === 'califica') {
+                $nexp = trim($postulante->nexp);
+                $sig005 = null;
 
-        // Inicializar variables para usar en ambos bloques
-        $sig005 = SIG005::where('NroExpPer', $postulante->cedula)
+                // 1. Intentar buscar por el expediente guardado en el postulante
+                if ($nexp) {
+                    $sig005 = SIG005::where('NroExp', $nexp)
                         ->where('TexCod', 118)
                         ->first();
-        if ($request->field === 'califica' && $request->value === 'N') {
-            if ($sig005) {
-                // Obtener el NroExp
-                // return "No califica";
-                $nroExp = $sig005->NroExp;
-                $detalle = SIG006::where('NroExp', $nroExp)
-                                    ->orderBy('DENroLin', 'desc')
-                                    ->first();
-                $nroLin = $detalle->DENroLin + 1;
-                $date = new \DateTime();
+                }
 
-                // Insertar un nuevo registro en SIG006 usando el modelo
-                Sig006::create([
-                    'NroExp' => $nroExp,
-                    'NroExpS' => 'A',
-                    'DENroLin' => $nroLin,
-                    'DEExpEst' => 'N', // Estado 'N'
-                    'DEFecDis' => date_format($date, 'Ymd H:i:s'),
-                    'UsuRcp' => $username,
-                    'DEUnOrHa' => $dependencia,
-                    'DEUnOrDe' => $dependencia,
-                    'DERcpChk' => 1,
-                    'DERcpNam' => $nombreusuario,
-                    'DEExpAcc' => $postulante->observacion_de_consideracion,
-                    // Agrega aquí cualquier otro campo requerido por tu tabla SIG006
-                ]);
+                // 2. Si no hay, o no coincide, buscar el más reciente por cédula
+                if (!$sig005) {
+                    $sig005 = SIG005::where('NroExpPer', $postulante->cedula)
+                        ->where('TexCod', 118)
+                        ->orderBy('NroExp', 'desc')
+                        ->first();
+                }
+
+                if ($sig005) {
+                    $nroExp = $sig005->NroExp;
+                    $detalles = SIG006::where('NroExp', $nroExp)
+                        ->orderBy('DENroLin', 'desc')
+                        ->get();
+
+                    $detalle = $detalles->first();
+
+                    $estadoActual = $detalle ? trim($detalle->DEExpEst) : null;
+                    $nuevoEstado = $request->value === 'N' ? 'N' : ($request->value === 'S' ? 'K' : null);
+
+                    // Solo insertar si el estado cambia (o si no hay historial)
+                    if ($nuevoEstado && $estadoActual !== $nuevoEstado) {
+                        $nroLin = $detalle ? $detalle->DENroLin + 1 : 1;
+                        $date = new \DateTime();
+
+                        $created = Sig006::create([
+                            'NroExp' => $nroExp,
+                            'NroExpS' => 'A',
+                            'DENroLin' => $nroLin,
+                            'DEExpEst' => $nuevoEstado,
+                            'DEFecDis' => date_format($date, 'Ymd H:i:s'),
+                            'UsuRcp' => $username,
+                            'DEUnOrHa' => $dependencia,
+                            'DEUnOrDe' => $dependencia,
+                            'DERcpChk' => 1,
+                            'DERcpNam' => $nombreusuario,
+                            'DEExpAcc' => $postulante->observacion_de_consideracion,
+                        ]);
+                    }
+                }
             }
-        } else
-        if ($request->field === 'califica' && $request->value === 'S') {
-            // Si no es N, entonces es un estado 'P'
-            if ($sig005) {
-                $nroExp = $sig005->NroExp;
-                $detalle = SIG006::where('NroExp', $nroExp)
-                                    ->orderBy('DENroLin', 'desc')
-                                    ->first();
-                $nroLin = $detalle ? $detalle->DENroLin + 1 : 1; // Manejar caso si no hay detalle
-                $date = new \DateTime();
 
-                // Insertar un nuevo registro en SIG006 usando el modelo
-                Sig006::create([
-                    'NroExp' => $nroExp,
-                    'NroExpS' => 'A',
-                    'DENroLin' => $nroLin,
-                    'DEExpEst' => 'K', // Estado 'P'
-                    'DEFecDis' => date_format($date, 'Ymd H:i:s'),
-                    'UsuRcp' => $username,
-                    'DEUnOrHa' => $dependencia,
-                    'DEUnOrDe' => $dependencia,
-                    'DERcpChk' => 1,
-                    'DERcpNam' => $nombreusuario,
-                    'DEExpAcc' => $postulante->observacion_de_consideracion,
-                    // Agrega aquí cualquier otro campo requerido por tu tabla SIG006
-                ]);
-            }
-        }
-
-        // Retornar una respuesta
-        return response()->json(['success' => true]);
+            return response()->json(['success' => true]);
+        });
     }
 
     public function exportar($projectId = null)
@@ -428,8 +420,10 @@ class PostulantesController extends Controller
             'getMembers.getPostulante'
         ])->where('project_id', $projectId)->get();
 
-        return Excel::download(new PostulantesExport($project, $postulantes),
-            'PLANILLA-' . str_replace(' ', '-', $project->id.'-CH') . '.xlsx');
+        return Excel::download(
+            new PostulantesExport($project, $postulantes),
+            'PLANILLA-' . str_replace(' ', '-', $project->id . '-CH') . '.xlsx'
+        );
     }
 
     public function guardarmiembro(Request $request)
@@ -464,7 +458,7 @@ class PostulantesController extends Controller
             if (!$validacionEdad['esValido']) {
                 // Se redirige directamente al listado general, no se necesita withInput() aquí
                 return redirect('admin/projects/' . $request->project_id . '/showDGSO')
-                                 ->with('error', $validacionEdad['mensaje']);
+                    ->with('error', $validacionEdad['mensaje']);
             }
         }
 
@@ -532,5 +526,4 @@ class PostulantesController extends Controller
             ];
         }
     }
-
 }
