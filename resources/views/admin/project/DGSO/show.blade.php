@@ -237,14 +237,14 @@
                                             <td class="text-center">
                                                 <input type="text" class="form-control"
                                                     style="background-color: #f0f8ff; text-align: right; width: 120px;"
-                                                    value="{{ number_format(App\Models\ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.') }}"
+                                                    value="{{ number_format($ingresosTotales[$post->postulante_id] ?? 0, 0, ',', '.') }}"
                                                     onchange="saveField('{{ $post->postulante_id }}', 'ingreso_familiar', this.value.replace(/\./g, '').replace(',', '.'))">
                                             </td>
 
                                             <td class="text-center">
                                                 <input type="text" class="form-control"
                                                     style="background-color: #f0f8ff; text-align: right; width: 120px;"
-                                                    value="{{ App\Models\ProjectHasPostulantes::getNivel($post->postulante_id) }}"
+                                                    value="{{ $niveles[$post->postulante_id] ?? '' }}"
                                                     onchange="saveField('{{ $post->postulante_id }}', 'nivel', this.value)">
                                             </td>
                                             <td class="text-center">
@@ -304,7 +304,7 @@
                                                 </select>
                                             </td>
                                             <td class="text-center">
-                                                {{ utf8_encode($project->land_id ? $project->getLand->name : 'N') }}</td>
+                                                {{ utf8_encode($project->getLand->name ?? 'N') }}</td>
                                             <td class="text-center">{{ $post->getPostulante->address ?? 'N' }}</td>
                                             <td class="text-center">
                                                 <textarea class="form-control"
