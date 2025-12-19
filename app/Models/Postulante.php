@@ -117,6 +117,15 @@ class Postulante extends Model implements AuditableContract
     }
 
     /**
+     * Mutador para asegurar que la fecha de nacimiento siempre se guarde en formato Y-m-d.
+     * Esto elimina la hora y milisegundos que pueden venir de la API o del formulario.
+     */
+    public function setBirthdateAttribute($value)
+    {
+        $this->attributes['birthdate'] = $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : null;
+    }
+
+    /**
      * Scope para eager loading de relaciones necesarias
      */
     public function scopeWithRelationsOptimized($query)
