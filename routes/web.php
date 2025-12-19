@@ -635,5 +635,14 @@ Route::get('/{key}', [HomeController::class, 'verification']);
 
 
 
+
+/* Statistics Dashboard */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->name('admin/')->group(static function () {
+        Route::get('/statistics/projects', 'StatisticsController@projects')->name('statistics/projects');
+        Route::get('/statistics/postulantes', 'StatisticsController@postulantes')->name('statistics/postulantes');
+    });
+});
+
 // routes/web.php
 Route::get('/dashboard/sessions', [DashboardController::class, 'sessions']);

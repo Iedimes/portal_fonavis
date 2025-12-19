@@ -65,7 +65,6 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-has-expedientes') }}"><i
                             class="fa fa-archive" aria-hidden="true"></i>
                         {{ trans('admin.project-has-expediente.title') }}</a></li>
-
             @elseif (Auth::user()->rol_app->dependency_id == 7)
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/modalities') }}"><i class="nav-icon icon-plane"></i> {{ trans('admin.modality.title') }}</a></li> --}}
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/lands') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.land.title') }}</a></li>
@@ -82,7 +81,8 @@
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-type-has-typologies') }}"><i class="nav-icon icon-drop"></i> {{ trans('admin.project-type-has-typology.title') }}</a></li> --}}
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/users') }}"><i class="fa fa-user"></i>
                         {{ trans('admin.user.title') }}</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i class="fa fa-building"></i>
+                <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i
+                            class="fa fa-building"></i>
                         {{ trans('admin.project.title') }}</a></li>
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/document-checks') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.document-check.title') }}</a></li> --}}
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/project-statuses') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.project-status.title') }}</a></li> --}}
@@ -103,8 +103,15 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i
                             class="fa fa-area-chart" aria-hidden="true"></i>
                         {{ trans('admin.admin-users-dependency.title') }}</a></li>
+
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects/legajo-masivo/create') }}"><i
                             class="fa fa-building"></i> {{ trans('LEGAJOS-MASIVO') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('admin/statistics/projects') }}"><i
+                            class="fa fa-line-chart" aria-hidden="true"></i>
+                        ESTADÍSTICAS PROYECTOS</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('admin/statistics/postulantes') }}"><i
+                            class="fa fa-users" aria-hidden="true"></i>
+                        ESTADÍSTICAS POSTULANTES</a></li>
             @else
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i
                             class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
