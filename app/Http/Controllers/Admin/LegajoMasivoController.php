@@ -14,31 +14,34 @@ use App\Models\Stage;
 use Illuminate\Http\Request;
 use ZipArchive;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class LegajoMasivoController extends Controller
 {
     public function create()
     {
-        $proyecto = Project::where('created_at','>=', '2024-07-13')
-                            ->OrWhere('updated_at', '>=', '2024-07-13')
-                            ->get();
+        // Optimización: Solo traer id y name, y usar pluck para evitar hidratación de modelos pesados
+        $proyecto = Project::where('created_at', '>=', '2024-07-13')
+            ->orWhere('updated_at', '>=', '2024-07-13')
+            ->without(['getState', 'getModality', 'getCity', 'getEstado', 'getSat', 'documents', 'statuses'])
+            ->orderBy('id', 'desc')
+            ->get(['id', 'name']);
 
-        $sats = Sat::where('NucRuc','!=', null)
-        ->where('NucEst','=', 'H')
-        ->select('NucNomSat','NucCod','NucCont')
-        ->get();
+        $sats = Sat::whereNotNull('NucRuc')
+            ->where('NucEst', 'H')
+            ->orderBy('NucNomSat', 'asc')
+            ->get(['NucNomSat', 'NucCod']);
 
-        $dep = [18, 19, 20, 21, 999];
-        $states = Departamento::whereNotIn('DptoId', $dep)
-                          ->orderBy('DptoNom', 'asc')->get();
+        $depIgnored = [18, 19, 20, 21, 999];
+        $states = Departamento::whereNotIn('DptoId', $depIgnored)
+            ->orderBy('DptoNom', 'asc')
+            ->get(['DptoId', 'DptoNom']);
 
-        $dis = [0, 900, 998];
-        $distrito = Distrito::whereNotIn('CiuId', $dis)
-            ->orderBy('CiuNom', 'asc')->get();
+        // Eliminamos el distrito de aquí ya que se carga dinámicamente vía AJAX en la vista
+        $distrito = [];
 
-        $modalities = Modality::all();
-
-        $estado = Stage::all();
+        $modalities = Modality::all(['id', 'name']);
+        $estado = Stage::all(['id', 'name']);
 
         return view('admin.legajo-masivo.create', compact('proyecto', 'sats', 'states', 'distrito', 'modalities', 'estado'));
     }
