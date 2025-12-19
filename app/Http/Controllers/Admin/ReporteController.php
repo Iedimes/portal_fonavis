@@ -77,36 +77,39 @@ class ReporteController extends Controller
     {
         $this->authorize('admin.reporte.create');
 
-        $proyecto = Project::where('created_at','>=', '2024-07-13')
-                            ->OrWhere('updated_at', '>=', '2024-07-13')
-                            ->get();
+        // Optimización: Solo traer id y name, y usar pluck para evitar hidratación de modelos pesados
+        $proyecto = Project::where('created_at', '>=', '2024-07-13')
+            ->orWhere('updated_at', '>=', '2024-07-13')
+            ->without(['getState', 'getModality', 'getCity', 'getEstado', 'getSat', 'documents', 'statuses'])
+            ->orderBy('id', 'desc')
+            ->get(['id', 'name']);
 
-        $sat = Sat::where('NucRuc','!=', null)
-        ->where('NucEst','=', 'H')
-        ->select('NucNomSat','NucCod','NucCont')
-        ->get();
+        $sat = Sat::whereNotNull('NucRuc')
+            ->where('NucEst', 'H')
+            ->orderBy('NucNomSat', 'asc')
+            ->get(['NucNomSat', 'NucCod']);
 
-        $dep = [18, 19, 20, 21, 999];
-        $departamento = Departamento::whereNotIn('DptoId', $dep)
-                          ->orderBy('DptoNom', 'asc')->get();
+        $depIgnored = [18, 19, 20, 21, 999];
+        $departamento = Departamento::whereNotIn('DptoId', $depIgnored)
+            ->orderBy('DptoNom', 'asc')
+            ->get(['DptoId', 'DptoNom']);
 
-        $dis = [0, 900, 998];
-        $distrito = Distrito::whereNotIn('CiuId', $dis)
-            ->orderBy('CiuNom', 'asc')->get();
+        // Eliminado $distrito ya que se carga por AJAX en la vista
 
-        $modalidad = Modality::all();
+        $modalidad = Modality::all(['id', 'name']);
+        $estado = Stage::all(['id', 'name']);
 
-        $estado=Stage::all();
-
-        return view('admin.reporte.create', compact('proyecto', 'sat', 'departamento', 'distrito', 'modalidad', 'estado'));
+        return view('admin.reporte.create', compact('proyecto', 'sat', 'departamento', 'modalidad', 'estado'));
     }
 
     public function getCities(Request $request)
-{
-    $stateId = $request->query('state_id');
-    $cities = Distrito::where('CiuDptoID', $stateId)->get(); // Adjust the query based on your database structure
-    return response()->json($cities);
-}
+    {
+        $stateId = $request->query('state_id');
+        $cities = Distrito::where('CiuDptoID', $stateId)
+            ->orderBy('CiuNom', 'asc')
+            ->get(['CiuId', 'CiuNom']);
+        return response()->json($cities);
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -169,13 +172,13 @@ class ReporteController extends Controller
         // Construir la consulta inicial
         $query = Project::where(function ($q) use ($fechaReferencia) {
             $q->where('created_at', '>=', $fechaReferencia)
-              ->orWhere('updated_at', '>=', $fechaReferencia);
+                ->orWhere('updated_at', '>=', $fechaReferencia);
         });
 
         if (!empty($inicio) && !empty($fin)) {
             // Aplicar filtros adicionales a la consulta
             $query->whereBetween('created_at', [$inicio, $fin])
-                  ->orWhereBetween('updated_at', [$inicio, $fin]);
+                ->orWhereBetween('updated_at', [$inicio, $fin]);
         }
 
         // Agregar filtros basados en los IDs
@@ -198,22 +201,22 @@ class ReporteController extends Controller
         if ($modalidad_id && $modalidad_id > 0) {
             $query->where('modalidad_id', $modalidad_id);
         }
-    // Filtrar por stage_id en el último estado del modelo ProjectStatus
-    if ($stage_id && $stage_id > 0) {
-        $query->whereHas('getEstado', function ($q) use ($stage_id) {
-            $q->where('stage_id', $stage_id)
-              ->where('id', function($subQuery) {
-                  $subQuery->select('id')
-                      ->from('project_status') // Asegúrate de que este es el nombre correcto de la tabla
-                      ->whereColumn('project_status.project_id', 'projects.id') // Asegúrate de que 'projects.id' es la clave foránea
-                      ->orderBy('updated_at', 'desc') // Ordena para obtener el más reciente
-                      ->limit(1);
-              });
-        });
-    }
+        // Filtrar por stage_id en el último estado del modelo ProjectStatus
+        if ($stage_id && $stage_id > 0) {
+            $query->whereHas('getEstado', function ($q) use ($stage_id) {
+                $q->where('stage_id', $stage_id)
+                    ->where('id', function ($subQuery) {
+                        $subQuery->select('id')
+                            ->from('project_status') // Asegúrate de que este es el nombre correcto de la tabla
+                            ->whereColumn('project_status.project_id', 'projects.id') // Asegúrate de que 'projects.id' es la clave foránea
+                            ->orderBy('updated_at', 'desc') // Ordena para obtener el más reciente
+                            ->limit(1);
+                    });
+            });
+        }
 
         // Obtener los resultados
-       $results = $query->get();
+        $results = $query->get();
 
         // Retornar los resultados a la vista correspondiente
         return view('admin.reporte.resultados', compact('results'));
@@ -221,25 +224,25 @@ class ReporteController extends Controller
 
 
     public function exportarExcel(Request $request)
-{
-    // Filtra según los parámetros recibidos en el request (si es necesario)
-    $validatedData = $request->validate([
-        'inicio' => 'nullable|date',
-        'fin' => 'nullable|date',
-        'proyecto_id' => 'nullable|integer',
-        'sat_id' => 'nullable|string',
-        'state_id' => 'nullable|integer',
-        'city_id' => 'nullable|integer',
-        'modalidad_id' => 'nullable|integer',
-        'stage_id' => 'nullable|integer',
-    ]);
+    {
+        // Filtra según los parámetros recibidos en el request (si es necesario)
+        $validatedData = $request->validate([
+            'inicio' => 'nullable|date',
+            'fin' => 'nullable|date',
+            'proyecto_id' => 'nullable|integer',
+            'sat_id' => 'nullable|string',
+            'state_id' => 'nullable|integer',
+            'city_id' => 'nullable|integer',
+            'modalidad_id' => 'nullable|integer',
+            'stage_id' => 'nullable|integer',
+        ]);
 
-    // Filtra los proyectos según los parámetros
-    $projects = $this->obtenerResultados($request);
+        // Filtra los proyectos según los parámetros
+        $projects = $this->obtenerResultados($request);
 
-    // Retorna el archivo Excel con los resultados
-    return Excel::download(new ResultadosExport($projects), 'reporte_proyectos.xlsx');
-}
+        // Retorna el archivo Excel con los resultados
+        return Excel::download(new ResultadosExport($projects), 'reporte_proyectos.xlsx');
+    }
 
 
 
@@ -273,12 +276,12 @@ class ReporteController extends Controller
         // Construir la consulta inicial
         $query = Project::where(function ($q) use ($fechaReferencia) {
             $q->where('created_at', '>=', $fechaReferencia)
-              ->orWhere('updated_at', '>=', $fechaReferencia);
+                ->orWhere('updated_at', '>=', $fechaReferencia);
         });
 
         if (!empty($inicio) && !empty($fin)) {
             $query->whereBetween('created_at', [$inicio, $fin])
-                  ->orWhereBetween('updated_at', [$inicio, $fin]);
+                ->orWhereBetween('updated_at', [$inicio, $fin]);
         }
 
         if ($proyecto_id) {
@@ -304,13 +307,13 @@ class ReporteController extends Controller
         if ($stage_id) {
             $query->whereHas('getEstado', function ($q) use ($stage_id) {
                 $q->where('stage_id', $stage_id)
-                  ->where('id', function ($subQuery) {
-                      $subQuery->select('id')
-                          ->from('project_status')
-                          ->whereColumn('project_status.project_id', 'projects.id')
-                          ->orderBy('updated_at', 'desc')
-                          ->limit(1);
-                  });
+                    ->where('id', function ($subQuery) {
+                        $subQuery->select('id')
+                            ->from('project_status')
+                            ->whereColumn('project_status.project_id', 'projects.id')
+                            ->orderBy('updated_at', 'desc')
+                            ->limit(1);
+                    });
             });
         }
 
@@ -403,7 +406,7 @@ class ReporteController extends Controller
      * @throws Exception
      * @return Response|bool
      */
-    public function bulkDestroy(BulkDestroyReporte $request) : Response
+    public function bulkDestroy(BulkDestroyReporte $request): Response
     {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
