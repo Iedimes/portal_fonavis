@@ -17,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use App\Models\ProjectHasPostulantes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class PostulantesExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths, WithTitle, WithEvents
 {
@@ -84,7 +85,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
                 // Insertar toda la información del proyecto y datos
@@ -122,7 +123,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
 
     private function addProjectInfo($sheet)
     {
-    // Insertar imagen del logo (ajusta la URL según corresponda)
+        // Insertar imagen del logo (ajusta la URL según corresponda)
         $this->addLogo($sheet);
 
         // Dirección General Social en la fila 10
@@ -282,23 +283,28 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             $conyuge = null;
             if ($post->getMembers && $post->getMembers->count() > 0) {
                 $conyuge = $post->getMembers->firstWhere('parentesco_id', 1) ??
-                          $post->getMembers->firstWhere('parentesco_id', 8);
+                    $post->getMembers->firstWhere('parentesco_id', 8);
             }
+
+            // Función ayudante para campos vacíos
+            $fe = function ($val) {
+                return (trim($val) === '' || $val === null) ? '--------------' : $val;
+            };
 
             return [
                 'orden' => $key + 1,
                 'biblio' => 1,
-                'exp' => $postulante->nexp ?? '',
-                'apellido_nombre' => ($postulante->last_name ?? '') . ' ' . ($postulante->first_name ?? ''),
+                'exp' => $fe($postulante->nexp),
+                'apellido_nombre' => $fe(trim(($postulante->last_name ?? '') . ' ' . ($postulante->first_name ?? ''))),
                 'cedula' => is_numeric($postulante->cedula ?? '') ?
-                           number_format($postulante->cedula, 0, ',', '.') : '',
+                    number_format($postulante->cedula, 0, ',', '.') : '--------------',
                 'ingreso' => number_format($postulante->ingreso ?? 0, 0, ',', '.'),
                 'conyuge_nombre' => $conyuge ?
-                                   ($conyuge->getPostulante->last_name ?? '') . ' ' . ($conyuge->getPostulante->first_name ?? '') : '',
+                    $fe(trim(($conyuge->getPostulante->last_name ?? '') . ' ' . ($conyuge->getPostulante->first_name ?? ''))) : '--------------',
                 'conyuge_cedula' => $conyuge && is_numeric($conyuge->getPostulante->cedula ?? '') ?
-                                   number_format($conyuge->getPostulante->cedula, 0, ',', '.') : '',
+                    number_format($conyuge->getPostulante->cedula, 0, ',', '.') : '--------------',
                 'conyuge_ingreso' => $conyuge ?
-                                    number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') : '',
+                    number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') : '--------------',
                 'ingreso_total' => number_format(ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.'),
                 'nivel' => ProjectHasPostulantes::getNivel($post->postulante_id),
                 'cantidad_hijos' => $postulante->cantidad_hijos ?? 0,
@@ -307,11 +313,11 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'hijo_sosten' => $postulante->hijo_sosten ?? 'N',
                 'otra_persona_cargo' => $postulante->otra_persona_a_cargo ?? 'N',
                 'terreno' => $this->project->land_id ? $this->project->getLand->name : 'N',
-                'residencia' => $postulante->address ?? '',
-                'composicion_familiar' => $postulante->composicion_del_grupo ?? '',
-                'documentos_presentados' => $postulante->documentos_presentados ?? '',
-                'documentos_faltantes' => $postulante->documentos_faltantes ?? '',
-                'observacion_consideracion' => $postulante->observacion_de_consideracion ?? ''
+                'residencia' => $fe($postulante->address),
+                'composicion_familiar' => $fe($postulante->composicion_del_grupo),
+                'documentos_presentados' => $fe($postulante->documentos_presentados),
+                'documentos_faltantes' => $fe($postulante->documentos_faltantes),
+                'observacion_consideracion' => $fe($postulante->observacion_de_consideracion)
             ];
         });
 
