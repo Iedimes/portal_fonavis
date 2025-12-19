@@ -129,7 +129,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            {{-- <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION</h2>
                     <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2">
@@ -365,7 +365,7 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 
