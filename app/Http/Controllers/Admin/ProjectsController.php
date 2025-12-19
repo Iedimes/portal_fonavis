@@ -457,31 +457,48 @@ class ProjectsController extends Controller
     public function showDGSO(Project $project)
     {
         //$this->authorize('admin.project.show', $project);
+
+        // Optimización: Cargar relaciones del proyecto de una vez
+        $project->load(['getCity', 'getState', 'getSat', 'getLand']);
+
         $id = $project->id;
         $project_type = Land_project::where('land_id', $project->land_id)->first();
-        $postulantes = ProjectHasPostulantes::where('project_id', $id)->get();
+
+        // Optimización: Cargar relaciones de postulantes y familiares de una vez
+        $postulantes = ProjectHasPostulantes::where('project_id', $id)
+            ->with(['getPostulante', 'getMembers.getPostulante'])
+            ->get();
+
+        // Obtener IDs para cálculos en lote
+        $postulanteIds = $postulantes->pluck('postulante_id')->toArray();
+
+        // Pre-calculo optimizado
+        $ingresosTotales = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
+
         $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
             ->where('category_id', 1)
             ->get();
-        $history = ProjectStatus::where('project_id', $project['id'])
+
+        $history = ProjectStatus::where('project_id', $id)
             ->orderBy('created_at')
             ->get();
 
-        // Verificar si se ha cargado un archivo para cada elemento
-        $uploadedFiles = [];
-        foreach ($docproyecto as $item) {
-            $uploadedFile = Documents::where('project_id', $project->id)
-                ->where('document_id', $item->document_id)
-                ->first();
-            //return $uploadedFile;
-            $documentExists = /*$uploadedFile &&*/ $uploadedFile  ? $uploadedFile->file_path : false;
-            //return $documentExists;
-            $uploadedFiles[$item->document_id] = $documentExists;
-        }
+        // Optimización: Traer todos los documentos de una sola consulta
+        $uploadedFiles = Documents::where('project_id', $id)
+            ->whereIn('document_id', $docproyecto->pluck('document_id'))
+            ->pluck('file_path', 'document_id')
+            ->toArray();
 
-        //return $history;
-
-        return view('admin.project.DGSO.show', compact('project', 'docproyecto', 'history', 'postulantes', 'uploadedFiles'));
+        return view('admin.project.DGSO.show', compact(
+            'project',
+            'docproyecto',
+            'history',
+            'postulantes',
+            'uploadedFiles',
+            'ingresosTotales',
+            'niveles'
+        ));
     }
 
     public function showFONAVISTECNICO(Project $project)

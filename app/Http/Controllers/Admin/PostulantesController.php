@@ -398,30 +398,32 @@ class PostulantesController extends Controller
 
     public function exportar($projectId = null)
     {
-        // Si no se proporciona projectId, usar el primer proyecto disponible o manejar según tu lógica
         if (!$projectId) {
-            // Aquí puedes ajustar la lógica según cómo determines qué proyecto exportar
             $projectId = request()->get('project_id');
         }
 
-        // $project = Project::with([
-        //     'getState',
-        //     'getCity',
-        //     'getSat',
-        //     'getModality',
-        //     'getLand',
-        //     'getTypology'
-        // ])->findOrFail($projectId);
-
-        $project = Project::findOrFail($projectId);
+        // Optimización: Cargar todas las relaciones necesarias de una vez
+        $project = Project::with([
+            'getState',
+            'getCity',
+            'getSat',
+            'getModality',
+            'getLand',
+            'getTypology'
+        ])->findOrFail($projectId);
 
         $postulantes = ProjectHasPostulantes::with([
             'getPostulante',
             'getMembers.getPostulante'
         ])->where('project_id', $projectId)->get();
 
+        // Optimización: Cálculo en lote para evitar N+1 en el exportador
+        $postulanteIds = $postulantes->pluck('postulante_id')->toArray();
+        $ingresosTotales = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
+
         return Excel::download(
-            new PostulantesExport($project, $postulantes),
+            new PostulantesExport($project, $postulantes, $ingresosTotales, $niveles),
             'PLANILLA-' . str_replace(' ', '-', $project->id . '-CH') . '.xlsx'
         );
     }

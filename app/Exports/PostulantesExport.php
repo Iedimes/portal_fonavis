@@ -23,11 +23,15 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
 {
     protected $project;
     protected $postulantes;
+    protected $ingresosTotales;
+    protected $niveles;
 
-    public function __construct($project, $postulantes)
+    public function __construct($project, $postulantes, $ingresosTotales = [], $niveles = [])
     {
         $this->project = $project;
         $this->postulantes = $postulantes;
+        $this->ingresosTotales = $ingresosTotales;
+        $this->niveles = $niveles;
     }
 
     public function collection()
@@ -305,8 +309,8 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                     number_format($conyuge->getPostulante->cedula, 0, ',', '.') : '--------------',
                 'conyuge_ingreso' => $conyuge ?
                     number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') : '--------------',
-                'ingreso_total' => number_format(ProjectHasPostulantes::getIngreso($post->postulante_id), 0, ',', '.'),
-                'nivel' => ProjectHasPostulantes::getNivel($post->postulante_id),
+                'ingreso_total' => number_format($this->ingresosTotales[$post->postulante_id] ?? 0, 0, ',', '.'),
+                'nivel' => $this->niveles[$post->postulante_id] ?? '',
                 'cantidad_hijos' => $postulante->cantidad_hijos ?? 0,
                 'discap' => $postulante->discapacidad ?? 'N',
                 'tercera_edad' => $postulante->tercera_edad ?? 'N',
