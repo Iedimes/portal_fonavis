@@ -257,7 +257,8 @@
 
 
                                         <td>
-                                            <div class="d-flex">
+                                            <div class="d-flex"
+                                                style="{{ Auth::user()->rol_app->dependency_id == 7 ? 'display: grid !important; grid-template-columns: repeat(4, auto); gap: 2px;' : '' }}">
 
                                                 {{-- DEPENDENCY 1 --}}
                                                 @if (Auth::user()->rol_app->dependency_id == 1)
@@ -465,18 +466,143 @@
                                                     </div>
                                                 @endif
 
-                                                {{-- DEPENDENCY 7 DGTI--}}
+                                                {{-- DEPENDENCY 7 DGTI --}}
                                                 @if (Auth::user()->rol_app->dependency_id == 7)
-
+                                                    {{-- Legajo --}}
                                                     <div class="p-1">
-                                                    <a class="btn btn-sm"
-                                                        style="background-color: #0787db; color: #b5bbbb;"
-                                                        :href="item.resource_url + '/legajo'" title="VER LEGAJO"
-                                                        role="button">
-                                                        <i class="fa fa-search"></i>
-                                                    </a>
-                                                </div>
+                                                        <a class="btn btn-sm"
+                                                            style="background-color: #0787db; color: #b5bbbb;"
+                                                            :href="item.resource_url + '/legajo'" title="VER LEGAJO"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
 
+                                                    {{-- Editar --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-spinner btn-info"
+                                                            :href="item.resource_url + '/edit'"
+                                                            title="{{ trans('brackets/admin-ui::admin.btn.edit') }}"
+                                                            role="button"><i class="fa fa-edit"></i></a>
+                                                    </div>
+
+                                                    {{-- Imprimir --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-primary"
+                                                            :href="item.resource_url + '/project'"
+                                                            title="{{ trans('IMPRIMIR POSTULANTES') }}" role="button">
+                                                            <i class="fa fa-print"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- VARIANTS OF SHOW (VER) --}}
+                                                    {{-- Basic Show --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/show'" title="VER"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showVERDOCFONAVIS --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-success"
+                                                            :href="item.resource_url + '/showVERDOCFONAVIS'"
+                                                            title="VER DOC FONAVIS" role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showFONAVIS --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showFONAVIS'" title="VER FONAVIS"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showFONAVISSOCIAL --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showFONAVISSOCIAL'"
+                                                            title="VER SOCIAL" role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showFONAVISTECNICO --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showFONAVISTECNICO'"
+                                                            title="VER TECNICO" role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showFONAVISADJ --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showFONAVISADJ'" title="VER ADJ"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showDGJN --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showDGJN'" title="VER DGJN"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showDGJNFALTANTE --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showDGJNFALTANTE'"
+                                                            title="VER DGJN FALTANTE" role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showDGSO --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showDGSO'" title="VER DGSO"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showDIGH --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showDIGH'" title="VER DIGH"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- showDSGO --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-warning"
+                                                            :href="item.resource_url + '/showDSGO'" title="VER DSGO"
+                                                            role="button">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    {{-- Eliminar --}}
+                                                    <div class="p-1">
+                                                        <a class="btn btn-sm btn-danger"
+                                                            :href="'/admin/motivos/' + item.id + '/create/'"
+                                                            title="{{ trans('ELIMINAR PROYECTO') }}" role="button">
+                                                            <i class="fa fa-trash-o"></i>
+                                                        </a>
+                                                    </div>
                                                 @endif
 
                                                 {{-- Historial (Común a todos) --}}
