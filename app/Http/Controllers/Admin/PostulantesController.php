@@ -16,7 +16,7 @@ use App\Models\PostulanteHasDiscapacidad;
 use App\Models\SIG005;
 use App\Models\SIG006;
 use App\Models\Usuario;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,6 +33,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
+use DateTime;
 
 class PostulantesController extends Controller
 {
@@ -295,7 +297,7 @@ class PostulantesController extends Controller
 
             $ingreso = $postulante->ingreso ?? 0;
             $edad = $postulante->birthdate
-                ? \Carbon\Carbon::parse($postulante->birthdate)->age
+                ? Carbon::parse($postulante->birthdate)->age
                 : 0;
 
             return [
@@ -373,9 +375,9 @@ class PostulantesController extends Controller
                     // Solo insertar si el estado cambia (o si no hay historial)
                     if ($nuevoEstado && $estadoActual !== $nuevoEstado) {
                         $nroLin = $detalle ? $detalle->DENroLin + 1 : 1;
-                        $date = new \DateTime();
+                        $date = new DateTime();
 
-                        $created = Sig006::create([
+                        $created = SIG006::create([
                             'NroExp' => $nroExp,
                             'NroExpS' => 'A',
                             'DENroLin' => $nroLin,
@@ -443,8 +445,8 @@ class PostulantesController extends Controller
         $fechaNacimiento = $request->input('birthdate'); // Obtenemos 'birthdate' del request
 
         // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
-        \Log::info('storemiembro: Valor de parentesco_id: ' . $parentescoId);
-        \Log::info('storemiembro: Valor de fechaNacimiento (birthdate): ' . $fechaNacimiento);
+        Log::info('storemiembro: Valor de parentesco_id: ' . $parentescoId);
+        Log::info('storemiembro: Valor de fechaNacimiento (birthdate): ' . $fechaNacimiento);
         // --- FIN DE LA SECCIÓN DEPURACIÓN ---
 
         // Aplicar la validación de edad solo para parentesco 1 (Cónyuge) y 8 (Postulante Titular)
@@ -453,7 +455,7 @@ class PostulantesController extends Controller
             $validacionEdad = $this->validarEdadMinima($fechaNacimiento);
 
             // --- INICIO DE LA SECCIÓN DEPURACIÓN ---
-            \Log::info('storemiembro: Resultado de validarEdadMinima: ', $validacionEdad);
+            Log::info('storemiembro: Resultado de validarEdadMinima: ', $validacionEdad);
             // --- FIN DE LA SECCIÓN DEPURACIÓN ---
 
             // Si la validación de edad falla, redirigimos con un error
@@ -501,8 +503,8 @@ class PostulantesController extends Controller
     private function validarEdadMinima($fechaNacimiento)
     {
         try {
-            $fechaNac = new \DateTime($fechaNacimiento);
-            $hoy = new \DateTime();
+            $fechaNac = new DateTime($fechaNacimiento);
+            $hoy = new DateTime();
             $edad = $hoy->diff($fechaNac)->y;
 
             if ($edad < 18) {
@@ -516,8 +518,8 @@ class PostulantesController extends Controller
                 'esValido' => true,
                 'mensaje' => ''
             ];
-        } catch (\Exception $e) {
-            \Log::error('Error al validar edad', [
+        } catch (Exception $e) {
+            Log::error('Error al validar edad', [
                 'fecha' => $fechaNacimiento,
                 'error' => $e->getMessage()
             ]);
