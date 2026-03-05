@@ -95,7 +95,7 @@ class ProjectStatusController extends Controller
     {
         $sanitized = $request->getSanitized();
         $sanitized['stage_id'] = $request->getStageId();
-        $dependencia = $sanitized['dependencia'];
+        $dependencia = $request->input('dependencia');
 
         // Obtener el último estado del proyecto
         $ultimoEstado = ProjectStatus::where('project_id', $request->project_id)
@@ -244,42 +244,51 @@ class ProjectStatusController extends Controller
                 $projectStatus = ProjectStatus::create($sanitized);
 
                 if ($mailEnabled) {
-                    $toEmails[] = 'preseleccionfonavis@muvh.gov.py';
+                    if ($correoSat) {
+                        $subject = 'PROYECTO ' . $proyecto->name . ' - OBSERVADO DGJN';
+                        $contenidoCorreo = "
+                            Proyecto: {$proyecto->name} (ID: {$proyecto->id}) <br>
+                            Nombre SAT: {$satnombre} (SAT: {$sat}) <br><br>
+                            {$projectStatus->record}
+                        ";
 
-                    $subject = 'INFORME DGJN EN ARCHIVO ' . $proyecto->name;
-
-                    Mail::mailer('smtp')->send(
-                        'admin.project-status.emailDGJNAFONAVISARCHIVADO',
-                        [
-                            'proyecto' => $proyecto->name,
-                            'id' => $proyecto->id,
-                            'sat' => $sat,
-                            'satnombre' => $satnombre
-                        ],
-                        function ($message) use ($toEmails, $subject, $correoSat) {
-                            $message->to($toEmails);
-                            $message->bcc($correoSat);
+                        // Enviar correo al SAT
+                        Mail::mailer('smtp')->html($contenidoCorreo, function ($message) use ($correoSat, $subject, $projectStatus) {
+                            $message->to($correoSat);
+                            $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
                             $message->subject($subject);
-                            $message->from('sistema_fonavis@muvh.gov.py', env('APP_NAME'));
-                        }
-                    );
 
-                    if (count(Mail::failures()) > 0) {
-                        throw new \Exception('Error al enviar el correo a: ' . implode(', ', Mail::failures()));
+                            // Adjuntar documento(s)
+                            foreach ($projectStatus->getMedia('gallery') as $media) {
+                                $message->attach($media->getPath(), [
+                                    'as' => $media->file_name,
+                                    'mime' => $media->mime_type,
+                                ]);
+                            }
+                        });
+
+                        // Enviar copia al remitente DGJN
+                        $subjectDGJN = "Notificaste al SAT: {$satnombre}";
+                        $contenidoDGJN = "
+                            Proyecto: {$proyecto->name} ({$proyecto->id})<br><br>
+                            Notificaste al correo({$correoSat}) registrado por SAT, lo siguiente: <br><br>
+                            {$projectStatus->record}
+                        ";
+
+                        Mail::mailer('smtp')->html($contenidoDGJN, function ($message) use ($correoDGJN, $subjectDGJN, $projectStatus) {
+                            $message->to($correoDGJN);
+                            $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
+                            $message->subject($subjectDGJN);
+
+                            // Adjuntar documento(s) en la copia
+                            foreach ($projectStatus->getMedia('gallery') as $media) {
+                                $message->attach($media->getPath(), [
+                                    'as' => $media->file_name,
+                                    'mime' => $media->mime_type,
+                                ]);
+                            }
+                        });
                     }
-
-                    $subjectDGJN = "Envío de correo con Estado ARCHIVADO DGJN a FONAVIS del proyecto: {$proyecto->name}";
-                    $contenidoDGJN = "
-                        Se notificó correctamente el siguiente proyecto:<br><br>
-                        Proyecto: {$proyecto->name} ({$proyecto->id})<br>
-                        SAT: {$satnombre}<br><br>
-                        Comentario registrado:<br>" . nl2br(htmlspecialchars($projectStatus->record));
-
-                    Mail::mailer('smtp')->html($contenidoDGJN, function ($message) use ($correoDGJN, $subjectDGJN) {
-                        $message->to($correoDGJN);
-                        $message->from('sistema_fonavis@muvh.gov.py', 'DGJN - MUVH');
-                        $message->subject($subjectDGJN);
-                    });
                 }
 
                 DB::commit();
@@ -291,7 +300,7 @@ class ProjectStatusController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
 
-                \Log::error('Error en etapa 4 (ARCHIVADO DGJN): ' . $e->getMessage());
+                \Log::error('Error en etapa 4 (OBSERVADO DGJN): ' . $e->getMessage());
 
                 return response()->json([
                     'error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()

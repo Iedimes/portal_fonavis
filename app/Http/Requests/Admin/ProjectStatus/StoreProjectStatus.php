@@ -29,8 +29,8 @@ class StoreProjectStatus extends FormRequest
             'stage' => ['required'],
             'user_id' => ['required', 'integer'],
             'record' => ['required', 'string'],
-            'dependencia' => ['required', 'integer'], // <-- agregar
-
+            'dependencia' => ['nullable', 'integer'], // <-- agregar
+            'gallery' => ['nullable'],
         ];
 
         $stageId = $this->getStageId(); // obtener el ID del stage
