@@ -304,6 +304,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::post('/{project}/save-dsgo-observation', 'ProjectsController@saveDSGOObservation')->name('saveDSGOObservation');
 
             Route::get('ajax/{state_id?}/local', [ProjectController::class, 'distrito']);
+            Route::get('ajax/{state_id?}/lands', [ProjectController::class, 'lands']);
+            Route::get('ajax/{state_id?}/typology', [ProjectController::class, 'typology']);
 
             Route::post('{project}/postulante/{postulante}/crearmiembro', 'ProjectsController@crearmiembro')->name('crearmiembro');
             Route::post('{project}/postulante/{postulante}/crearmiembronocge', 'ProjectsController@crearmiembroNoCge')->name('crearmiembroNoCge');

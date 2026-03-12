@@ -1794,7 +1794,9 @@ public function showTecnico($id)
     public function typology($dptoid)
     {
         $tipo = Land_project::where('land_id', $dptoid)->first();
-        //dd($tipo);
+        if (!$tipo) {
+            return json_encode([], JSON_UNESCAPED_UNICODE);
+        }
         $dpto = Project_tipologies::join('typologies', 'project_type_has_typologies.typology_id', '=', 'typologies.id')
             ->where('project_type_id', $tipo->project_type_id)->get()->sortBy("name")->pluck("name", "typology_id");
         return json_encode($dpto, JSON_UNESCAPED_UNICODE);
