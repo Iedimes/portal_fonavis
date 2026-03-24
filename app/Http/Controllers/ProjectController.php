@@ -314,18 +314,18 @@ class ProjectController extends Controller
             ->pluck('file_path', 'document_id')
             ->toArray();
 
-        foreach ($documentos as $item) {
+        foreach ($datosAdiciones as $item) {
             if (!isset($uploadedFiles2[$item->document_id])) {
                 $uploadedFiles2[$item->document_id] = false;
             }
         }
 
-        $existenDocumentos = $documentos->isNotEmpty();
+        $existenDocumentos = $datosAdiciones->isNotEmpty();
         $todosCargados = !in_array(false, $uploadedFiles, true);
 
         return view('projects.show', compact(
             'project', 'postulantes', 'postulantesData',
-            'title', 'docproyecto', 'documentos',
+            'title', 'docproyecto', 'documentos', 'datosAdiciones',
             'claves', 'history', 'uploadedFiles', 'uploadedFiles2',
             'edadesPostulantes', 'edadesConyuges', 'existenDocumentos', 'todosCargados'
         ));
@@ -1709,6 +1709,14 @@ public function showTecnico($id)
     public function send(Request $request, $id)
     {
 
+            // Verificar si el último estado es 1 (Enviado) para evitar duplicados consecutivos
+            $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
+            if ($ultimoEstado && $ultimoEstado->stage_id == '1') {
+                return [
+                    'message' => 'success'
+                ];
+            }
+
             $state = new ProjectStatusF();
             $state->project_id = $id;
             $state->stage_id = '1';
@@ -1745,6 +1753,11 @@ public function showTecnico($id)
                 ];
             } catch (\Exception $e) {
                 throw new \Exception('No se pudo enviar el correo electrónico: ' . $e->getMessage());
+                // Si falla el correo, logueamos el error pero retornamos éxito porque el estado ya se guardó correctamente.
+                Log::error('Error al enviar correo de proyecto ' . $id . ': ' . $e->getMessage());
+                return [
+                    'message' => 'success'
+                ];
             }
 
         //  return [

@@ -818,11 +818,19 @@ class ProjectsController extends Controller
         $email = Auth::user()->email;
         // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
+        $countEstado1 = ProjectStatusF::where('project_id', $project->id)
+            ->where('stage_id', 1)
+            ->count();
+
+        $masDeUnEstado1 = $countEstado1 > 1;
+
         switch ($estado) {
             case 1:
-                // Lógica específica para el estado 1
-                $stages = Stage::whereIn('id', [2])->get();
-                // $opcion = 2;
+                if ($masDeUnEstado1) {
+                    $stages = Stage::whereNotIn('id', [1, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21])->get();
+                } else {
+                    $stages = Stage::whereIn('id', [2])->get();
+                }
                 break;
             case 2:
                 // Lógica específica para el estado 2
@@ -873,7 +881,7 @@ class ProjectsController extends Controller
                 break;
             case 16:
                 // Lógica específica para el estado 16
-                $stages = Stage::whereIn('id', [18, 19])->get();
+                $stages = Stage::whereIn('id', [18, 19, 21])->get();
                 break;
             case 17:
                 // Lógica específica para el estado 17
@@ -931,20 +939,12 @@ class ProjectsController extends Controller
 
         // Contador específico para estado 1
         $state1Count = 0;
+        $satNombre = $project->getSat ? $project->getSat->NucNomSat : '';
 
-        $history = $history->map(function ($item) use (&$state1Count) {
+        $history = $history->map(function ($item) use (&$state1Count, $satNombre) {
             if ($item->stage_id == 1) {
                 $state1Count++;
-
-                if ($state1Count == 1 || $item->stage_id == 1) {
-                    // Primera vez -> SAT
-                    $user = User::find($item->user_id);
-                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
-                } else {
-                    // Desde la segunda vez en adelante -> Admin
-                    $adminUser = \App\Models\AdminUser::find($item->user_id);
-                    $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
-                }
+                $item->nombre_usuario = $satNombre . ' (SAT)';
             } elseif (in_array($item->stage_id, [5, 8, 11])) {
                 // Siempre SAT
                 $user = User::find($item->user_id);
