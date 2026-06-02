@@ -376,6 +376,9 @@ class PostulantesController extends Controller
                     if ($nuevoEstado && $estadoActual !== $nuevoEstado) {
                         $nroLin = $detalle ? $detalle->DENroLin + 1 : 1;
                         $date = new DateTime();
+                        $deExpAcc = $request->value === 'N'
+                            ? $postulante->motivo
+                            : '';
 
                         $created = SIG006::create([
                             'NroExp' => $nroExp,
@@ -388,7 +391,7 @@ class PostulantesController extends Controller
                             'DEUnOrDe' => $dependencia,
                             'DERcpChk' => 1,
                             'DERcpNam' => $nombreusuario,
-                            'DEExpAcc' => $postulante->observacion_de_consideracion,
+                            'DEExpAcc' => $deExpAcc,
                         ]);
                     }
                 }

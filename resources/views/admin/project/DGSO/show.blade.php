@@ -37,10 +37,23 @@
     }
 
     textarea.form-control {
+        min-height: 150px;
         height: 150px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 200px;
         /* Aumentar la altura de los textarea */
         resize: vertical;
         /* Permitir redimensionar verticalmente */
+        box-sizing: border-box;
+        display: block;
+        white-space: normal;
+    }
+
+    .table td textarea.form-control {
+        width: 100%;
+        min-width: 200px;
+        max-width: 100%;
     }
 </style>
 
@@ -129,7 +142,7 @@
                 </div>
             </div>
 
-            {{-- <div class="card">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION</h2>
                     <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2">
@@ -173,6 +186,7 @@
                                     <th class="text-center">{{ trans('Composición del Grupo Familiar') }}</th>
                                     <th class="text-center">{{ trans('Documentos Presentados') }}</th>
                                     <th class="text-center">{{ trans('Documentos Faltantes') }}</th>
+                                    <th class="text-center">Motivo</th>
                                     <th class="text-center">{{ trans('Observaciones de Consideracion') }}</th>
                                     <th class="text-center">{{ trans('Califica') }}</th>
                                     <th class="text-center">{{ trans('Acciones') }}</th>
@@ -280,16 +294,9 @@
                                             </td>
 
                                             <td class="text-center">
-                                                <select class="form-control"
+                                                <textarea class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'hijo_sosten', this.value)"
-                                                    style="background-color: #f0f8ff;">
-                                                    <option value="N"
-                                                        {{ $post->getPostulante->hijo_sosten == 'N' || $post->getPostulante->hijo_sosten === null ? 'selected' : '' }}>
-                                                        N</option>
-                                                    <option value="S"
-                                                        {{ $post->getPostulante->hijo_sosten == 'S' ? 'selected' : '' }}>S
-                                                    </option>
-                                                </select>
+                                                    style="background-color: #f0f8ff;">{{ $post->getPostulante->hijo_sosten ?? '' }}</textarea>
                                             </td>
                                             <td class="text-center">
                                                 <select class="form-control"
@@ -322,16 +329,20 @@
                                                     style="background-color: #f0f8ff;">{{ $post->getPostulante->documentos_faltantes ?? '' }}</textarea>
                                             </td>
                                             <td class="text-center">
-                                                <textarea class="form-control"
+                                                <textarea class="form-control" id="motivo_{{ $post->getPostulante->id }}" readonly
+                                                    style="background-color: #e9ecef;">{{ $post->getPostulante->motivo ?? '' }}</textarea>
+                                            </td>
+                                            <td class="text-center">
+                                                <textarea class="form-control" id="obs_{{ $post->getPostulante->id }}"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'observacion_de_consideracion', this.value)"
                                                     style="background-color: #f0f8ff;">{{ $post->getPostulante->observacion_de_consideracion ?? '' }}</textarea>
                                             </td>
                                             <td class="text-center">
                                                 <select class="form-control"
-                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'califica', this.value)"
+                                                    onchange="handleCalificaChange(this, '{{ $post->getPostulante->id }}')"
                                                     style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
                                                     <option value="S"
-                                                        {{ $post->getPostulante->califica === 'S' ? 'selected' : '' }}>S
+                                                        {{ $post->getPostulante->califica === 'S' || $post->getPostulante->califica === null ? 'selected' : '' }}>S
                                                     </option>
                                                     <option value="N"
                                                         {{ $post->getPostulante->califica === 'N' ? 'selected' : '' }}>N
@@ -365,7 +376,7 @@
                         </table>
                     </div>
                 </div>
-            </div> --}}
+            </div>
         </div>
     </div>
 
@@ -427,6 +438,34 @@
         </div>
     </div>
 
+    <!-- Modal Motivo No Califica -->
+    <div class="modal fade" id="modalMotivo" data-backdrop="static" data-keyboard="false" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Motivo de No Calificación</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="motivo_postulante_id" value="">
+                    <div class="form-group">
+                        <label for="motivo_select">Seleccione un motivo (Obligatorio)</label>
+                        <select class="form-control" id="motivo_select">
+                            <option value="">Seleccione motivo...</option>
+                            <option value="Falta de presupuesto">Falta de presupuesto</option>
+                            <option value="Falta de Documentos">Falta de Documentos</option>
+                            <option value="Excluído por Fonavis">Excluído por Fonavis</option>
+                        </select>
+                        <span id="motivo_error" class="text-danger" style="display:none;">Debe seleccionar una opción.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="cancelarMotivo()">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarMotivo()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 <script type="text/javascript">
@@ -440,7 +479,7 @@
         console.log('ID Miembro establecido:', postulanteId);
     }
 
-    function saveField(postId, fieldName, value) {
+    function saveField(postId, fieldName, value, callback) {
         $.ajax({
             url: '/admin/postulantes/' + postId + '/actualizar',
             method: 'POST',
@@ -451,6 +490,9 @@
             },
             success: function(response) {
                 console.log('Campo guardado exitosamente.');
+                if (typeof callback === 'function') {
+                    callback();
+                }
             },
             error: function(error) {
                 console.error('Error al guardar el campo:', error);
@@ -458,7 +500,67 @@
         });
     }
 
+    let currentCalificaSelect = null;
+
+    function handleCalificaChange(selectElement, postId) {
+        var value = selectElement.value;
+        if (value === 'N') {
+            currentCalificaSelect = selectElement;
+            $('#motivo_postulante_id').val(postId);
+            $('#motivo_select').val('');
+            $('#motivo_select').css('border-color', 'red');
+            $('#motivo_error').hide();
+            $('#modalMotivo').modal('show');
+        } else {
+            // Si vuelve a S, preguntar si desea eliminar solo el motivo
+            if (confirm('¿Desea eliminar el motivo?')) {
+                $('#motivo_' + postId).val('');
+                saveField(postId, 'motivo', '');
+            }
+            saveField(postId, 'califica', value);
+        }
+    }
+
+    function cancelarMotivo() {
+        if(currentCalificaSelect) {
+            currentCalificaSelect.value = 'S';
+        }
+        $('#modalMotivo').modal('hide');
+    }
+
+    function confirmarMotivo() {
+        var motivo = $('#motivo_select').val();
+        if(motivo === '') {
+            $('#motivo_error').show();
+            $('#motivo_select').css('border-color', 'red');
+            return;
+        }
+
+        var postId = $('#motivo_postulante_id').val();
+
+        // Insertar en textarea
+        var textarea = $('#obs_' + postId);
+        // Guardar el motivo y luego actualizar califica
+        var motivoField = $('#motivo_' + postId);
+        motivoField.val(motivo);
+
+        saveField(postId, 'motivo', motivo, function() {
+            saveField(postId, 'califica', 'N');
+        });
+
+        $('#modalMotivo').modal('hide');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        $('#motivo_select').on('change', function() {
+            if($(this).val() !== '') {
+                $(this).css('border-color', '');
+                $('#motivo_error').hide();
+            } else {
+                $(this).css('border-color', 'red');
+            }
+        });
+
         // Buscador en tabla
         const searchInput = document.getElementById('tableSearch');
         const tableRows = document.querySelectorAll('#postulantesTable tbody tr');

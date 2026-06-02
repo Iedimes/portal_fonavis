@@ -38,6 +38,7 @@ class Postulante extends Model implements AuditableContract
         'cantidad_hijos',
         'documentos_faltantes',
         'observacion_de_consideracion',
+        'motivo',
         'nivel',
     ];
 

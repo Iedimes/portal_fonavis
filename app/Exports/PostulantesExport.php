@@ -252,6 +252,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'Composición Familiar',
             'Documentos Presentados',
             'Documentos Faltantes',
+            'Motivo',
             'Observacion de Consideracion'
         ];
 
@@ -261,7 +262,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         }
 
         // Aplicar estilo a los encabezados
-        $sheet->getStyle('A20:V20')->applyFromArray([
+        $sheet->getStyle('A20:W20')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 9
