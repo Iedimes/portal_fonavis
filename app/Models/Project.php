@@ -34,7 +34,14 @@ class Project extends Model implements AuditableContract
         'fechares',
         'coordenadax',
         'coordenaday',
-        'ubicacion'
+        'ubicacion',
+        'calificacion_finalizada',
+        'shd_migrated',
+    ];
+
+    protected $casts = [
+        'calificacion_finalizada' => 'boolean',
+        'shd_migrated' => 'boolean',
     ];
 
     protected $with = ['getState', 'getModality', 'getCity', 'getEstado', 'getSat', 'documents', 'statuses'];

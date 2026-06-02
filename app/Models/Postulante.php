@@ -82,6 +82,11 @@ class Postulante extends Model implements AuditableContract
         );
     }
 
+    public function discapacidad()
+    {
+        return $this->hasOne('App\Models\PostulanteHasDiscapacidad', 'postulante_id', 'id');
+    }
+
     /**
      * Determina el tipo de postulante: Titular, Miembro o Sin Clasificar
      */

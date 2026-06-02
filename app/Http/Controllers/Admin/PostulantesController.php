@@ -337,6 +337,22 @@ class PostulantesController extends Controller
             // Buscar el postulante
             $postulante = Postulante::findOrFail($id);
 
+            // Verificar si la calificación del proyecto ya fue finalizada
+            $projectHasPostulante = ProjectHasPostulantes::where('postulante_id', $id)->first();
+            if (!$projectHasPostulante) {
+                $beneficiary = PostulanteHasBeneficiary::where('miembro_id', $id)->first();
+                if ($beneficiary) {
+                    $projectHasPostulante = ProjectHasPostulantes::where('postulante_id', $beneficiary->postulante_id)->first();
+                }
+            }
+
+            if ($projectHasPostulante && $projectHasPostulante->project_id) {
+                $project = Project::find($projectHasPostulante->project_id);
+                if ($project && $project->calificacion_finalizada) {
+                    return response()->json(['error' => 'La calificación ya fue finalizada. No se permiten cambios.'], 403);
+                }
+            }
+
             // Actualizar el campo correspondiente
             $postulante->{$request->field} = $request->value;
             $postulante->save();

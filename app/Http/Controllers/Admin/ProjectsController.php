@@ -20,8 +20,10 @@ use App\Models\AdminUser;
 use App\Models\Dependency;
 use App\Models\Departamento;
 use App\Models\ProjectHasPostulantes;
+use App\Models\ProjectHasExpediente;
 use App\Models\Documents;
 use App\Models\Documentsmissing;
+use App\Services\SHDMigrationService;
 use App\Models\Medium;
 use App\Models\Modality;
 use App\Models\Land;
@@ -522,6 +524,63 @@ class ProjectsController extends Controller
             'ingresosTotales',
             'niveles'
         ));
+    }
+
+    public function finalizarCalificacion(Project $project)
+    {
+        if ($project->calificacion_finalizada) {
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('status', 'La calificación ya está finalizada.');
+        }
+
+        $project->calificacion_finalizada = true;
+        $project->shd_migrated = false;
+        $project->save();
+
+        return redirect('admin/projects/' . $project->id . '/showDGSO')
+            ->with('success', 'Calificación finalizada. Ahora puede ingresar el número de planilla para migrar a SHD.');
+    }
+
+    public function migrarSHD(Request $request, Project $project, SHDMigrationService $migrationService)
+    {
+        if (!$project->calificacion_finalizada) {
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('error', 'Debe finalizar la calificación antes de migrar a SHD.');
+        }
+
+        $request->validate([
+            'planilla' => 'required|string|max:50',
+        ]);
+
+        $expediente = ProjectHasExpediente::where('project_id', $project->id)->first();
+
+        if (!$expediente) {
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('error', 'No se encontró un expediente asociado al proyecto.');
+        }
+
+        $tipoterreno = Land::find($project->land_id);
+        if (!$tipoterreno) {
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('error', 'No se encontró el tipo de terreno asociado al proyecto.');
+        }
+
+        $email = Auth::user()->email;
+        $username = strstr($email, '@', true);
+        $perUser = strtoupper(substr($username, 0, 8)) . '-M';
+
+        $result = $migrationService->migrate($project, $request->input('planilla'), $expediente->exp, $tipoterreno, $perUser);
+
+        if ($result['success']) {
+            $project->shd_migrated = true;
+            $project->save();
+
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('success', "Migración a SHD completada: {$result['processed']}/{$result['total']} registros. Ahora puede exportar a Excel.");
+        }
+
+        return redirect('admin/projects/' . $project->id . '/showDGSO')
+            ->with('error', $result['error'] ?? 'Ocurrieron errores durante la migración a SHD.');
     }
 
     public function showFONAVISTECNICO(Project $project)

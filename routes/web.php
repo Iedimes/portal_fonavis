@@ -280,6 +280,8 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/{project}/showFONAVISTECNICO',                 'ProjectsController@showFONAVISTECNICO')->name('FONAVISTECNICO');
             Route::get('/{project}/showFONAVISTECNICODOS',              'ProjectsController@showFONAVISTECNICODOS')->name('FONAVISTECNICODOS');
             Route::get('/{project}/showDGSO',                           'ProjectsController@showDGSO')->name('DGSO');
+            Route::post('/{project}/finalizar-calificacion',            'ProjectsController@finalizarCalificacion')->name('finalizarCalificacion');
+            Route::post('/{project}/migrar-shd',                        'ProjectsController@migrarSHD')->name('migrarSHD');
             Route::get('/{project}/showDIGH',                           'ProjectsController@showDIGH')->name('DIGH');
             Route::get('/{project}/showDSGO',                           'ProjectsController@showDSGO')->name('DSGO');
             Route::get('/{project}/transition',                         'ProjectsController@transition')->name('transition');

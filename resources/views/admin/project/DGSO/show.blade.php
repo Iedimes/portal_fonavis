@@ -145,9 +145,35 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION</h2>
-                    <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2">
-                        <i class="fas fa-file-excel"></i> Exportar a Excel
-                    </a>
+                    <div class="d-flex align-items-center">
+                        @if($project->calificacion_finalizada)
+                            <span class="badge badge-success mr-2">Calificación finalizada</span>
+                            @if($project->shd_migrated)
+                                <a href="{{ url('/admin/postulantes/exportar/' . $project->id) }}" class="btn btn-success mt-2 mr-2">
+                                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                                </a>
+                            @else
+                                <form method="POST" action="{{ url('admin/projects/' . $project->id . '/migrar-shd') }}" class="form-inline mt-2">
+                                    @csrf
+                                    <div class="input-group">
+                                        <input type="text" name="planilla" class="form-control" placeholder="N° de planilla" value="{{ old('planilla') }}" required>
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-exchange-alt"></i> Migrar a SHD
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            @endif
+                        @else
+                            <form id="finalizarForm" method="POST" action="{{ url('admin/projects/' . $project->id . '/finalizar-calificacion') }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="btn btn-warning mt-2">
+                                    <i class="fas fa-check"></i> Finalizar Calificación
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
@@ -339,6 +365,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <select class="form-control"
+                                                    data-initial-value="{{ $post->getPostulante->califica ?? 'S' }}"
                                                     onchange="handleCalificaChange(this, '{{ $post->getPostulante->id }}')"
                                                     style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
                                                     <option value="S"
@@ -469,6 +496,8 @@
 @endsection
 
 <script type="text/javascript">
+    const dgsoFinalizada = {{ $project->calificacion_finalizada ? 'true' : 'false' }};
+
     function setPostulanteId(postulanteId) {
         document.getElementById('postulante_id').value = postulanteId;
         console.log('ID Cónyuge establecido:', postulanteId);
@@ -480,6 +509,11 @@
     }
 
     function saveField(postId, fieldName, value, callback) {
+        if (dgsoFinalizada) {
+            alert('La calificación ya fue finalizada. No se pueden guardar cambios.');
+            return;
+        }
+
         $.ajax({
             url: '/admin/postulantes/' + postId + '/actualizar',
             method: 'POST',
@@ -503,6 +537,12 @@
     let currentCalificaSelect = null;
 
     function handleCalificaChange(selectElement, postId) {
+        if (dgsoFinalizada) {
+            alert('La calificación ya fue finalizada. No se pueden hacer cambios.');
+            selectElement.value = selectElement.dataset.initialValue || selectElement.value;
+            return;
+        }
+
         var value = selectElement.value;
         if (value === 'N') {
             currentCalificaSelect = selectElement;
@@ -512,7 +552,6 @@
             $('#motivo_error').hide();
             $('#modalMotivo').modal('show');
         } else {
-            // Si vuelve a S, preguntar si desea eliminar solo el motivo
             if (confirm('¿Desea eliminar el motivo?')) {
                 $('#motivo_' + postId).val('');
                 saveField(postId, 'motivo', '');
@@ -522,25 +561,21 @@
     }
 
     function cancelarMotivo() {
-        if(currentCalificaSelect) {
-            currentCalificaSelect.value = 'S';
+        if (currentCalificaSelect) {
+            currentCalificaSelect.value = currentCalificaSelect.dataset.initialValue || 'S';
         }
         $('#modalMotivo').modal('hide');
     }
 
     function confirmarMotivo() {
         var motivo = $('#motivo_select').val();
-        if(motivo === '') {
+        if (motivo === '') {
             $('#motivo_error').show();
             $('#motivo_select').css('border-color', 'red');
             return;
         }
 
         var postId = $('#motivo_postulante_id').val();
-
-        // Insertar en textarea
-        var textarea = $('#obs_' + postId);
-        // Guardar el motivo y luego actualizar califica
         var motivoField = $('#motivo_' + postId);
         motivoField.val(motivo);
 
@@ -553,7 +588,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         $('#motivo_select').on('change', function() {
-            if($(this).val() !== '') {
+            if ($(this).val() !== '') {
                 $(this).css('border-color', '');
                 $('#motivo_error').hide();
             } else {
@@ -561,7 +596,6 @@
             }
         });
 
-        // Buscador en tabla
         const searchInput = document.getElementById('tableSearch');
         const tableRows = document.querySelectorAll('#postulantesTable tbody tr');
 
@@ -570,7 +604,6 @@
                 const query = this.value.toLowerCase();
 
                 tableRows.forEach(row => {
-                    // Ignorar la fila de "no hay postulantes" si existe
                     if (row.cells.length < 5) return;
 
                     const exp = row.cells[2].textContent.toLowerCase();
@@ -586,10 +619,27 @@
             });
         }
 
-        // Form para cónyuge
+        if (dgsoFinalizada) {
+            document.querySelectorAll('#postulantesTable input, #postulantesTable select, #postulantesTable textarea').forEach(function(el) {
+                el.setAttribute('disabled', 'disabled');
+            });
+
+            document.querySelectorAll('a[data-target="#modal"], a[data-target="#modal1"]').forEach(function(el) {
+                el.classList.add('disabled');
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.65';
+            });
+        }
+
         const formConyuge = document.getElementById('miembro-form');
         if (formConyuge) {
             formConyuge.addEventListener('submit', function(event) {
+                if (dgsoFinalizada) {
+                    event.preventDefault();
+                    alert('La calificación ya fue finalizada. No se pueden agregar cónyuges.');
+                    return;
+                }
+
                 event.preventDefault();
                 const postulanteId = document.getElementById('postulante_id').value;
                 console.log('Enviando formulario cónyuge con ID:', postulanteId);
@@ -604,10 +654,15 @@
             });
         }
 
-        // Form para miembro
         const formMiembro = document.getElementById('miembronocge-form');
         if (formMiembro) {
             formMiembro.addEventListener('submit', function(event) {
+                if (dgsoFinalizada) {
+                    event.preventDefault();
+                    alert('La calificación ya fue finalizada. No se pueden agregar miembros.');
+                    return;
+                }
+
                 event.preventDefault();
                 const postulanteId = document.getElementById('postulante_id_nc').value;
                 console.log('Enviando formulario miembro con ID:', postulanteId);
