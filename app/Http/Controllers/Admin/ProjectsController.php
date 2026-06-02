@@ -526,7 +526,7 @@ class ProjectsController extends Controller
         ));
     }
 
-    public function finalizarCalificacion(Project $project)
+    public function finalizarCalificacion(Project $project, SHDMigrationService $migrationService)
     {
         if ($project->calificacion_finalizada) {
             return redirect('admin/projects/' . $project->id . '/showDGSO')
@@ -537,8 +537,19 @@ class ProjectsController extends Controller
         $project->shd_migrated = false;
         $project->save();
 
+        $tipoterreno = Land::find($project->land_id);
+        if ($tipoterreno) {
+            $result = $migrationService->refreshPostgresData($project, $tipoterreno);
+            $message = "Calificación finalizada. Datos locales actualizados: {$result['processed']}/{$result['total']} registros.";
+            if ($result['errors'] > 0) {
+                $message .= " Algunos registros no pudieron actualizarse.";
+            }
+        } else {
+            $message = 'Calificación finalizada. No se encontró el tipo de terreno para actualizar los datos locales.';
+        }
+
         return redirect('admin/projects/' . $project->id . '/showDGSO')
-            ->with('success', 'Calificación finalizada. Ahora puede ingresar el número de planilla para migrar a SHD.');
+            ->with('success', $message);
     }
 
     public function migrarSHD(Request $request, Project $project, SHDMigrationService $migrationService)

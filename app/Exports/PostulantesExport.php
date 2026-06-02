@@ -70,7 +70,8 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'S' => 25, // Composición
             'T' => 25, // Documentos Presentados
             'U' => 25, // Documentos Faltantes
-            'V' => 25, // Observacion de Consideracion
+            'V' => 25, // Motivo
+            'W' => 25, // Observacion de Consideracion
         ];
     }
 
@@ -322,6 +323,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'composicion_familiar' => $fe($postulante->composicion_del_grupo),
                 'documentos_presentados' => $fe($postulante->documentos_presentados),
                 'documentos_faltantes' => $fe($postulante->documentos_faltantes),
+                'motivo' => $fe($postulante->motivo ?? ''),
                 'observacion_consideracion' => $fe($postulante->observacion_de_consideracion)
             ];
         });

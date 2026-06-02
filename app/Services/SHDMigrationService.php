@@ -6,6 +6,7 @@ use App\Models\Land;
 use App\Models\POSSVS;
 use App\Models\POSSVS1;
 use App\Models\Project;
+use App\Models\ProjectHasExpediente;
 use App\Models\ProjectHasPostulantes;
 use App\Models\SIG005L1;
 use Illuminate\Support\Facades\Log;
@@ -55,6 +56,100 @@ class SHDMigrationService
             'PsvDptoId' => $project->state_id,
             'PsvCiudId' => $project->city_id,
         ]);
+    }
+
+    public function refreshPostgresData(Project $project, Land $tipoterreno): array
+    {
+        $postulantes = ProjectHasPostulantes::with([
+            'getPostulante.discapacidad',
+            'getMembers.getPostulante',
+        ])
+            ->where('project_id', $project->id)
+            ->whereNull('deleted_at')
+            ->get();
+
+        $processed = 0;
+        $errors = 0;
+        $total = $postulantes->count();
+        $expedienteNumber = $this->getExpedienteNumberForProject($project->id);
+
+        foreach ($postulantes as $postulante) {
+            try {
+                if ($this->processIndividualPostulantePostgresOnly($postulante, $tipoterreno, $expedienteNumber)) {
+                    $processed++;
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $titular = $postulante->getPostulante;
+                Log::error("Error al actualizar Postgres para postulante {$postulante->id}: {$e->getMessage()}", [
+                    'postulante_id' => $postulante->id,
+                    'cedula' => $titular->cedula ?? 'N/A',
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
+        return compact('processed', 'errors', 'total');
+    }
+
+    private function getExpedienteNumberForProject(int $projectId): ?string
+    {
+        $expediente = ProjectHasExpediente::where('project_id', $projectId)->first();
+
+        return $expediente ? $expediente->exp : null;
+    }
+
+    private function processIndividualPostulantePostgresOnly($postulante, Land $tipoterreno, ?string $expedienteNumber): bool
+    {
+        $titular = $postulante->getPostulante;
+        if (!$titular) {
+            Log::warning("No se encontró el titular para el registro ProjectHasPostulantes ID {$postulante->id}");
+            return false;
+        }
+
+        $conyugeData = $this->prepareConyugeData($postulante);
+        $postulanteData = $this->preparePostgresDataOnly($postulante, $conyugeData, $expedienteNumber);
+
+        $pgRecord = $titular;
+        $pgRecord->ingreso = $postulanteData['ingreso'];
+        $pgRecord->ingreso_familiar = $postulanteData['ingreso_familiar'];
+        $pgRecord->hijo_sosten = $postulanteData['hijo_sosten'];
+        $pgRecord->discapacidad = $postulanteData['discapacidad'];
+        $pgRecord->tercera_edad = $postulanteData['tercera_edad'];
+        $pgRecord->cantidad_hijos = $postulanteData['cantidad_hijos'];
+        $pgRecord->nexp = $postulanteData['nexp'];
+        $pgRecord->otra_persona_a_cargo = $postulanteData['otra_persona_a_cargo'];
+        $pgRecord->nivel = $postulanteData['nivel'];
+        $pgRecord->composicion_del_grupo = $postulanteData['composicion_del_grupo'];
+        $pgRecord->observacion_de_consideracion = $postulanteData['observacion_de_consideracion'];
+        $pgRecord->save();
+
+        Log::info("Actualizado en Postgres postulante ID {$pgRecord->id} - Cedula {$pgRecord->cedula}");
+
+        return true;
+    }
+
+    private function preparePostgresDataOnly($postulante, array $conyugeData, ?string $expedienteNumber): array
+    {
+        $persona = $postulante->getPostulante;
+        $discapacidadId = optional($persona->discapacidad)->discapacidad_id ?? 1;
+        $tieneDiscapacidad = $discapacidadId == 1 ? 'N' : 'S';
+        $ingresoTitular = $persona->ingreso ?? 0;
+        $ingresoConyuge = $conyugeData['ingreso'];
+
+        return [
+            'ingreso' => $ingresoTitular,
+            'ingreso_familiar' => $ingresoTitular + $ingresoConyuge,
+            'hijo_sosten' => $persona->hijo_sosten,
+            'discapacidad' => $tieneDiscapacidad,
+            'tercera_edad' => 'N',
+            'cantidad_hijos' => $postulante->childrens_count ?? 0,
+            'nexp' => $expedienteNumber ?? $persona->nexp,
+            'otra_persona_a_cargo' => 'N',
+            'nivel' => ProjectHasPostulantes::getNivel($persona->id),
+            'composicion_del_grupo' => $persona->composicion_del_grupo ?? $persona->composicion_del_grupo,
+            'observacion_de_consideracion' => $persona->hijo_sosten,
+        ];
     }
 
     private function processPostulantes(int $projectId, string $planilla, ?string $expedienteNumber, Land $tipoterreno, string $perUser): array

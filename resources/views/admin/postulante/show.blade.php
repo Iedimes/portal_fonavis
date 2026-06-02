@@ -68,16 +68,18 @@
                             <td class="text-center">{{ number_format($mi->miembro_id ? $mi->getPostulante->ingreso : "", 0, ".", ".") }}</td>
                             <td class="text-center" style="width: 150px;">
                                 @if($mi->miembro_id)
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-danger"
-                                            title="Eliminar miembro"
-                                            data-toggle="modal"
-                                            data-target="#modal-danger"
-                                            data-id="{{ $mi->miembro_id }}"
-                                            data-title="{{ $mi->getPostulante->first_name }} {{ $mi->getPostulante->last_name }}">
-                                        <i class="fa fa-trash-o"></i>
-                                    </button>
-                                </div>
+                                    @if (!(isset($project->calificacion_finalizada) && $project->calificacion_finalizada))
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    title="Eliminar miembro"
+                                                    data-toggle="modal"
+                                                    data-target="#modal-danger"
+                                                    data-id="{{ $mi->miembro_id }}"
+                                                    data-title="{{ $mi->getPostulante->first_name }} {{ $mi->getPostulante->last_name }}">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </div>
+                                    @endif
                                 @endif
                             </td>
                         </tr>
