@@ -37,6 +37,7 @@ use App\Models\SHMCER;
 use App\Models\PRMCLI;
 use App\Models\IVMSOL;
 use App\Models\Postulante;
+use App\Models\Usuario;
 use Carbon\Carbon;
 use App\Models\Discapacidad;
 use App\Models\Parentesco;
@@ -494,6 +495,15 @@ class ProjectsController extends Controller
             ->with(['getPostulante', 'getMembers.getPostulante'])
             ->get();
 
+        // Establecer califica='S' por defecto para postulantes sin calificar
+        foreach ($postulantes as $php) {
+            $p = $php->getPostulante;
+            if ($p && $p->califica === null) {
+                $p->califica = 'S';
+                $p->save();
+            }
+        }
+
         // Obtener IDs para cálculos en lote
         $postulanteIds = $postulantes->pluck('postulante_id')->toArray();
 
@@ -537,19 +547,34 @@ class ProjectsController extends Controller
         $project->shd_migrated = false;
         $project->save();
 
+        // Obtener datos del usuario para SIG006
+        $user = Auth::user();
+        $email = $user->email;
+        $username = strtoupper(explode('@', $email)[0]);
+        $usuario = Usuario::where('UsuCod', $username)->first();
+        $dependencia = $usuario ? $usuario->DepenCod : '';
+        $nombreusuario = $usuario ? $usuario->UsuNombre : '';
+
+        $messages = [];
+
+        // Sincronizar califica a SIG006 (SQL Server)
+        $sig006Result = $migrationService->syncCalificaSIG006($project, $username, $dependencia, $nombreusuario);
+        $messages[] = "Estado de calificación sincronizado: {$sig006Result['processed']}/{$sig006Result['total']} registros.";
+
+        // Actualizar datos locales en PostgreSQL
         $tipoterreno = Land::find($project->land_id);
         if ($tipoterreno) {
             $result = $migrationService->refreshPostgresData($project, $tipoterreno);
-            $message = "Calificación finalizada. Datos locales actualizados: {$result['processed']}/{$result['total']} registros.";
+            $messages[] = "Datos locales actualizados: {$result['processed']}/{$result['total']} registros.";
             if ($result['errors'] > 0) {
-                $message .= " Algunos registros no pudieron actualizarse.";
+                $messages[] = "Algunos registros no pudieron actualizarse.";
             }
         } else {
-            $message = 'Calificación finalizada. No se encontró el tipo de terreno para actualizar los datos locales.';
+            $messages[] = 'No se encontró el tipo de terreno para actualizar los datos locales.';
         }
 
         return redirect('admin/projects/' . $project->id . '/showDGSO')
-            ->with('success', $message);
+            ->with('success', 'Calificación finalizada. ' . implode(' ', $messages));
     }
 
     public function migrarSHD(Request $request, Project $project, SHDMigrationService $migrationService)
@@ -582,16 +607,23 @@ class ProjectsController extends Controller
 
         $result = $migrationService->migrate($project, $request->input('planilla'), $expediente->exp, $tipoterreno, $perUser);
 
+        $details = $result['details'] ?? [];
+        $msgBamper = isset($details['bamper']) ? "BAMPER: {$details['bamper']['processed']}/{$details['bamper']['total']}" : '';
+        $msgSol = isset($details['solicitantes']) ? "SOLICITANTES: {$details['solicitantes']['processed']}/{$details['solicitantes']['total']}" : '';
+        $msgShd = isset($details['shd']) ? "SHD: {$details['shd']['processed']}/{$details['shd']['total']}" : '';
+
+        $detailMsg = "{$msgBamper} | {$msgSol} | {$msgShd}";
+
         if ($result['success']) {
             $project->shd_migrated = true;
             $project->save();
 
             return redirect('admin/projects/' . $project->id . '/showDGSO')
-                ->with('success', "Migración a SHD completada: {$result['processed']}/{$result['total']} registros. Ahora puede exportar a Excel.");
+                ->with('success', "Migración completada exitosamente. {$detailMsg}");
         }
 
         return redirect('admin/projects/' . $project->id . '/showDGSO')
-            ->with('error', $result['error'] ?? 'Ocurrieron errores durante la migración a SHD.');
+            ->with('warning', "Migración completada con errores. {$detailMsg}");
     }
 
     public function showFONAVISTECNICO(Project $project)

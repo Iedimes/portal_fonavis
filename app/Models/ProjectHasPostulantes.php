@@ -52,10 +52,16 @@ class ProjectHasPostulantes extends Model implements AuditableContract
             return null;
         }
 
-        $miembros = PostulanteHasBeneficiary::where('postulante_id', $id)->get();
-        $total = Postulante::whereIn('id', $miembros->pluck('miembro_id'))->get();
-        $ingreso = $total->sum('ingreso');
-        $grupo = $ingreso + $postulante->ingreso;
+        $conyuge = PostulanteHasBeneficiary::where('postulante_id', $id)
+            ->whereIn('parentesco_id', [1, 8])
+            ->first();
+        $ingresoConyuge = 0;
+        if ($conyuge) {
+            $miembroPostulante = Postulante::find($conyuge->miembro_id);
+            $ingresoConyuge = $miembroPostulante->ingreso ?? 0;
+        }
+
+        $grupo = $postulante->ingreso + $ingresoConyuge;
 
         return self::calcularNivel($grupo);
     }
@@ -67,11 +73,16 @@ class ProjectHasPostulantes extends Model implements AuditableContract
             return 0;
         }
 
-        $miembros = PostulanteHasBeneficiary::where('postulante_id', $id)->get();
-        $total = Postulante::whereIn('id', $miembros->pluck('miembro_id'))->get();
-        $ingreso = $total->sum('ingreso');
+        $conyuge = PostulanteHasBeneficiary::where('postulante_id', $id)
+            ->whereIn('parentesco_id', [1, 8])
+            ->first();
+        $ingresoConyuge = 0;
+        if ($conyuge) {
+            $miembroPostulante = Postulante::find($conyuge->miembro_id);
+            $ingresoConyuge = $miembroPostulante->ingreso ?? 0;
+        }
 
-        return $ingreso + $postulante->ingreso;
+        return $postulante->ingreso + $ingresoConyuge;
     }
 
     /* ************************ NUEVOS MÉTODOS OPTIMIZADOS ************************* */
@@ -93,31 +104,30 @@ class ProjectHasPostulantes extends Model implements AuditableContract
             ->pluck('ingreso', 'id')
             ->toArray();
 
-        // Query 2: Traer todas las relaciones de beneficiarios
-        $miembrosRelaciones = PostulanteHasBeneficiary::whereIn('postulante_id', $postulanteIds)
+        // Query 2: Traer ingresos de cónyuges (parentesco 1=esposo/a, 8=concubino/a)
+        $conyuges = PostulanteHasBeneficiary::whereIn('postulante_id', $postulanteIds)
+            ->whereIn('parentesco_id', [1, 8])
             ->select('postulante_id', 'miembro_id')
-            ->get()
-            ->groupBy('postulante_id');
+            ->get();
 
-        // Query 3: Traer ingresos de todos los miembros
-        $miembrosIds = $miembrosRelaciones->flatten()->pluck('miembro_id')->unique()->filter();
-        $miembrosIngresos = Postulante::whereIn('id', $miembrosIds)
+        $conyugeIds = $conyuges->pluck('miembro_id')->unique()->filter();
+        $conyugesIngresos = Postulante::whereIn('id', $conyugeIds)
             ->pluck('ingreso', 'id')
             ->toArray();
 
-        // Calcular ingreso total por postulante
+        $conyugeMap = $conyuges->keyBy('postulante_id');
+
+        // Calcular ingreso total por postulante (solo titular + conyuge)
         $resultado = [];
         foreach ($postulanteIds as $postulanteId) {
             $ingresoPostulante = $postulantesIngresos[$postulanteId] ?? 0;
-            $ingresoMiembros = 0;
+            $ingresoConyuge = 0;
 
-            if (isset($miembrosRelaciones[$postulanteId])) {
-                foreach ($miembrosRelaciones[$postulanteId] as $relacion) {
-                    $ingresoMiembros += $miembrosIngresos[$relacion->miembro_id] ?? 0;
-                }
+            if (isset($conyugeMap[$postulanteId])) {
+                $ingresoConyuge = $conyugesIngresos[$conyugeMap[$postulanteId]->miembro_id] ?? 0;
             }
 
-            $resultado[$postulanteId] = $ingresoPostulante + $ingresoMiembros;
+            $resultado[$postulanteId] = $ingresoPostulante + $ingresoConyuge;
         }
 
         return $resultado;

@@ -235,10 +235,11 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <input type="text" class="form-control"
+                                                <input type="text" class="form-control titular-ingreso"
                                                     style="background-color: #f0f8ff; text-align: right; width: 120px;"
                                                     value="{{ number_format($post->getPostulante->ingreso ?? 0, 0, ',', '.') }}"
-                                                    onchange="saveField('{{ $post->getPostulante->id }}', 'ingreso', this.value.replace(/\./g, '').replace(',', '.'))">
+                                                    oninput="updateTotalPreview(this)"
+                                                    onchange="saveIncomeAndTotal(this, '{{ $post->getPostulante->id }}', '{{ $post->postulante_id }}')">
                                             </td>
 
                                             @php
@@ -266,10 +267,11 @@
                                             </td>
                                             <td class="text-center">
                                                 @if ($conyuge)
-                                                    <input type="text" class="form-control"
+                                                    <input type="text" class="form-control conyuge-ingreso"
                                                         style="background-color: #f0f8ff; text-align: right; width: 120px;"
                                                         value="{{ number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') }}"
-                                                        onchange="saveField('{{ $conyuge->getPostulante->id }}', 'ingreso', this.value.replace(/\./g, '').replace(',', '.'))">
+                                                        oninput="updateTotalPreview(this)"
+                                                        onchange="saveIncomeAndTotal(this, '{{ $conyuge->getPostulante->id }}', '{{ $post->postulante_id }}')">
                                                 @else
                                                     --------------
                                                 @endif
@@ -506,6 +508,43 @@
     function setPostulanteIdNc(postulanteId) {
         document.getElementById('postulante_id_nc').value = postulanteId;
         console.log('ID Miembro establecido:', postulanteId);
+    }
+
+    function updateTotalPreview(input) {
+        var row = input.closest('tr');
+        var titularInput = row.cells[5].querySelector('input');
+        var spouseCell = row.cells[8];
+        var spouseInput = spouseCell.querySelector('input');
+        var totalInput = row.cells[9].querySelector('input');
+        if (!totalInput) return;
+
+        var titularValue = parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+        var spouseValue = spouseInput ? (parseFloat(spouseInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+        var total = titularValue + spouseValue;
+
+        totalInput.value = total.toLocaleString('es-PY').replace(/,/g, '.');
+    }
+
+    function saveIncomeAndTotal(input, personId, pivotId) {
+        var rawValue = input.value.replace(/\./g, '').replace(',', '.');
+
+        saveField(personId, 'ingreso', rawValue, function() {
+            var row = input.closest('tr');
+            var titularInput = row.cells[5].querySelector('input');
+            var spouseCell = row.cells[8];
+            var spouseInput = spouseCell.querySelector('input');
+
+            var titularValue = parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+            var spouseValue = spouseInput ? (parseFloat(spouseInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+            var total = titularValue + spouseValue;
+
+            var totalInput = row.cells[9].querySelector('input');
+            if (totalInput) {
+                totalInput.value = total.toLocaleString('es-PY').replace(/,/g, '.');
+            }
+
+            saveField(pivotId, 'ingreso_familiar', String(total));
+        });
     }
 
     function saveField(postId, fieldName, value, callback) {

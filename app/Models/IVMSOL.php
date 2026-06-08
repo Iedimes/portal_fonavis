@@ -7,20 +7,31 @@ use Illuminate\Database\Eloquent\Model;
 class IVMSOL extends Model
 {
     protected $table = 'IVMSOL';
-
     protected $connection = 'sqlsrvsecond';
+    public $incrementing = false;
+    protected $primaryKey = 'SolPerCod';
+    public $timestamps = false;
 
-    /*public function tiposol() {
-        return $this->hasOne('App\SIG0001','TexCod','TexCod');
-    }*/
-
-    //protected $primaryKey = 'SEOBId';
-
-    /*public function distrito() {
-        return $this->hasOne('App\Distrito','CiuId','CiuId');
-    }
-
-    public function departamento() {
-        return $this->hasOne('App\Departamento','DptoId','DptoId');
-    }*/
+    protected $fillable = [
+        'SolPerCod',
+        'SolSer',
+        'SolNro',
+        'SolFch',
+        'SolTieUni',
+        'SolAuto',
+        'SolEquipo',
+        'SolMaquin',
+        'SolAnimal',
+        'SolOtros',
+        'SolTipo',
+        'SolInscri',
+        'SolComent',
+        'SolPerCge',
+        'SolHabViv',
+        'SolFum',
+        'SolEtapa',
+        'SolReFecAd',
+        'SolReNroAd',
+        'SolCodObra',
+    ];
 }
