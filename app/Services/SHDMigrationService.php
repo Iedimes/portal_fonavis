@@ -321,7 +321,7 @@ class SHDMigrationService
 
         $postulantes = ProjectHasPostulantes::where('project_id', $project->id)
             ->whereNull('deleted_at')
-            ->with(['getPostulante.discapacidad', 'getMembers.getPostulante', 'getMembers.getParentesco'])
+            ->with(['getPostulante.discapacidad', 'getMembers.getPostulante.discapacidad', 'getMembers.getParentesco'])
             ->get();
 
         $processed = 0;
@@ -524,7 +524,7 @@ class SHDMigrationService
     {
         $postulantes = ProjectHasPostulantes::with([
             'getPostulante.discapacidad',
-            'getMembers.getPostulante',
+            'getMembers.getPostulante.discapacidad',
         ])
             ->where('project_id', $project->id)
             ->whereNull('deleted_at')
@@ -627,7 +627,7 @@ class SHDMigrationService
     {
         $postulantes = ProjectHasPostulantes::with([
             'getPostulante.discapacidad',
-            'getMembers.getPostulante',
+            'getMembers.getPostulante.discapacidad',
         ])
             ->where('project_id', $projectId)
             ->whereNull('deleted_at')
