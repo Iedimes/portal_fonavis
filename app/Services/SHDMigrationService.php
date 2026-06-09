@@ -493,22 +493,12 @@ class SHDMigrationService
 
     private function determinarDiscapacidad($persona): string
     {
-        // Try the relationship first (by Postulante.id)
-        if (isset($persona->discapacidad) &&
-            !empty($persona->discapacidad->discapacidad_id)) {
-            return $persona->discapacidad->discapacidad_id == 1 ? 'N' : 'S';
-        }
-
-        // Fallback: look up by cedula on the active Postulante
-        // (handles case where postulante was soft-deleted and recreated)
-        if ($persona && $persona->cedula) {
-            $active = Postulante::where('cedula', $persona->cedula)
-                ->whereNull('deleted_at')
-                ->orderBy('id', 'desc')
+        if ($persona && $persona->id) {
+            $phd = \DB::table('postulante_has_discapacidad')
+                ->where('postulante_id', $persona->id)
                 ->first();
-            if ($active && isset($active->discapacidad) &&
-                !empty($active->discapacidad->discapacidad_id)) {
-                return $active->discapacidad->discapacidad_id == 1 ? 'N' : 'S';
+            if ($phd && !empty($phd->discapacidad_id)) {
+                return $phd->discapacidad_id == 1 ? 'N' : 'S';
             }
         }
 
@@ -618,7 +608,10 @@ class SHDMigrationService
     private function preparePostgresDataOnly($postulante, array $conyugeData, ?string $expedienteNumber): array
     {
         $persona = $postulante->getPostulante;
-        $discapacidadId = optional($persona->discapacidad)->discapacidad_id ?? 1;
+        $phd = \DB::table('postulante_has_discapacidad')
+            ->where('postulante_id', $persona->id)
+            ->first();
+        $discapacidadId = ($phd && !empty($phd->discapacidad_id)) ? $phd->discapacidad_id : 1;
         $tieneDiscapacidad = $discapacidadId == 1 ? 'N' : 'S';
         $ingresoTitular = $persona->ingreso ?? 0;
         $ingresoConyuge = $conyugeData['ingreso'];
@@ -767,7 +760,10 @@ class SHDMigrationService
         $persona = $postulante->getPostulante;
         $date = new \DateTime();
 
-        $discapacidadId = optional($persona->discapacidad)->discapacidad_id ?? 1;
+        $phd = \DB::table('postulante_has_discapacidad')
+            ->where('postulante_id', $persona->id)
+            ->first();
+        $discapacidadId = ($phd && !empty($phd->discapacidad_id)) ? $phd->discapacidad_id : 1;
         $tieneDiscapacidad = $discapacidadId == 1 ? 'N' : 'S';
 
         $fechaNacimiento = $persona->birthdate ? date_format(new \DateTime($persona->birthdate), 'Ymd') : null;
