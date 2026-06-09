@@ -493,11 +493,26 @@ class SHDMigrationService
 
     private function determinarDiscapacidad($persona): string
     {
-        if (!isset($persona->discapacidad) ||
-            empty($persona->discapacidad->discapacidad_id)) {
-            return 'N';
+        // Try the relationship first (by Postulante.id)
+        if (isset($persona->discapacidad) &&
+            !empty($persona->discapacidad->discapacidad_id)) {
+            return $persona->discapacidad->discapacidad_id == 1 ? 'N' : 'S';
         }
-        return $persona->discapacidad->discapacidad_id == 1 ? 'N' : 'S';
+
+        // Fallback: look up by cedula on the active Postulante
+        // (handles case where postulante was soft-deleted and recreated)
+        if ($persona && $persona->cedula) {
+            $active = Postulante::where('cedula', $persona->cedula)
+                ->whereNull('deleted_at')
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($active && isset($active->discapacidad) &&
+                !empty($active->discapacidad->discapacidad_id)) {
+                return $active->discapacidad->discapacidad_id == 1 ? 'N' : 'S';
+            }
+        }
+
+        return 'N';
     }
 
     private function procesarMonto($monto): float
