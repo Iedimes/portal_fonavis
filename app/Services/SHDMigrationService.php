@@ -146,24 +146,57 @@ class SHDMigrationService
 
                 $nuevoEstado = $titular->califica === 'N' ? 'N' : 'K';
 
-                if ($nuevoEstado && $estadoActual !== $nuevoEstado) {
-                    $nroLin = $detalle ? $detalle->DENroLin + 1 : 1;
+                if ($nuevoEstado) {
                     $date = new \DateTime();
+                    $fecha = date_format($date, 'Ymd H:i:s');
                     $deExpAcc = $titular->califica === 'N' ? ($titular->motivo ?? '') : '';
 
-                    SIG006::create([
-                        'NroExp' => $nroExp,
-                        'NroExpS' => 'A',
-                        'DENroLin' => $nroLin,
-                        'DEExpEst' => $nuevoEstado,
-                        'DEFecDis' => date_format($date, 'Ymd H:i:s'),
-                        'UsuRcp' => $username,
-                        'DEUnOrHa' => $dependencia,
-                        'DEUnOrDe' => $dependencia,
-                        'DERcpChk' => 1,
-                        'DERcpNam' => $nombreusuario,
-                        'DEExpAcc' => $deExpAcc,
-                    ]);
+                    if ($detalle) {
+                        // Actualizar UsuRcp/DERcpNam en el registro mas reciente
+                        SIG006::where('NroExp', $nroExp)
+                            ->where('DENroLin', $detalle->DENroLin)
+                            ->update([
+                                'UsuRcp' => $username,
+                                'DERcpNam' => $nombreusuario,
+                                'DEUnOrHa' => $dependencia,
+                                'DEUnOrDe' => $dependencia,
+                                'DEFecDis' => $fecha,
+                            ]);
+
+                        // Si el estado cambio, crear nueva linea
+                        if ($estadoActual !== $nuevoEstado) {
+                            $nroLin = $detalle->DENroLin + 1;
+
+                            SIG006::create([
+                                'NroExp' => $nroExp,
+                                'NroExpS' => 'A',
+                                'DENroLin' => $nroLin,
+                                'DEExpEst' => $nuevoEstado,
+                                'DEFecDis' => $fecha,
+                                'UsuRcp' => $username,
+                                'DEUnOrHa' => $dependencia,
+                                'DEUnOrDe' => $dependencia,
+                                'DERcpChk' => 1,
+                                'DERcpNam' => $nombreusuario,
+                                'DEExpAcc' => $deExpAcc,
+                            ]);
+                        }
+                    } else {
+                        // No existe, crear primero
+                        SIG006::create([
+                            'NroExp' => $nroExp,
+                            'NroExpS' => 'A',
+                            'DENroLin' => 1,
+                            'DEExpEst' => $nuevoEstado,
+                            'DEFecDis' => $fecha,
+                            'UsuRcp' => $username,
+                            'DEUnOrHa' => $dependencia,
+                            'DEUnOrDe' => $dependencia,
+                            'DERcpChk' => 1,
+                            'DERcpNam' => $nombreusuario,
+                            'DEExpAcc' => $deExpAcc,
+                        ]);
+                    }
 
                     Log::info("SIG006 sincronizado para {$titular->cedula}: estado {$nuevoEstado}");
                 }
