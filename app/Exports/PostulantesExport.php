@@ -72,6 +72,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'U' => 25, // Documentos Faltantes
             'V' => 25, // Motivo
             'W' => 25, // Observacion de Consideracion
+            'X' => 8,  // Califica
         ];
     }
 
@@ -121,6 +122,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                     $sheet->getStyle('E21:F' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('H21:L' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('M21:P' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('X21:X' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
             },
         ];
@@ -132,7 +134,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         $this->addLogo($sheet);
 
         // Dirección General Social en la fila 10
-        $sheet->mergeCells('A10:V10');
+        $sheet->mergeCells('A10:X10');
         $sheet->setCellValue('A10', 'Dirección General Social');
         $sheet->getStyle('A10')->applyFromArray([
             'alignment' => [
@@ -146,7 +148,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Dirección de Postulación, Evaluación y Adjudicación FONAVIS en la fila 11
-        $sheet->mergeCells('A11:V11');
+        $sheet->mergeCells('A11:X11');
         $sheet->setCellValue('A11', 'Dirección de Postulación, Evaluación y Adjudicación FONAVIS');
         $sheet->getStyle('A11')->applyFromArray([
             'alignment' => [
@@ -160,7 +162,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Departamento de Análisis de Postulantes de Grupos Organizados en la fila 12
-        $sheet->mergeCells('A12:V12');
+        $sheet->mergeCells('A12:X12');
         $sheet->setCellValue('A12', 'Departamento de Análisis de Postulantes de Grupos Organizados');
         $sheet->getStyle('A12')->applyFromArray([
             'alignment' => [
@@ -174,7 +176,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Título de la tabla en la fila 13
-        $sheet->mergeCells('A13:V13');
+        $sheet->mergeCells('A13:X13');
         $sheet->setCellValue('A13', 'Lista de Postulantes al Subsidio de la Vivienda Social');
         $sheet->getStyle('A13')->applyFromArray([
             'alignment' => [
@@ -254,7 +256,8 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'Documentos Presentados',
             'Documentos Faltantes',
             'Motivo',
-            'Observacion de Consideracion'
+            'Observacion de Consideracion',
+            'Califica'
         ];
 
         foreach ($headings as $index => $heading) {
@@ -263,7 +266,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         }
 
         // Aplicar estilo a los encabezados
-        $sheet->getStyle('A20:W20')->applyFromArray([
+        $sheet->getStyle('A20:X20')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 9
@@ -324,7 +327,8 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'documentos_presentados' => $fe($postulante->documentos_presentados),
                 'documentos_faltantes' => $fe($postulante->documentos_faltantes),
                 'motivo' => $fe($postulante->motivo ?? ''),
-                'observacion_consideracion' => $fe($postulante->observacion_de_consideracion)
+                'observacion_consideracion' => $fe($postulante->observacion_de_consideracion),
+                'califica' => $postulante->califica ?? 'N'
             ];
         });
 
@@ -362,7 +366,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             $drawing->setWidth(1000);  // Ajusta según sea necesario
 
             // Centrar la imagen
-            $columnCount = 22; // Por ejemplo, si tienes de A a V
+            $columnCount = 24; // Por ejemplo, si tienes de A a X
             $drawing->setCoordinates('A1');
             $drawing->setOffsetX((($columnCount * 22) - 300) / 2); // Ajusta el offset X para centrar
 
