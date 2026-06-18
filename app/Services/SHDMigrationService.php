@@ -657,7 +657,7 @@ class SHDMigrationService
             'tercera_edad' => 'N',
             'cantidad_hijos' => $postulante->childrens_count ?? 0,
             'nexp' => $expedienteNumber ?? $persona->nexp,
-            'otra_persona_a_cargo' => 'N',
+            'otra_persona_a_cargo' => $persona->otra_persona_a_cargo ?? '',
             'nivel' => ProjectHasPostulantes::getNivel($persona->id),
             'composicion_del_grupo' => $persona->composicion_del_grupo ?? $persona->composicion_del_grupo,
             'observacion_de_consideracion' => $persona->hijo_sosten,
@@ -751,7 +751,7 @@ class SHDMigrationService
         $pgRecord->tercera_edad = $postulanteData['PsvTerEdad'];
         $pgRecord->cantidad_hijos = $postulanteData['PsvCanHij'];
         $pgRecord->nexp = $postulanteData['PsvExpNro'];
-        $pgRecord->otra_persona_a_cargo = 'N';
+        $pgRecord->otra_persona_a_cargo = $postulanteData['PsvNomSos'];
         $pgRecord->nivel = $postulanteData['PsvNivel'];
         $pgRecord->composicion_del_grupo = $postulanteData['PsvObs2'] ?? $pgRecord->composicion_del_grupo;
         $pgRecord->observacion_de_consideracion = $postulanteData['PsvObs'];
@@ -837,7 +837,7 @@ class SHDMigrationService
             'PsvIngCge' => $ingresoConyuge,
             'PsvIngOtr' => 0,
             'PsvIngFam' => $ingresoFamiliar,
-            'PsvNomSos' => '',
+            'PsvNomSos' => !empty($persona->otra_persona_a_cargo) ? $persona->otra_persona_a_cargo : '',
             'PsvCgeFNac' => $conyugeData['fecha_nacimiento'],
             'PsvTitFNac' => $fechaNacimiento,
             'PsvTerreno' => trim($tipoterreno->name),
