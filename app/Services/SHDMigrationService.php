@@ -829,7 +829,7 @@ class SHDMigrationService
             'PsvAporte' => 0,
             'PsvIfac' => '',
             'PsvDomi' => trim($direccion),
-            'PsvObs' => $persona->hijo_sosten,
+            'PsvObs' => $persona->observacion_de_consideracion,
             'PsvRegCon' => 'S',
             'PsvUsuIng' => $perUser,
             'PsvUsuMod' => $perUser,

@@ -603,7 +603,7 @@ class ProjectsController extends Controller
 
         $email = Auth::user()->email;
         $username = strstr($email, '@', true);
-        $perUser = strtoupper(substr($username, 0, 8)) . '-M';
+        $perUser = strtoupper(substr($username, 0, 8));
 
         $result = $migrationService->migrate($project, $request->input('planilla'), $expediente->exp, $tipoterreno, $perUser);
 
