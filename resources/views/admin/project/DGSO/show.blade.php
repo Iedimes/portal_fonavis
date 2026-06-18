@@ -327,16 +327,9 @@
                                                     style="background-color: #f0f8ff;">{{ $post->getPostulante->hijo_sosten ?? '' }}</textarea>
                                             </td>
                                             <td class="text-center">
-                                                <select class="form-control"
+                                                <textarea class="form-control"
                                                     onchange="saveField('{{ $post->getPostulante->id }}', 'otra_persona_a_cargo', this.value)"
-                                                    style="background-color: #f0f8ff; padding: 0.375rem 0.75rem;">
-                                                    <option value="N"
-                                                        {{ $post->getPostulante->otra_persona_a_cargo == 'N' || $post->getPostulante->otra_persona_a_cargo === null ? 'selected' : '' }}>
-                                                        N</option>
-                                                    <option value="S"
-                                                        {{ $post->getPostulante->otra_persona_a_cargo == 'S' ? 'selected' : '' }}>
-                                                        S</option>
-                                                </select>
+                                                    style="background-color: #f0f8ff;">{{ $post->getPostulante->otra_persona_a_cargo ?? '' }}</textarea>
                                             </td>
                                             <td class="text-center">
                                                 {{ utf8_encode($project->getLand->name ?? 'N') }}</td>
