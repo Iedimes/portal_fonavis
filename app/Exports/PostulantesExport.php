@@ -320,7 +320,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'discap' => $postulante->discapacidad ?? 'N',
                 'tercera_edad' => $postulante->tercera_edad ?? 'N',
                 'hijo_sosten' => $postulante->hijo_sosten ?? 'N',
-                'otra_persona_cargo' => $postulante->otra_persona_a_cargo ?? 'N',
+                'otra_persona_cargo' => $postulante->otra_persona_a_cargo ?? '',
                 'terreno' => $this->project->land_id ? $this->project->getLand->name : 'N',
                 'residencia' => $fe($postulante->address),
                 'composicion_familiar' => $fe($postulante->composicion_del_grupo),
