@@ -660,7 +660,7 @@ class SHDMigrationService
             'otra_persona_a_cargo' => $persona->otra_persona_a_cargo ?? '',
             'nivel' => ProjectHasPostulantes::getNivel($persona->id),
             'composicion_del_grupo' => $persona->composicion_del_grupo ?? $persona->composicion_del_grupo,
-            'observacion_de_consideracion' => $persona->hijo_sosten,
+            'observacion_de_consideracion' => $persona->observacion_de_consideracion,
         ];
     }
 
