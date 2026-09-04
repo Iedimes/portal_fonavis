@@ -17,6 +17,7 @@
     </div>
 </div>
 
+{{-- Campos localizados con interpolación corregida para Vue/Blade --}}
 <div class="row">
     @foreach($locales as $locale)
         <div class="col-md" v-show="shouldShowLangGroup('{{ $locale }}')" v-cloak>
@@ -24,7 +25,7 @@
                 <label for="manipulations_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.medium.columns.manipulations') }}</label>
                 <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
                     <input type="text" v-model="form.manipulations.{{ $locale }}" v-validate="'required'" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('manipulations_{{ $locale }}'), 'form-control-success': fields.manipulations_{{ $locale }} && fields.manipulations_{{ $locale }}.valid }" id="manipulations_{{ $locale }}" name="manipulations_{{ $locale }}" placeholder="{{ trans('admin.medium.columns.manipulations') }}">
-                    <div v-if="errors.has('manipulations_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('manipulations_{{ $locale }}') }}</div>
+                    <div v-if="errors.has('manipulations_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('manipulations_}} {{ $locale }}@{{ ') }}</div>
                 </div>
             </div>
         </div>
@@ -38,7 +39,7 @@
                 <label for="custom_properties_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.medium.columns.custom_properties') }}</label>
                 <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
                     <input type="text" v-model="form.custom_properties.{{ $locale }}" v-validate="'required'" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('custom_properties_{{ $locale }}'), 'form-control-success': fields.custom_properties_{{ $locale }} && fields.custom_properties_{{ $locale }}.valid }" id="custom_properties_{{ $locale }}" name="custom_properties_{{ $locale }}" placeholder="{{ trans('admin.medium.columns.custom_properties') }}">
-                    <div v-if="errors.has('custom_properties_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('custom_properties_{{ $locale }}') }}</div>
+                    <div v-if="errors.has('custom_properties_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('custom_properties_}} {{ $locale }}@{{ ') }}</div>
                 </div>
             </div>
         </div>
@@ -52,7 +53,7 @@
                 <label for="generated_conversions_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.medium.columns.generated_conversions') }}</label>
                 <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
                     <input type="text" v-model="form.generated_conversions.{{ $locale }}" v-validate="'required'" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('generated_conversions_{{ $locale }}'), 'form-control-success': fields.generated_conversions_{{ $locale }} && fields.generated_conversions_{{ $locale }}.valid }" id="generated_conversions_{{ $locale }}" name="generated_conversions_{{ $locale }}" placeholder="{{ trans('admin.medium.columns.generated_conversions') }}">
-                    <div v-if="errors.has('generated_conversions_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('generated_conversions_{{ $locale }}') }}</div>
+                    <div v-if="errors.has('generated_conversions_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('generated_conversions_}} {{ $locale }}@{{ ') }}</div>
                 </div>
             </div>
         </div>
@@ -66,7 +67,7 @@
                 <label for="responsive_images_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.medium.columns.responsive_images') }}</label>
                 <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
                     <input type="text" v-model="form.responsive_images.{{ $locale }}" v-validate="'required'" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('responsive_images_{{ $locale }}'), 'form-control-success': fields.responsive_images_{{ $locale }} && fields.responsive_images_{{ $locale }}.valid }" id="responsive_images_{{ $locale }}" name="responsive_images_{{ $locale }}" placeholder="{{ trans('admin.medium.columns.responsive_images') }}">
-                    <div v-if="errors.has('responsive_images_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('responsive_images_{{ $locale }}') }}</div>
+                    <div v-if="errors.has('responsive_images_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('responsive_images_}} {{ $locale }}@{{ ') }}</div>
                 </div>
             </div>
         </div>

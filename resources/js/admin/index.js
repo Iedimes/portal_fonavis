@@ -27,3 +27,5 @@ import './reporte';
 import './project-has-expediente';
 import './project-old';
 import './legajo-masivo';
+// Componente de formulario y listado para modulo Medium
+import './medium';

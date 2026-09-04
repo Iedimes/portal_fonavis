@@ -65,7 +65,9 @@ class MediaController extends Controller
     {
         $this->authorize('admin.medium.create');
 
-        return view('admin.medium.create');
+        return view('admin.medium.create', [
+            'locales' => config('translatable.locales'),
+        ]);
     }
 
     /**
@@ -114,9 +116,9 @@ class MediaController extends Controller
     {
         $this->authorize('admin.medium.edit', $medium);
 
-
         return view('admin.medium.edit', [
             'medium' => $medium,
+            'locales' => config('translatable.locales'),
         ]);
     }
 
