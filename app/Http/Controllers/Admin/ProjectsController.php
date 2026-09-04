@@ -77,34 +77,11 @@ class ProjectsController extends Controller
         // Crear una instancia de AdminListing
         $listing = AdminListing::create(Project::class);
 
-        // Procesar con filtro por dependencia
+        // Procesar listado de proyectos
         $data = $listing->processRequestAndGet(
             $request,
             ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-            ['id', 'name', 'sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-            function ($query) use ($usuarioRol) {
-                // Filtro para dependencias que no son DGFO (1) ni DGTI (7)
-                if (!in_array($usuarioRol, [1, 7])) {
-                    $query->whereIn('id', function ($q) use ($usuarioRol) {
-                        $q->select('project_id')
-                            ->from('project_status as ps1')
-                            ->whereRaw('ps1.id = (select max(id) from project_status as ps2 where ps2.project_id = ps1.project_id)');
-
-                        if ($usuarioRol == 2) {
-                            $q->whereIn('stage_id', [2, 4, 5, 6]);
-                        } elseif ($usuarioRol == 3) {
-                            $q->whereIn('stage_id', [8]);
-                        } elseif ($usuarioRol == 4) {
-                            $q->whereIn('stage_id', [11, 12]);
-                        } elseif ($usuarioRol == 5) {
-                            $q->whereIn('stage_id', [11, 16]);
-                        } else {
-                            // Para cualquier otra dependencia no definida (ej. 6), no mostramos nada o filtramos agresivamente
-                            $q->where('stage_id', 0);
-                        }
-                    });
-                }
-            }
+            ['id', 'name', 'sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad']
         );
 
         // Comprobamos si es una solicitud AJAX
@@ -1034,10 +1011,23 @@ class ProjectsController extends Controller
     {
         $project = Project::findOrFail($id);
 
-        $history = ProjectStatusF::where('project_id', $project->id)
+        $rawHistory = ProjectStatusF::where('project_id', $project->id)
             ->orderBy('created_at')
             ->with('imagen')
             ->get();
+
+        // Filtrar duplicados consecutivos causados por doble clic / internet lento
+        $history = collect();
+        $previous = null;
+        foreach ($rawHistory as $item) {
+            if ($previous && $previous->stage_id == $item->stage_id && $previous->record == $item->record) {
+                if ($item->created_at && $previous->created_at && $item->created_at->diffInMinutes($previous->created_at) <= 5) {
+                    continue;
+                }
+            }
+            $history->push($item);
+            $previous = $item;
+        }
 
         // Contador específico para estado 1
         $state1Count = 0;
