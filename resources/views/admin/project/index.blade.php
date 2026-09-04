@@ -290,6 +290,14 @@
                                                     @include('admin.project.actions.dependency_7_dgti')
                                                 @endif
 
+                                                {{-- Imprimir postulantes (Común a todos) --}}
+                                                <div class="p-1">
+                                                    <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}"
+                                                        role="button">
+                                                        <i class="fa fa-print"></i>
+                                                    </a>
+                                                </div>
+
                                                 {{-- Historial (Común a todos) --}}
                                                 <div class="p-1">
                                                     <a class="btn btn-sm"
