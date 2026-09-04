@@ -901,10 +901,23 @@ class ProjectsController extends Controller
     {
         $project = Project::findOrFail($id);
 
-        $history = ProjectStatusF::where('project_id', $project->id)
+        $rawHistory = ProjectStatusF::where('project_id', $project->id)
             ->orderBy('created_at')
             ->with('imagen')
             ->get();
+
+        // Filtrar duplicados consecutivos causados por doble clic / internet lento
+        $history = collect();
+        $previous = null;
+        foreach ($rawHistory as $item) {
+            if ($previous && $previous->stage_id == $item->stage_id && $previous->record == $item->record) {
+                if ($item->created_at && $previous->created_at && $item->created_at->diffInMinutes($previous->created_at) <= 5) {
+                    continue;
+                }
+            }
+            $history->push($item);
+            $previous = $item;
+        }
 
         // Contador específico para estado 1
         $state1Count = 0;
