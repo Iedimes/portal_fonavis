@@ -199,7 +199,8 @@
                                     <th class="text-center">{{ trans('Ingreso') }}</th>
                                     <th class="text-center">{{ trans('Apellido y Nombre del Conyuge o concubino') }}</th>
                                     <th class="text-center">{{ trans('N° de cedula de identidad') }}</th>
-                                    <th class="text-center">{{ trans('Ingreso') }}</th>
+                                    <th class="text-center">{{ trans('Ingreso Cónyuge') }}</th>
+                                    <th class="text-center">{{ trans('Otros Ingresos') }}</th>
                                     <th class="text-center">{{ trans('Ingreso Total') }}</th>
                                     <th class="text-center">{{ trans('Nivel') }}</th>
                                     <th class="text-center">{{ trans('Cantidad de Hijos') }}</th>
@@ -277,7 +278,14 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <input type="text" class="form-control"
+                                                <input type="text" class="form-control otros-ingresos"
+                                                    style="background-color: #f0f8ff; text-align: right; width: 120px;"
+                                                    value="{{ number_format($otrosIngresos[$post->getPostulante->id] ?? ($post->getPostulante->otros_ingresos ?? 0), 0, ',', '.') }}"
+                                                    oninput="updateTotalPreview(this)"
+                                                    onchange="saveOtrosIngresosAndTotal(this, '{{ $post->getPostulante->id }}', '{{ $post->postulante_id }}')">
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="text" class="form-control ingreso-total"
                                                     style="background-color: #f0f8ff; text-align: right; width: 120px;"
                                                     value="{{ number_format($ingresosTotales[$post->postulante_id] ?? 0, 0, ',', '.') }}"
                                                     onchange="saveField('{{ $post->postulante_id }}', 'ingreso_familiar', this.value.replace(/\./g, '').replace(',', '.'))">
@@ -505,15 +513,16 @@
 
     function updateTotalPreview(input) {
         var row = input.closest('tr');
-        var titularInput = row.cells[5].querySelector('input');
-        var spouseCell = row.cells[8];
-        var spouseInput = spouseCell.querySelector('input');
-        var totalInput = row.cells[9].querySelector('input');
+        var titularInput = row.querySelector('.titular-ingreso');
+        var spouseInput = row.querySelector('.conyuge-ingreso');
+        var otrosInput = row.querySelector('.otros-ingresos');
+        var totalInput = row.querySelector('.ingreso-total');
         if (!totalInput) return;
 
-        var titularValue = parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+        var titularValue = titularInput ? (parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
         var spouseValue = spouseInput ? (parseFloat(spouseInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
-        var total = titularValue + spouseValue;
+        var otrosValue = otrosInput ? (parseFloat(otrosInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+        var total = titularValue + spouseValue + otrosValue;
 
         totalInput.value = total.toLocaleString('es-PY').replace(/,/g, '.');
     }
@@ -522,22 +531,36 @@
         var rawValue = input.value.replace(/\./g, '').replace(',', '.');
 
         saveField(personId, 'ingreso', rawValue, function() {
-            var row = input.closest('tr');
-            var titularInput = row.cells[5].querySelector('input');
-            var spouseCell = row.cells[8];
-            var spouseInput = spouseCell.querySelector('input');
-
-            var titularValue = parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0;
-            var spouseValue = spouseInput ? (parseFloat(spouseInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
-            var total = titularValue + spouseValue;
-
-            var totalInput = row.cells[9].querySelector('input');
-            if (totalInput) {
-                totalInput.value = total.toLocaleString('es-PY').replace(/,/g, '.');
-            }
-
-            saveField(pivotId, 'ingreso_familiar', String(total));
+            recalculateAndSaveTotal(input, pivotId);
         });
+    }
+
+    function saveOtrosIngresosAndTotal(input, personId, pivotId) {
+        var rawValue = input.value.replace(/\./g, '').replace(',', '.');
+
+        saveField(personId, 'otros_ingresos', rawValue, function() {
+            recalculateAndSaveTotal(input, pivotId);
+        });
+    }
+
+    function recalculateAndSaveTotal(input, pivotId) {
+        var row = input.closest('tr');
+        var titularInput = row.querySelector('.titular-ingreso');
+        var spouseInput = row.querySelector('.conyuge-ingreso');
+        var otrosInput = row.querySelector('.otros-ingresos');
+
+        var titularValue = titularInput ? (parseFloat(titularInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+        var spouseValue = spouseInput ? (parseFloat(spouseInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+        var otrosValue = otrosInput ? (parseFloat(otrosInput.value.replace(/\./g, '').replace(',', '.')) || 0) : 0;
+
+        var total = titularValue + spouseValue + otrosValue;
+
+        var totalInput = row.querySelector('.ingreso-total');
+        if (totalInput) {
+            totalInput.value = total.toLocaleString('es-PY').replace(/,/g, '.');
+        }
+
+        saveField(pivotId, 'ingreso_familiar', String(total));
     }
 
     function saveField(postId, fieldName, value, callback) {

@@ -88,6 +88,60 @@ class ProjectHasPostulantes extends Model implements AuditableContract
     /* ************************ NUEVOS MÉTODOS OPTIMIZADOS ************************* */
 
     /**
+     * Obtiene otros ingresos (miembros no cónyuges) para múltiples postulantes.
+     * Si 'otros_ingresos' en postulantes es null, calcula la suma de los miembros con parentesco != 1 y != 8
+     * y guarda el resultado en la base de datos PostgreSQL.
+     *
+     * @param array $postulanteIds IDs de postulantes
+     * @return array ['postulante_id' => otros_ingresos]
+     */
+    public static function getOtrosIngresosBatch($postulanteIds)
+    {
+        if (empty($postulanteIds)) {
+            return [];
+        }
+
+        $postulantes = Postulante::whereIn('id', $postulanteIds)
+            ->get()
+            ->keyBy('id');
+
+        // Query: Miembros que NO son cónyuges (parentesco_id != 1 y != 8)
+        $otrosMiembros = PostulanteHasBeneficiary::whereIn('postulante_id', $postulanteIds)
+            ->whereNotIn('parentesco_id', [1, 8])
+            ->select('postulante_id', 'miembro_id')
+            ->get();
+
+        $miembroIds = $otrosMiembros->pluck('miembro_id')->unique()->filter();
+        $miembrosIngresos = Postulante::whereIn('id', $miembroIds)
+            ->pluck('ingreso', 'id')
+            ->toArray();
+
+        $otrosIngresosCalculados = [];
+        foreach ($otrosMiembros as $om) {
+            $ing = $miembrosIngresos[$om->miembro_id] ?? 0;
+            if (!isset($otrosIngresosCalculados[$om->postulante_id])) {
+                $otrosIngresosCalculados[$om->postulante_id] = 0;
+            }
+            $otrosIngresosCalculados[$om->postulante_id] += $ing;
+        }
+
+        $resultado = [];
+        foreach ($postulanteIds as $postulanteId) {
+            $postulante = $postulantes[$postulanteId] ?? null;
+
+            if ($postulante && $postulante->otros_ingresos !== null) {
+                // Si el usuario editó manualmente este campo, usar el valor guardado
+                $resultado[$postulanteId] = (float) $postulante->otros_ingresos;
+            } else {
+                // Si es NULL en DB, calcular dinámicamente la suma de miembros no cónyuges
+                $resultado[$postulanteId] = $otrosIngresosCalculados[$postulanteId] ?? 0;
+            }
+        }
+
+        return $resultado;
+    }
+
+    /**
      * Calcula ingresos para múltiples postulantes en una sola operación
      *
      * @param array $postulanteIds IDs de postulantes
@@ -117,7 +171,10 @@ class ProjectHasPostulantes extends Model implements AuditableContract
 
         $conyugeMap = $conyuges->keyBy('postulante_id');
 
-        // Calcular ingreso total por postulante (solo titular + conyuge)
+        // Query 3: Traer otros ingresos (miembros no cónyuges o valor editado)
+        $otrosIngresos = self::getOtrosIngresosBatch($postulanteIds);
+
+        // Calcular ingreso total por postulante (titular + conyuge + otros_ingresos)
         $resultado = [];
         foreach ($postulanteIds as $postulanteId) {
             $ingresoPostulante = $postulantesIngresos[$postulanteId] ?? 0;
@@ -127,7 +184,9 @@ class ProjectHasPostulantes extends Model implements AuditableContract
                 $ingresoConyuge = $conyugesIngresos[$conyugeMap[$postulanteId]->miembro_id] ?? 0;
             }
 
-            $resultado[$postulanteId] = $ingresoPostulante + $ingresoConyuge;
+            $ingresoOtros = $otrosIngresos[$postulanteId] ?? 0;
+
+            $resultado[$postulanteId] = $ingresoPostulante + $ingresoConyuge + $ingresoOtros;
         }
 
         return $resultado;

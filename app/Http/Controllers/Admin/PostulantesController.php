@@ -473,10 +473,11 @@ class PostulantesController extends Controller
         // Optimización: Cálculo en lote para evitar N+1 en el exportador
         $postulanteIds = $postulantes->pluck('postulante_id')->toArray();
         $ingresosTotales = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $otrosIngresos = ProjectHasPostulantes::getOtrosIngresosBatch($postulanteIds);
         $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
 
         return Excel::download(
-            new PostulantesExport($project, $postulantes, $ingresosTotales, $niveles),
+            new PostulantesExport($project, $postulantes, $ingresosTotales, $niveles, $otrosIngresos),
             'PLANILLA-' . str_replace(' ', '-', $project->id . '-CH') . '.xlsx'
         );
     }

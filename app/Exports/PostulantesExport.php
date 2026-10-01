@@ -25,13 +25,15 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
     protected $postulantes;
     protected $ingresosTotales;
     protected $niveles;
+    protected $otrosIngresos;
 
-    public function __construct($project, $postulantes, $ingresosTotales = [], $niveles = [])
+    public function __construct($project, $postulantes, $ingresosTotales = [], $niveles = [], $otrosIngresos = [])
     {
         $this->project = $project;
         $this->postulantes = $postulantes;
         $this->ingresosTotales = $ingresosTotales;
         $this->niveles = $niveles;
+        $this->otrosIngresos = $otrosIngresos;
     }
 
     public function collection()
@@ -54,25 +56,26 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'C' => 10, // Exp
             'D' => 25, // Apellido y Nombre
             'E' => 18, // Cédula
-            'F' => 12, // Ingreso
+            'F' => 20, // Ingreso (Titular)
             'G' => 25, // Cónyuge Nombre
             'H' => 18, // Cónyuge Cédula
-            'I' => 12, // Cónyuge Ingreso
-            'J' => 15, // Ingreso Total
-            'K' => 8,  // Nivel
-            'L' => 12, // Cantidad Hijos
-            'M' => 8,  // Discap
-            'N' => 8,  // 3° Edad
-            'O' => 12, // Hijo Sostén
-            'P' => 15, // Otra persona
-            'Q' => 15, // Terreno
-            'R' => 20, // Residencia
-            'S' => 25, // Composición
-            'T' => 25, // Documentos Presentados
-            'U' => 25, // Documentos Faltantes
-            'V' => 25, // Motivo
-            'W' => 25, // Observacion de Consideracion
-            'X' => 8,  // Califica
+            'I' => 20, // Cónyuge Ingreso
+            'J' => 20, // Otros Ingresos
+            'K' => 22, // Ingreso Total
+            'L' => 8,  // Nivel
+            'M' => 12, // Cantidad Hijos
+            'N' => 8,  // Discap
+            'O' => 8,  // 3° Edad
+            'P' => 12, // Hijo Sostén
+            'Q' => 15, // Otra persona
+            'R' => 15, // Terreno
+            'S' => 20, // Residencia
+            'T' => 25, // Composición
+            'U' => 25, // Documentos Presentados
+            'V' => 25, // Documentos Faltantes
+            'W' => 25, // Motivo
+            'X' => 25, // Observacion de Consideracion
+            'Y' => 8,  // Califica
         ];
     }
 
@@ -115,14 +118,19 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                         ]
                     ]);
 
-                    // Centrar columnas numéricas (datos empiezan en fila 16)
-                    $sheet->getStyle('A21:A' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('B21:B' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('C21:C' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('E21:F' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('H21:L' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('M21:P' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('X21:X' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    // Centrar columnas generales
+                    $sheet->getStyle('A21:C' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('E21:E' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setWrapText(false);
+                    $sheet->getStyle('H21:H' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setWrapText(false);
+                    $sheet->getStyle('L21:Q' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('Y21:Y' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    // Formato numérico, alineación a la derecha y sin wrapText para los 4 campos de Ingreso (evita recortes y ###)
+                    $sheet->getStyle('F21:F' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT)->setWrapText(false);
+                    $sheet->getStyle('F21:F' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+
+                    $sheet->getStyle('I21:K' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT)->setWrapText(false);
+                    $sheet->getStyle('I21:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
                 }
             },
         ];
@@ -130,11 +138,11 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
 
     private function addProjectInfo($sheet)
     {
-        // Insertar imagen del logo (ajusta la URL según corresponda)
+        // Insertar imagen del logo
         $this->addLogo($sheet);
 
         // Dirección General Social en la fila 10
-        $sheet->mergeCells('A10:X10');
+        $sheet->mergeCells('A10:Y10');
         $sheet->setCellValue('A10', 'Dirección General Social');
         $sheet->getStyle('A10')->applyFromArray([
             'alignment' => [
@@ -148,7 +156,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Dirección de Postulación, Evaluación y Adjudicación FONAVIS en la fila 11
-        $sheet->mergeCells('A11:X11');
+        $sheet->mergeCells('A11:Y11');
         $sheet->setCellValue('A11', 'Dirección de Postulación, Evaluación y Adjudicación FONAVIS');
         $sheet->getStyle('A11')->applyFromArray([
             'alignment' => [
@@ -162,7 +170,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Departamento de Análisis de Postulantes de Grupos Organizados en la fila 12
-        $sheet->mergeCells('A12:X12');
+        $sheet->mergeCells('A12:Y12');
         $sheet->setCellValue('A12', 'Departamento de Análisis de Postulantes de Grupos Organizados');
         $sheet->getStyle('A12')->applyFromArray([
             'alignment' => [
@@ -176,7 +184,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         ]);
 
         // Título de la tabla en la fila 13
-        $sheet->mergeCells('A13:X13');
+        $sheet->mergeCells('A13:Y13');
         $sheet->setCellValue('A13', 'Lista de Postulantes al Subsidio de la Vivienda Social');
         $sheet->getStyle('A13')->applyFromArray([
             'alignment' => [
@@ -211,11 +219,11 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             12 => 'Diciembre'
         ];
 
-        $currentMonth = $months[date('n')]; // Obtener el mes actual
-        $currentYear = date('Y'); // Obtener el año actual
-        $monthYear = $currentMonth . ' / ' . $currentYear; // Formato "Mes / Año"
+        $currentMonth = $months[date('n')];
+        $currentYear = date('Y');
+        $monthYear = $currentMonth . ' / ' . $currentYear;
 
-        $sheet->setCellValue('I18', $monthYear); // Colocar en la columna I al lado de A18
+        $sheet->setCellValue('I18', $monthYear);
 
         // Aplicar negrita a las celdas de información del proyecto
         $sheet->getStyle('A15:A19')->applyFromArray([
@@ -231,7 +239,6 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             ]
         ]);
 
-
         // Insertar encabezados en la fila 20
         $headings = [
             'Orden',
@@ -243,6 +250,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             'Apellido y Nombre del Cónyuge o concubino',
             'N° de Cédula de Identidad',
             'Ingreso',
+            'Otros Ingresos',
             'Ingreso Total',
             'Nivel',
             'Cantidad de Hijos',
@@ -266,7 +274,7 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
         }
 
         // Aplicar estilo a los encabezados
-        $sheet->getStyle('A20:X20')->applyFromArray([
+        $sheet->getStyle('A20:Y20')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 9
@@ -283,9 +291,8 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             ],
         ]);
 
-        // Procesar y insertar los datos de postulantes a partir de la fila 21
+        // Procesar e insertar los datos de postulantes a partir de la fila 21
         $data = $this->postulantes->map(function ($post, $key) {
-            // $post es un ProjectHasPostulantes, por lo que accedemos a getPostulante
             $postulante = $post->getPostulante;
 
             // Buscar cónyuge en los miembros del grupo familiar
@@ -307,14 +314,14 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'apellido_nombre' => $fe(trim(($postulante->last_name ?? '') . ' ' . ($postulante->first_name ?? ''))),
                 'cedula' => is_numeric($postulante->cedula ?? '') ?
                     number_format($postulante->cedula, 0, ',', '.') : '--------------',
-                'ingreso' => number_format($postulante->ingreso ?? 0, 0, ',', '.'),
+                'ingreso' => (float) ($postulante->ingreso ?? 0),
                 'conyuge_nombre' => $conyuge ?
                     $fe(trim(($conyuge->getPostulante->last_name ?? '') . ' ' . ($conyuge->getPostulante->first_name ?? ''))) : '--------------',
                 'conyuge_cedula' => $conyuge && is_numeric($conyuge->getPostulante->cedula ?? '') ?
                     number_format($conyuge->getPostulante->cedula, 0, ',', '.') : '--------------',
-                'conyuge_ingreso' => $conyuge ?
-                    number_format($conyuge->getPostulante->ingreso ?? 0, 0, ',', '.') : '--------------',
-                'ingreso_total' => number_format($this->ingresosTotales[$post->postulante_id] ?? 0, 0, ',', '.'),
+                'conyuge_ingreso' => $conyuge ? (float) ($conyuge->getPostulante->ingreso ?? 0) : '--------------',
+                'otros_ingresos' => (float) ($this->otrosIngresos[$post->getPostulante->id] ?? ($postulante->otros_ingresos ?? 0)),
+                'ingreso_total' => (float) ($this->ingresosTotales[$post->postulante_id] ?? 0),
                 'nivel' => $this->niveles[$post->postulante_id] ?? '',
                 'cantidad_hijos' => $postulante->cantidad_hijos ?? 0,
                 'discap' => $postulante->discapacidad ?? 'N',
@@ -362,13 +369,13 @@ class PostulantesExport implements FromCollection, WithHeadings, WithStyles, Wit
             }
 
             // Establecer tamaño de la imagen
-            $drawing->setHeight(400); // Ajusta según sea necesario
-            $drawing->setWidth(1000);  // Ajusta según sea necesario
+            $drawing->setHeight(400);
+            $drawing->setWidth(1000);
 
             // Centrar la imagen
-            $columnCount = 24; // Por ejemplo, si tienes de A a X
+            $columnCount = 25;
             $drawing->setCoordinates('A1');
-            $drawing->setOffsetX((($columnCount * 22) - 300) / 2); // Ajusta el offset X para centrar
+            $drawing->setOffsetX((($columnCount * 22) - 300) / 2);
 
             // Añadir al worksheet
             $drawing->setWorksheet($sheet);

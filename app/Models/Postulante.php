@@ -35,6 +35,7 @@ class Postulante extends Model implements AuditableContract
         'discapacidad',
         'tercera_edad',
         'ingreso_familiar',
+        'otros_ingresos',
         'cantidad_hijos',
         'documentos_faltantes',
         'observacion_de_consideracion',

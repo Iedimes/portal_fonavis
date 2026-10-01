@@ -509,6 +509,7 @@ class ProjectsController extends Controller
 
         // Pre-calculo optimizado
         $ingresosTotales = ProjectHasPostulantes::getIngresosBatch($postulanteIds);
+        $otrosIngresos = ProjectHasPostulantes::getOtrosIngresosBatch($postulanteIds);
         $niveles = ProjectHasPostulantes::getNivelesBatch($postulanteIds);
 
         $docproyecto = Assignment::where('project_type_id', $project_type->project_type_id)
@@ -526,7 +527,9 @@ class ProjectsController extends Controller
             ->toArray();
 
         // Obtener número de planilla automático
-        $planilla = $migrationService->getOrRegisterPlanillaNumber($project);
+        $email = Auth::user()->email ?? '';
+        $username = strstr($email, '@', true) ?: 'PORTAL';
+        $planilla = $migrationService->getOrRegisterPlanillaNumber($project, $username);
 
         return view('admin.project.DGSO.show', compact(
             'project',
@@ -535,6 +538,7 @@ class ProjectsController extends Controller
             'postulantes',
             'uploadedFiles',
             'ingresosTotales',
+            'otrosIngresos',
             'niveles',
             'planilla'
         ));

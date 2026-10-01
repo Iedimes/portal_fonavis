@@ -19,6 +19,31 @@ use Illuminate\Support\Facades\Log;
 
 class SHDMigrationService
 {
+    /**
+     * Formatea un nombre de usuario asegurando que termine siempre en '-M'
+     * y respetando la longitud máxima del campo en la base de datos (por defecto 10 caracteres).
+     */
+    public static function formatUserWithM(?string $user, int $maxLength = 10): string
+    {
+        $user = trim($user ?? '');
+        if ($user === '') {
+            $user = 'PORTAL';
+        }
+
+        $user = strtoupper($user);
+
+        if (substr($user, -2) === '-M') {
+            $baseUser = substr($user, 0, -2);
+        } else {
+            $baseUser = $user;
+        }
+
+        $maxBaseLength = max(1, $maxLength - 2);
+        $truncatedBase = substr($baseUser, 0, $maxBaseLength);
+
+        return $truncatedBase . '-M';
+    }
+
     public function migrate(Project $project, string $planilla, string $expedienteNumber, Land $tipoterreno, string $perUser): array
     {
         $planilla = trim($planilla);
@@ -150,13 +175,14 @@ class SHDMigrationService
                     $date = new \DateTime();
                     $fecha = date_format($date, 'Ymd H:i:s');
                     $deExpAcc = $titular->califica === 'N' ? ($titular->motivo ?? '') : '';
+                    $userRcp = self::formatUserWithM($username, 10);
 
                     if ($detalle) {
                         // Actualizar UsuRcp/DERcpNam en el registro mas reciente
                         SIG006::where('NroExp', $nroExp)
                             ->where('DENroLin', $detalle->DENroLin)
                             ->update([
-                                'UsuRcp' => $username,
+                                'UsuRcp' => $userRcp,
                                 'DERcpNam' => $nombreusuario,
                                 'DEUnOrHa' => $dependencia,
                                 'DEUnOrDe' => $dependencia,
@@ -173,7 +199,7 @@ class SHDMigrationService
                                 'DENroLin' => $nroLin,
                                 'DEExpEst' => $nuevoEstado,
                                 'DEFecDis' => $fecha,
-                                'UsuRcp' => $username,
+                                'UsuRcp' => $userRcp,
                                 'DEUnOrHa' => $dependencia,
                                 'DEUnOrDe' => $dependencia,
                                 'DERcpChk' => 1,
@@ -189,7 +215,7 @@ class SHDMigrationService
                             'DENroLin' => 1,
                             'DEExpEst' => $nuevoEstado,
                             'DEFecDis' => $fecha,
-                            'UsuRcp' => $username,
+                            'UsuRcp' => $userRcp,
                             'DEUnOrHa' => $dependencia,
                             'DEUnOrDe' => $dependencia,
                             'DERcpChk' => 1,
@@ -339,7 +365,7 @@ class SHDMigrationService
             'CiuId' => 179,
             'PerRelPar' => $relpar[$maritalStatus],
             'PerFUM' => date_format($date, 'Ymd H:i:s'),
-            'PerUser' => $perUser,
+            'PerUser' => self::formatUserWithM($perUser, 10),
         ];
     }
 
@@ -453,7 +479,7 @@ class SHDMigrationService
             'SolAnimal' => 'N',
             'SolOtros' => '',
             'SolTipo' => 12,
-            'SolInscri' => $perUser,
+            'SolInscri' => self::formatUserWithM($perUser, 10),
             'SolComent' => "Exp. Social: " . $exp->exp . " Codigo de Proyecto: " . $exp->project_id,
             'SolPerCge' => $solpercge,
             'SolHabViv' => '',
@@ -502,7 +528,7 @@ class SHDMigrationService
             'GfsDis' => $dis,
             'GfsImpSue' => $montoProcesado,
             'GfsImpApo' => 0.00,
-            'GfsUsuCod' => $perUser,
+            'GfsUsuCod' => self::formatUserWithM($perUser, 10),
             'GfsFecAlta' => date_format($date, 'Ymd H:i:s'),
             'GfsPEC' => 'N',
         ];
@@ -621,6 +647,7 @@ class SHDMigrationService
 
         $pgRecord = $titular;
         $pgRecord->ingreso = $postulanteData['ingreso'];
+        $pgRecord->otros_ingresos = $postulanteData['otros_ingresos'];
         $pgRecord->ingreso_familiar = $postulanteData['ingreso_familiar'];
         $pgRecord->hijo_sosten = $postulanteData['hijo_sosten'];
         $pgRecord->discapacidad = $postulanteData['discapacidad'];
@@ -649,9 +676,13 @@ class SHDMigrationService
         $ingresoTitular = $persona->ingreso ?? 0;
         $ingresoConyuge = $conyugeData['ingreso'];
 
+        $otrosIngresosArr = ProjectHasPostulantes::getOtrosIngresosBatch([$persona->id]);
+        $ingresoOtros = $otrosIngresosArr[$persona->id] ?? 0;
+
         return [
             'ingreso' => $ingresoTitular,
-            'ingreso_familiar' => $ingresoTitular + $ingresoConyuge,
+            'otros_ingresos' => $ingresoOtros,
+            'ingreso_familiar' => $ingresoTitular + $ingresoConyuge + $ingresoOtros,
             'hijo_sosten' => $persona->hijo_sosten,
             'discapacidad' => $tieneDiscapacidad,
             'tercera_edad' => 'N',
@@ -804,7 +835,9 @@ class SHDMigrationService
         $nombreCompleto = trim($persona->last_name . ', ' . $persona->first_name);
         $ingresoTitular = $persona->ingreso ?? 0;
         $ingresoConyuge = $conyugeData['ingreso'];
-        $ingresoFamiliar = $ingresoTitular + $ingresoConyuge;
+        $otrosIngresosArr = ProjectHasPostulantes::getOtrosIngresosBatch([$persona->id]);
+        $ingresoOtros = $otrosIngresosArr[$persona->id] ?? 0;
+        $ingresoFamiliar = $ingresoTitular + $ingresoConyuge + $ingresoOtros;
         $nivel = ProjectHasPostulantes::getNivel($persona->id);
 
         return [
@@ -831,13 +864,13 @@ class SHDMigrationService
             'PsvDomi' => trim($direccion),
             'PsvObs' => $persona->observacion_de_consideracion,
             'PsvRegCon' => 'S',
-            'PsvUsuIng' => $perUser,
-            'PsvUsuMod' => $perUser,
+            'PsvUsuIng' => self::formatUserWithM($perUser, 10),
+            'PsvUsuMod' => self::formatUserWithM($perUser, 10),
             'PsvFecIng' => date_format($date, 'Ymd H:i:s'),
             'PsvFecMod' => date_format($date, 'Ymd H:i:s'),
             'PsvIngTit' => $ingresoTitular,
             'PsvIngCge' => $ingresoConyuge,
-            'PsvIngOtr' => 0,
+            'PsvIngOtr' => $ingresoOtros,
             'PsvIngFam' => $ingresoFamiliar,
             'PsvNomSos' => !empty($persona->otra_persona_a_cargo) ? $persona->otra_persona_a_cargo : '',
             'PsvCgeFNac' => $conyugeData['fecha_nacimiento'],
@@ -855,7 +888,7 @@ class SHDMigrationService
      * 3. Busca en POSSVS1 por cédulas de postulantes del proyecto.
      * 4. Si no se encuentra, genera una nueva cabecera en POSSVS con max(PsvCod) + 1.
      */
-    public function getOrRegisterPlanillaNumber(Project $project): ?int
+    public function getOrRegisterPlanillaNumber(Project $project, ?string $perUser = null): ?int
     {
         $cleanName = trim($project->name);
 
@@ -913,7 +946,7 @@ class SHDMigrationService
                 'PsvCiudId' => $project->city_id ?? 0,
                 'PsvFec' => date_format($now, 'Y-m-d H:i:s'),
                 'PsvFecins' => date_format($now, 'Y-m-d H:i:s'),
-                'PsvUsuIns' => 'PORTAL',
+                'PsvUsuIns' => self::formatUserWithM($perUser ?? 'PORTAL', 10),
                 'PsvProg' => 1,
             ]);
 
