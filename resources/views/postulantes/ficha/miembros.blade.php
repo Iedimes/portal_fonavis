@@ -87,11 +87,11 @@
                         @foreach($miembros as $key=>$mi)
             <tr>
               <td>{{$key+1}}</td>
-              <td>{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}</td>
-              <td class="text-center">{{ number_format($mi->miembro_id?$mi->getPostulante->cedula:"",0,".",".") }} </td>
-              <td class="text-center">{{ \Carbon\Carbon::parse( $mi->postulante_id?$mi->getPostulante->birthdate:"")->age }} </td>
-              <td>{{ $mi->miembro_id?$mi->getParentesco->name:"" }}</td>
-              <td class="text-center">{{ number_format($mi->miembro_id?$mi->getPostulante->ingreso:"",0,".",".") }} </td>
+              <td>{{ $mi->getPostulante ? $mi->getPostulante->first_name . ' ' . $mi->getPostulante->last_name : '-' }}</td>
+              <td class="text-center">{{ $mi->getPostulante ? number_format($mi->getPostulante->cedula, 0, ".", ".") : '-' }} </td>
+              <td class="text-center">{{ ($mi->getPostulante && $mi->getPostulante->birthdate) ? \Carbon\Carbon::parse($mi->getPostulante->birthdate)->age : '-' }} </td>
+              <td>{{ $mi->getParentesco ? $mi->getParentesco->name : '-' }}</td>
+              <td class="text-center">{{ $mi->getPostulante ? number_format($mi->getPostulante->ingreso, 0, ".", ".") : '-' }} </td>
               <td class="text-center" style="width: 150px;">
                     <div class="btn-group">
                             <button type="button" class="btn btn-info">Acciones</button>
@@ -103,7 +103,7 @@
                                 @if (!isset($project->getEstado->stage_id) || $project->getEstado->stage_id == 7)
                                     {{-- <li><a href="{!! action('PostulantesController@editmiembro', ['id'=>$project->id,'idpostulantes'=>$mi->postulante_id?$mi->getPostulante->id:""]) !!}">Editar</a></li> --}}
                                     <a class="dropdown-item feed-id" data-postulante-id="{{ $mi->postulante_id }}" href="{{ route('miembros.edit', ['id' => $project->id, 'idpostulante' => $mi->miembro_id]) }}">Editar Miembro</a>
-                                    <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger1" data-title="{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}" href="#">Eliminar Miembro</a>
+                                    <a class="dropdown-item feed-id" data-toggle="modal" data-id="{{ $mi->miembro_id }}" data-target="#modal-danger1" data-title="{{ $mi->getPostulante ? $mi->getPostulante->first_name . ' ' . $mi->getPostulante->last_name : '' }}" href="#">Eliminar Miembro</a>
                                 @endif
                             </ul>
                           </div>
