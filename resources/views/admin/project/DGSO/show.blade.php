@@ -156,7 +156,7 @@
                                 <form method="POST" action="{{ url('admin/projects/' . $project->id . '/migrar-shd') }}" class="form-inline mt-2">
                                     @csrf
                                     <div class="input-group">
-                                        <input type="text" name="planilla" class="form-control" placeholder="N° de planilla" value="{{ old('planilla') }}" required>
+                                        <input type="text" name="planilla" class="form-control" placeholder="N° de planilla" value="{{ old('planilla', $planilla) }}" readonly required>
                                         <div class="input-group-append">
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="fas fa-exchange-alt"></i> Migrar a SHD

@@ -10,10 +10,5 @@ class POSSVS extends Model
     protected $connection = 'sqlsrvsecond';
     public $timestamps = false;
 
-    protected $fillable = [
-        'PsvModDes',
-        'NucCod',
-        'PsvDptoId',
-        'PsvCiudId',
-    ];
+    protected $guarded = [];
 }

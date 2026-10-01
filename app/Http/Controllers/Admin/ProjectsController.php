@@ -480,7 +480,7 @@ class ProjectsController extends Controller
         return view('admin.project.FONAVIS.showSocial', compact('project', 'postulantes', 'proyectoEstado'));
     }
 
-    public function showDGSO(Project $project)
+    public function showDGSO(Project $project, SHDMigrationService $migrationService)
     {
         //$this->authorize('admin.project.show', $project);
 
@@ -525,6 +525,9 @@ class ProjectsController extends Controller
             ->pluck('file_path', 'document_id')
             ->toArray();
 
+        // Obtener número de planilla automático
+        $planilla = $migrationService->getOrRegisterPlanillaNumber($project);
+
         return view('admin.project.DGSO.show', compact(
             'project',
             'docproyecto',
@@ -532,7 +535,8 @@ class ProjectsController extends Controller
             'postulantes',
             'uploadedFiles',
             'ingresosTotales',
-            'niveles'
+            'niveles',
+            'planilla'
         ));
     }
 

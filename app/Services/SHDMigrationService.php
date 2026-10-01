@@ -847,4 +847,80 @@ class SHDMigrationService
             'PsvObsSost' => $persona->hijo_sosten,
         ];
     }
+
+    /**
+     * Obtiene automáticamente el número de planilla (PsvCod en POSSVS) para un proyecto.
+     * 1. Busca en POSSVS por nombre exacto del proyecto.
+     * 2. Busca en POSSVS por coincidencia parcial del nombre.
+     * 3. Busca en POSSVS1 por cédulas de postulantes del proyecto.
+     * 4. Si no se encuentra, genera una nueva cabecera en POSSVS con max(PsvCod) + 1.
+     */
+    public function getOrRegisterPlanillaNumber(Project $project): ?int
+    {
+        $cleanName = trim($project->name);
+
+        // 1. Buscar en POSSVS por nombre exacto
+        $possvs = POSSVS::where('PsvModDes', $cleanName)
+            ->orderBy('PsvCod', 'desc')
+            ->first();
+
+        if ($possvs && $possvs->PsvCod) {
+            return (int) $possvs->PsvCod;
+        }
+
+        // 2. Buscar en POSSVS por coincidencia parcial
+        if (strlen($cleanName) > 5) {
+            $shortName = substr($cleanName, 0, 20);
+            $possvsLike = POSSVS::where('PsvModDes', 'LIKE', '%' . $shortName . '%')
+                ->orderBy('PsvCod', 'desc')
+                ->first();
+
+            if ($possvsLike && $possvsLike->PsvCod) {
+                return (int) $possvsLike->PsvCod;
+            }
+        }
+
+        // 3. Buscar en POSSVS1 por cédulas de titulares del proyecto
+        $postulantes = ProjectHasPostulantes::where('project_id', $project->id)
+            ->whereNull('deleted_at')
+            ->with('getPostulante')
+            ->get();
+
+        $cedulas = $postulantes->pluck('getPostulante.cedula')->filter()->toArray();
+
+        if (!empty($cedulas)) {
+            $possvs1 = POSSVS1::whereIn('PsvCedTit', $cedulas)
+                ->whereNotNull('PsvCod')
+                ->first();
+
+            if ($possvs1 && $possvs1->PsvCod) {
+                return (int) $possvs1->PsvCod;
+            }
+        }
+
+        // 4. Si no existe en ningún lado, crear cabecera en POSSVS
+        try {
+            $maxCod = (int) POSSVS::max('PsvCod');
+            $newCod = $maxCod + 1;
+
+            $now = new \DateTime();
+
+            POSSVS::create([
+                'PsvCod' => $newCod,
+                'PsvModDes' => $cleanName,
+                'NucCod' => $project->sat_id ?? '',
+                'PsvDptoId' => $project->state_id ?? 0,
+                'PsvCiudId' => $project->city_id ?? 0,
+                'PsvFec' => date_format($now, 'Y-m-d H:i:s'),
+                'PsvFecins' => date_format($now, 'Y-m-d H:i:s'),
+                'PsvUsuIns' => 'PORTAL',
+                'PsvProg' => 1,
+            ]);
+
+            return $newCod;
+        } catch (\Exception $e) {
+            Log::error("Error al generar cabecera POSSVS para proyecto {$project->id}: {$e->getMessage()}");
+            return null;
+        }
+    }
 }
