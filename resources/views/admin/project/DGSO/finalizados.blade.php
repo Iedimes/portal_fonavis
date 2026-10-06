@@ -233,6 +233,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Auto desvanecer mensajes de alerta después de 5 segundos
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    if (typeof $ !== 'undefined' && $.fn && $.fn.fadeOut) {
+                        $(alert).fadeOut('slow');
+                    } else {
+                        alert.style.transition = 'opacity 0.5s ease';
+                        alert.style.opacity = '0';
+                        setTimeout(function () { alert.remove(); }, 500);
+                    }
+                });
+            }, 5000);
+
             var checkAll = document.getElementById('check-all');
             if (checkAll) {
                 checkAll.addEventListener('change', function () {
