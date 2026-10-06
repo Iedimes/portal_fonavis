@@ -80,7 +80,7 @@ class ProjectsController extends Controller
         // Procesar con filtro por dependencia
         $data = $listing->processRequestAndGet(
             $request,
-            ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
+            ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad', 'calificacion_finalizada', 'shd_migrated'],
             ['id', 'name', 'sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
             function ($query) use ($usuarioRol) {
                 // Filtro para dependencias que no son DGFO (1) ni DGTI (7)
@@ -484,6 +484,11 @@ class ProjectsController extends Controller
     {
         //$this->authorize('admin.project.show', $project);
 
+        if ($project->calificacion_finalizada) {
+            return redirect('admin/projects')
+                ->with('warning', 'La calificación del proyecto ' . $project->id . ' ya fue finalizada. Para ingresar nuevamente, debe re-habilitarlo en el menú "Re-habilitar Proyectos DGSO".');
+        }
+
         // Optimización: Cargar relaciones del proyecto de una vez
         $project->load(['getCity', 'getState', 'getSat', 'getLand']);
 
@@ -632,6 +637,72 @@ class ProjectsController extends Controller
 
         return redirect('admin/projects/' . $project->id . '/showDGSO')
             ->with('warning', "Migración completada con errores. {$detailMsg}");
+    }
+
+    public function finalizadosDGSO(Request $request)
+    {
+        $user = Auth::user();
+        $dependencyId = optional($user->rol_app)->dependency_id;
+
+        if ($dependencyId != 3) {
+            return redirect('admin/projects')->with('error', 'Acceso denegado. Esta vista es exclusiva para la dependencia DGSO.');
+        }
+
+        $query = Project::where('calificacion_finalizada', true)
+            ->with(['getCity', 'getState', 'getSat', 'getLand']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('id', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $projects = $query->orderBy('updated_at', 'desc')->paginate(15);
+
+        return view('admin.project.DGSO.finalizados', compact('projects'));
+    }
+
+    public function rehabilitarDGSO(Project $project)
+    {
+        $user = Auth::user();
+        $dependencyId = optional($user->rol_app)->dependency_id;
+
+        if ($dependencyId != 3) {
+            return redirect('admin/projects')->with('error', 'Acceso denegado.');
+        }
+
+        $project->calificacion_finalizada = false;
+        $project->shd_migrated = false;
+        $project->save();
+
+        return redirect()->back()->with('success', "El proyecto \"{$project->name}\" (ID: {$project->id}) ha sido habilitado nuevamente para edición y calificación en DGSO.");
+    }
+
+    public function rehabilitarMasivoDGSO(Request $request)
+    {
+        $user = Auth::user();
+        $dependencyId = optional($user->rol_app)->dependency_id;
+
+        if ($dependencyId != 3) {
+            return redirect('admin/projects')->with('error', 'Acceso denegado.');
+        }
+
+        $projectIds = $request->input('project_ids', []);
+
+        if (empty($projectIds)) {
+            return redirect()->back()->with('warning', 'No seleccionó ningún proyecto para re-habilitar.');
+        }
+
+        Project::whereIn('id', $projectIds)->update([
+            'calificacion_finalizada' => false,
+            'shd_migrated' => false,
+        ]);
+
+        $count = count($projectIds);
+
+        return redirect()->back()->with('success', "Se han re-habilitado {$count} proyecto(s) exitosamente para calificación en DGSO.");
     }
 
     public function showFONAVISTECNICO(Project $project)

@@ -60,10 +60,17 @@
 
 {{-- Stage 8: showDGSO --}}
 <div class="p-1">
-    <a class="btn btn-sm" style="background-color: #20c997; color: white;" :href="item.resource_url + '/showDGSO'"
-        title="VER DGSO (SOCIAL)" role="button">
-        <i class="fa fa-users"></i>
-    </a>
+    <template v-if="item.calificacion_finalizada">
+        <span class="badge badge-success p-2" style="font-size: 0.85em; font-weight: bold; color: white;">
+            <i class="fa fa-check-circle"></i> CALIFICADO
+        </span>
+    </template>
+    <template v-else>
+        <a class="btn btn-sm" style="background-color: #20c997; color: white;" :href="item.resource_url + '/showDGSO'"
+            title="VER DGSO (SOCIAL)" role="button">
+            <i class="fa fa-users"></i>
+        </a>
+    </template>
 </div>
 
 {{-- Stage 9: showFONAVISSOCIAL --}}

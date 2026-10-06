@@ -270,6 +270,9 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/',                                             'ProjectsController@index')->name('index');
             Route::get('/create',                                       'ProjectsController@create')->name('create');
             Route::post('/',                                            'ProjectsController@store')->name('store');
+            Route::get('/finalizados-dgso',                             'ProjectsController@finalizadosDGSO')->name('finalizadosDGSO');
+            Route::post('/rehabilitar-masivo-dgso',                     'ProjectsController@rehabilitarMasivoDGSO')->name('rehabilitarMasivoDGSO');
+            Route::post('/{project}/rehabilitar-dgso',                  'ProjectsController@rehabilitarDGSO')->name('rehabilitarDGSO');
             Route::get('/{project}/show',                               'ProjectsController@show');
             Route::get('/{project}/showDGJN',                           'ProjectsController@showDGJN')->name('DGJN');
             Route::get('/{project}/showDGJNFALTANTE',                   'ProjectsController@showDGJNFALTANTE')->name('DGJNFALTANTE');

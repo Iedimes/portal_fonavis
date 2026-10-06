@@ -58,6 +58,10 @@
                     Auth::user()->rol_app->dependency_id == 5)
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects') }}"><i
                             class="fa fa-building"></i> {{ trans('admin.project.title') }}</a></li>
+                @if (optional(Auth::user()->rol_app)->dependency_id == 3)
+                    <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects/finalizados-dgso') }}"><i
+                                class="fa fa-unlock"></i> RE-HABILITAR PROYECTOS</a></li>
+                @endif
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/reportes/create') }}"><i
                             class="fa fa-list-alt "></i> {{ trans('admin.reporte.title') }}</a></li>
                 {{-- MESA DE ENTRADA --}}
