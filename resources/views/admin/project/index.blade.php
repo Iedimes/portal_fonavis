@@ -113,10 +113,10 @@
                                         <td>@{{ item.name }}</td>
                                         <td>@{{ item.phone }}</td>
                                         <td>@{{ item.sat_id }}</td>
-                                        <td>@{{ item.get_sat.NucNomSat }}</td>
-                                        <td>@{{ item.get_state.DptoNom }}</td>
-                                        <td>@{{ item.get_city.CiuNom }}</td>
-                                        <td>@{{ item.get_modality.name }}</td>
+                                        <td>@{{ item.get_sat ? item.get_sat.NucNomSat : '' }}</td>
+                                        <td>@{{ item.get_state ? item.get_state.DptoNom : '' }}</td>
+                                        <td>@{{ item.get_city ? item.get_city.CiuNom : '' }}</td>
+                                        <td>@{{ item.get_modality ? item.get_modality.name : '' }}</td>
                                         <td>@{{ item.leader_name }}</td>
                                         <td>@{{ item.localidad }}</td>
                                         {{-- <td>@{{ item.get_estado ? item.get_estado.stage_id : '' }}</td> --}}

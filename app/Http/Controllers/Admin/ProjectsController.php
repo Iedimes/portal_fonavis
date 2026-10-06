@@ -107,6 +107,28 @@ class ProjectsController extends Controller
             }
         );
 
+        // Transformar la colección para corregir caracteres especiales/encoding y eliminar espacios de relleno
+        $data->getCollection()->transform(function ($project) {
+            $project->name = $this->fixUtf8($project->name);
+            $project->leader_name = $this->fixUtf8($project->leader_name);
+            $project->localidad = $this->fixUtf8($project->localidad);
+
+            if ($project->getSat) {
+                $project->getSat->NucNomSat = $this->fixUtf8($project->getSat->NucNomSat);
+            }
+            if ($project->getState) {
+                $project->getState->DptoNom = $this->fixUtf8($project->getState->DptoNom);
+            }
+            if ($project->getCity) {
+                $project->getCity->CiuNom = $this->fixUtf8($project->getCity->CiuNom);
+            }
+            if ($project->getModality) {
+                $project->getModality->name = $this->fixUtf8($project->getModality->name);
+            }
+
+            return $project;
+        });
+
         // Comprobamos si es una solicitud AJAX
         if ($request->ajax()) {
             if ($request->has('bulk')) {
@@ -120,6 +142,59 @@ class ProjectsController extends Controller
 
         // Retornar la vista con los datos (sin filtro en el backend)
         return view('admin.project.index', ['data' => $data, 'usuarioRol' => $usuarioRol, 'dependencia' => $dependencia]);
+    }
+
+    /**
+     * Auxiliar para limpiar y corregir problemas de encoding (UTF-8 / ISO-8859-1 / caracteres especiales)
+     */
+    private function fixUtf8($string)
+    {
+        if ($string === null || $string === '') {
+            return $string;
+        }
+
+        $string = rtrim($string);
+
+        for ($i = 0; $i < 3; $i++) {
+            if (preg_match('/[\xC2-\xF4][\x80-\xBF]/', $string)) {
+                $converted = @mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8');
+                if ($converted !== false && mb_check_encoding($converted, 'UTF-8') && preg_match('/[\x80-\xFF]/', $converted)) {
+                    $string = $converted;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        $replacements = [
+            'Ã‘' => 'Ñ',
+            'Ã±' => 'ñ',
+            'Ã ' => 'Á',
+            'Ã¡' => 'á',
+            'Ã‰' => 'É',
+            'Ã©' => 'é',
+            'ÃÍ' => 'Í',
+            'Ã­' => 'í',
+            'Ã“' => 'Ó',
+            'Ã³' => 'ó',
+            'ÃŠ' => 'Ú',
+            'Ãº' => 'ú',
+            'Ãœ' => 'Ü',
+            'Ã¼' => 'ü',
+            'Âº' => 'º',
+            'Â°' => '°',
+            'Âª' => 'ª',
+            'Â´' => '´',
+            'Â'  => '',
+            'â€œ' => '“',
+            'â€' => '”',
+            'â€“' => '–',
+            'â€”' => '—',
+        ];
+
+        return strtr($string, $replacements);
     }
 
 
