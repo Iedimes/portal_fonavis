@@ -559,9 +559,9 @@ class ProjectsController extends Controller
     {
         //$this->authorize('admin.project.show', $project);
 
-        if ($project->calificacion_finalizada) {
+        if ($project->calificacion_finalizada && $project->shd_migrated) {
             return redirect('admin/projects')
-                ->with('warning', 'La calificación del proyecto ' . $project->id . ' ya fue finalizada. Para ingresar nuevamente, debe re-habilitarlo en el menú "Re-habilitar Proyectos DGSO".');
+                ->with('warning', 'La calificación y migración a SHD del proyecto ' . $project->id . ' ya fue finalizada. Para ingresar nuevamente, debe re-habilitarlo en el menú "Re-habilitar Proyectos DGSO".');
         }
 
         // Optimización: Cargar relaciones del proyecto de una vez

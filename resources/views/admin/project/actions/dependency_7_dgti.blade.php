@@ -60,7 +60,7 @@
 
 {{-- Stage 8: showDGSO --}}
 <div class="p-1">
-    <template v-if="item.calificacion_finalizada">
+    <template v-if="item.calificacion_finalizada && item.shd_migrated">
         <span class="badge badge-success p-2" style="font-size: 0.85em; font-weight: bold; color: white;">
             <i class="fa fa-check-circle"></i> CALIFICADO
         </span>
