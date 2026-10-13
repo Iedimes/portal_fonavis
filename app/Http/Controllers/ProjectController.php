@@ -797,13 +797,16 @@ class ProjectController extends Controller
                 return response()->json(['message' => 'Existe al menos un cónyuge menor de 18 años. No se puede enviar el proyecto.'], 400);
             }
 
-            // Guardar estado del proyecto
-            $state = new ProjectStatusF();
-            $state->project_id = $id;
-            $state->stage_id = '8';
-            $state->user_id = Auth::user()->id;
-            $state->record = 'GRUPO FAMILIAR ENVIADO!';
-            $state->save();
+            // Guardar estado del proyecto (evitando duplicados por clic múltiple)
+            $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
+            if (!$ultimoEstado || $ultimoEstado->stage_id != '8') {
+                $state = new ProjectStatusF();
+                $state->project_id = $id;
+                $state->stage_id = '8';
+                $state->user_id = Auth::user()->id;
+                $state->record = 'GRUPO FAMILIAR ENVIADO!';
+                $state->save();
+            }
 
             // Enviar correo electrónico
             $projecto = Project::where('id', $id)->first();
@@ -842,12 +845,15 @@ public function showTecnico($id)
 {
     //return "Cambiar de estado";
     try {
-        $state = new ProjectStatusF();
-        $state->project_id = $id;
-        $state->stage_id = '11';
-        $state->user_id = Auth::user()->id;
-        $state->record = 'DOCUMENTACION TECNICA ENVIADA!';
-        $state->save();
+        $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
+        if (!$ultimoEstado || $ultimoEstado->stage_id != '11') {
+            $state = new ProjectStatusF();
+            $state->project_id = $id;
+            $state->stage_id = '11';
+            $state->user_id = Auth::user()->id;
+            $state->record = 'DOCUMENTACION TECNICA ENVIADA!';
+            $state->save();
+        }
 
         //return "controlamos si inserta bien";
 

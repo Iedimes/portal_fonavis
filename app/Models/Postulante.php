@@ -12,6 +12,15 @@ class Postulante extends Model implements AuditableContract
     use AuditableTrait;
     use SoftDeletes;
 
+    protected static function booted()
+    {
+        static::deleting(function ($postulante) {
+            PostulanteHasBeneficiary::where('miembro_id', $postulante->id)->delete();
+            PostulanteHasBeneficiary::where('postulante_id', $postulante->id)->delete();
+            PostulanteHasDiscapacidad::where('postulante_id', $postulante->id)->delete();
+        });
+    }
+
     protected $fillable = [
         'first_name',
         'last_name',

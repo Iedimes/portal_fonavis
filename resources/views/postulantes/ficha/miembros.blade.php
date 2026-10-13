@@ -87,11 +87,11 @@
                         @foreach($miembros as $key=>$mi)
             <tr>
               <td>{{$key+1}}</td>
-              <td>{{ $mi->miembro_id?$mi->getPostulante->first_name:"" }} {{ $mi->miembro_id?$mi->getPostulante->last_name:"" }}</td>
-              <td class="text-center">{{ number_format($mi->miembro_id?$mi->getPostulante->cedula:"",0,".",".") }} </td>
-              <td class="text-center">{{ \Carbon\Carbon::parse( $mi->postulante_id?$mi->getPostulante->birthdate:"")->age }} </td>
-              <td>{{ $mi->miembro_id?$mi->getParentesco->name:"" }}</td>
-              <td class="text-center">{{ number_format($mi->miembro_id?$mi->getPostulante->ingreso:"",0,".",".") }} </td>
+              <td>{{ $mi->getPostulante ? $mi->getPostulante->first_name . ' ' . $mi->getPostulante->last_name : '-' }}</td>
+              <td class="text-center">{{ $mi->getPostulante ? number_format($mi->getPostulante->cedula, 0, ".", ".") : '-' }} </td>
+              <td class="text-center">{{ ($mi->getPostulante && $mi->getPostulante->birthdate) ? \Carbon\Carbon::parse($mi->getPostulante->birthdate)->age : '-' }} </td>
+              <td>{{ $mi->getParentesco ? $mi->getParentesco->name : '-' }}</td>
+              <td class="text-center">{{ $mi->getPostulante ? number_format($mi->getPostulante->ingreso, 0, ".", ".") : '-' }} </td>
               <td class="text-center" style="width: 150px;">
                     <div class="btn-group">
                             <button type="button" class="btn btn-info">Acciones</button>

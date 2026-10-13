@@ -7,13 +7,6 @@
     </a>
 </div>
 
-{{-- Imprimir postulantes --}}
-<div class="p-1">
-    <a class="btn btn-sm btn-primary" :href="item.resource_url + '/project'" title="{{ trans('IMPRIMIR POSTULANTES') }}"
-        role="button">
-        <i class="fa fa-print"></i>
-    </a>
-</div>
 
 {{-- Stages FONAVIS --}}
 <div class="p-1" v-if="item.get_estado && item.get_estado.stage_id === 1">
