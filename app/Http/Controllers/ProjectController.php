@@ -320,7 +320,7 @@ class ProjectController extends Controller
             }
         }
 
-        $existenDocumentos = $datosAdiciones->isNotEmpty();
+        $existenDocumentos = $documentos->isNotEmpty();
         $todosCargados = !in_array(false, $uploadedFiles, true);
 
         return view('projects.show', compact(

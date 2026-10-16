@@ -338,6 +338,7 @@
 
                     </div>
 
+                    @if ($existenDocumentos)
                     <div class="tab-pane fade" id="custom-tabs-two-home" role="tabpanel"
                         aria-labelledby="custom-tabs-two-home-tab">
                         <div class="row">
@@ -439,6 +440,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <div class="tab-pane fade" id="custom-tabs-one-applicant" role="tabpanel"
                         aria-labelledby="custom-tabs-one-profile-tab">
@@ -598,9 +600,9 @@
                 return;
             }
 
-            // 🚫 Verificar documentos cargados
+            // 🚫 Verificar documentos cargados (solo documentos obligatorios de la primera pestaña)
             let todosCargados = true;
-            const rows = document.querySelectorAll('tr');
+            const rows = document.querySelectorAll('#custom-tabs-one-home tr');
             rows.forEach(row => {
                 const uploadForm = row.querySelector('form[action="/levantar"]');
                 if (uploadForm) {
