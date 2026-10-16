@@ -50,11 +50,11 @@
                 <div class="card-body">
                     @include('admin.project-status.components.form-elements')
 
-                    @if ($estado==1 || $estado==3 || $estado==9 || ($estado==11 && $dependencia != 4) || $estado==13 || $estado==21)
+                    @if ($estado==1 || $estado==3 || $estado==9 || ($estado==11 && !in_array($dependencia, [4, 5])) || $estado==13 || $estado==21)
 
                     @elseif($estado==8 && $dependencia == 1)
 
-                    @elseif ($estado==11 && $dependencia == 4 )
+                    @elseif ($estado==11 && in_array($dependencia, [4, 5]))
                         @php
                             $collection = app(App\Models\ProjectStatus::class)->getMediaCollection('gallery');
                             $collection->maxFilesize(1024 * 1024 * 30); // Forzar 30MB aquí

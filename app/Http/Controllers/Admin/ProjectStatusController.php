@@ -700,7 +700,7 @@ class ProjectStatusController extends Controller
                     'error' => 'No se pudo enviar el correo electrónico'
                 ]);
             }
-        }elseif ($sanitized['stage_id'] == 17) { //Estado CON CALIFICACION TECNICA HABITACIONAL
+        }elseif ($sanitized['stage_id'] == 17 || $sanitized['stage_id'] == 19) { //Estado CON CALIFICACION TECNICA HABITACIONAL
             $projecto = Project::where('id', $request->project_id)->get();
             $sat = $projecto[0]->sat_id;
             $useremail1 = User::where('sat_ruc', $sat)->get()->first();

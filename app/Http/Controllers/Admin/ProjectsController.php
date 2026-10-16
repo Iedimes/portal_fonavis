@@ -77,32 +77,49 @@ class ProjectsController extends Controller
         // Crear una instancia de AdminListing
         $listing = AdminListing::create(Project::class);
 
-        // Procesar con filtro por dependencia
+        // Configuración de etapas por rol: 'active' (donde actúa) y 'visible' (etapas activas + próximos estados)
+        $stagesConfigByRole = [
+            2 => [
+                'active'  => [2, 5],
+                'visible' => [2, 3, 4, 5, 6, 21],
+            ],
+            3 => [
+                'active'  => [8],
+                'visible' => [8, 9, 10],
+            ],
+            4 => [
+                'active'  => [11, 12],
+                'visible' => [11, 12, 13, 14, 15],
+            ],
+            5 => [
+                'active'  => [11, 16],
+                'visible' => [11, 16, 17, 18, 19, 21],
+            ],
+        ];
+
+        $roleConfig = $stagesConfigByRole[$usuarioRol] ?? null;
+
+        // Procesar listado de proyectos
         $data = $listing->processRequestAndGet(
             $request,
             ['id', 'name', 'phone', 'sat_id', 'state_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad', 'calificacion_finalizada', 'shd_migrated'],
             ['id', 'name', 'sat_id', 'city_id', 'modalidad_id', 'leader_name', 'localidad'],
-            function ($query) use ($usuarioRol) {
-                // Filtro para dependencias que no son DGFO (1) ni DGTI (7)
-                if (!in_array($usuarioRol, [1, 7])) {
-                    $query->whereIn('id', function ($q) use ($usuarioRol) {
+            function ($query) use ($roleConfig, $usuarioRol) {
+                // Filtro para dependencias (DGFO [1] y DGTI [7] ven todos los proyectos)
+                if (!in_array($usuarioRol, [1, 7]) && $roleConfig && !empty($roleConfig['visible'])) {
+                    $visibleList = implode(',', array_map('intval', $roleConfig['visible']));
+                    $query->whereIn('id', function ($q) use ($visibleList) {
                         $q->select('project_id')
                             ->from('project_status as ps1')
-                            ->whereRaw('ps1.id = (select max(id) from project_status as ps2 where ps2.project_id = ps1.project_id)');
-
-                        if ($usuarioRol == 2) {
-                            $q->whereIn('stage_id', [2, 4, 5, 6]);
-                        } elseif ($usuarioRol == 3) {
-                            $q->whereIn('stage_id', [8]);
-                        } elseif ($usuarioRol == 4) {
-                            $q->whereIn('stage_id', [11, 12]);
-                        } elseif ($usuarioRol == 5) {
-                            $q->whereIn('stage_id', [11, 16]);
-                        } else {
-                            // Para cualquier otra dependencia no definida (ej. 6), no mostramos nada o filtramos agresivamente
-                            $q->where('stage_id', 0);
-                        }
+                            ->whereRaw('ps1.id = (select max(id) from project_status as ps2 where ps2.project_id = ps1.project_id)')
+                            ->whereRaw("ps1.stage_id IN ($visibleList)");
                     });
+                }
+
+                // Prioridad arriba para los proyectos en los que la dependencia puede actuar actualmente
+                if ($roleConfig && !empty($roleConfig['active'])) {
+                    $activeList = implode(',', array_map('intval', $roleConfig['active']));
+                    $query->orderByRaw("CASE WHEN (SELECT ps.stage_id FROM project_status ps WHERE ps.project_id = projects.id ORDER BY ps.id DESC LIMIT 1) IN ($activeList) THEN 0 ELSE 1 END ASC");
                 }
             }
         );
@@ -1120,6 +1137,11 @@ class ProjectsController extends Controller
                     break;
                 }
 
+                if ($dependencia == 5) {
+                    $stages = Stage::whereIn('id', [19])->get();
+                    break;
+                }
+
                 $stages = Stage::whereIn('id', [13])->get();
                 break;
             case 12:
@@ -1203,20 +1225,37 @@ class ProjectsController extends Controller
 
         // Contador específico para estado 1
         $state1Count = 0;
-        $satNombre = $project->getSat ? $project->getSat->NucNomSat : '';
+        $satNombre = $project->getSat ? trim($project->getSat->NucNomSat) : '';
 
         $history = $history->map(function ($item) use (&$state1Count, $satNombre) {
             if ($item->stage_id == 1) {
                 $state1Count++;
-                $item->nombre_usuario = $satNombre . ' (SAT)';
+                if (!empty($satNombre)) {
+                    $item->nombre_usuario = $satNombre . ' (SAT)';
+                } else {
+                    $user = User::find($item->user_id);
+                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
+                }
             } elseif (in_array($item->stage_id, [5, 8, 11])) {
-                // Siempre SAT
+                // Primero verifica si fue un usuario SAT
                 $user = User::find($item->user_id);
-                $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
+                if ($user) {
+                    $item->nombre_usuario = $user->name . ' (SAT)';
+                } else {
+                    // Fallback a AdminUser (si una dependencia técnica o admin operó el estado)
+                    $adminUser = \App\Models\AdminUser::find($item->user_id);
+                    $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
+                }
             } else {
-                // Siempre Admin
+                // Primero verifica si fue un AdminUser
                 $adminUser = \App\Models\AdminUser::find($item->user_id);
-                $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
+                if ($adminUser) {
+                    $item->nombre_usuario = $adminUser->first_name . ' ' . $adminUser->last_name;
+                } else {
+                    // Fallback a usuario SAT (para registros históricos cargados por el SAT)
+                    $user = User::find($item->user_id);
+                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
+                }
             }
 
             return $item;
