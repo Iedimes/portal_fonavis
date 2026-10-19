@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class PostulanteHasBeneficiary extends Model
+class PostulanteHasBeneficiary extends Model implements AuditableContract
 {
-    use SoftDeletes; // 👈 Agregar esto
+    use SoftDeletes;
+    use AuditableTrait;
 
     protected $table = 'postulante_has_beneficiaries';
 

@@ -18,12 +18,14 @@ use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
 /**
  * @property mixed first_name
  * @property mixed last_name
  */
-class AdminUser extends Authenticatable implements CanActivateContract, HasMedia
+class AdminUser extends Authenticatable implements CanActivateContract, HasMedia, AuditableContract
 {
     use Notifiable;
     use CanActivate;
@@ -33,6 +35,24 @@ class AdminUser extends Authenticatable implements CanActivateContract, HasMedia
     use HasMediaCollectionsTrait;
     use HasMediaThumbsTrait;
     use ProcessMediaTrait;
+    use AuditableTrait;
+
+    protected $auditExclude = [
+        'password',
+        'remember_token',
+    ];
+
+    protected static function booted()
+    {
+        // En Craftable, ActivationService escucha 'eloquent.created' y retorna false si la activación
+        // está desactivada en config, cancelando la propagación de eventos para observers posteriores.
+        // Mediante saved() garantizamos que la auditoría de creación de AdminUser se registre siempre.
+        static::saved(function ($model) {
+            if ($model->wasRecentlyCreated) {
+                (new \OwenIt\Auditing\AuditableObserver())->created($model);
+            }
+        });
+    }
 
     protected $fillable = [
         'email',

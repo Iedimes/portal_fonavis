@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class LandHasProjectType extends Model
+class LandHasProjectType extends Model implements AuditableContract
 {
+    use AuditableTrait;
     protected $table = 'land_has_project_type';
 
     protected $fillable = [
