@@ -34,6 +34,20 @@ class AuditsController extends Controller
         'App\Models\Land_project' => 'Terreno de Proyecto',
         'App\Models\LandHasProjectType' => 'Tipo de Proyecto / Terreno',
         'App\Models\Assignment' => 'Asignación Documental',
+        'App\Models\Dependency' => 'Dependencia',
+        'App\Models\Category' => 'Categoría de Documento',
+        'App\Models\Document' => 'Tipo de Documento (Catálogo)',
+        'App\Models\Discapacidad' => 'Tipo de Discapacidad',
+        'App\Models\Land' => 'Tipo de Terreno (Catálogo)',
+        'App\Models\Modality' => 'Modalidad',
+        'App\Models\ModalityHasLand' => 'Modalidad / Terreno',
+        'App\Models\Parentesco' => 'Parentesco',
+        'App\Models\ProjectType' => 'Tipo de Proyecto',
+        'App\Models\ProjectTypeHasTypology' => 'Tipo de Proyecto / Tipología',
+        'App\Models\Stage' => 'Etapa / Estado de Flujo',
+        'App\Models\Typology' => 'Tipología',
+        'App\Models\Medium' => 'Archivo Multimedia',
+        'App\Models\ProjectOld' => 'Proyecto Histórico / Anterior',
     ];
 
     /**
