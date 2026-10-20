@@ -110,6 +110,15 @@ class ProjectStatusController extends Controller
             ]);
         }
 
+        // DGFO no puede actuar sobre el estado OBSERVADO DGJN
+        if ($ultimoEstado && $ultimoEstado->stage_id == 4 && $dependencia == 1) {
+            return response()->json([
+                'success' => false,
+                'redirect' => route('adminprojectsindex'),
+                'message' => 'DGFO no tiene autorización para actuar sobre proyectos en estado OBSERVADO DGJN.'
+            ], 403);
+        }
+
         // Variable para controlar envío de correos
         $mailEnabled = env('MAIL_ENABLED', true);
 

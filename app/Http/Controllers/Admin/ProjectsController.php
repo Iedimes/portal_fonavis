@@ -475,7 +475,13 @@ class ProjectsController extends Controller
     {
         // $this->authorize('admin.project.show', $project);
         $id = $project->id;
-        $stageId = $project->getestado->stage_id;
+        $stageId = $project->getestado ? $project->getestado->stage_id : null;
+        $dependencia = optional(Auth::user()->rol_app)->dependency_id;
+
+        // DGFO no puede acceder al proyecto en estado OBSERVADO DGJN
+        if ($dependencia == 1 && $stageId == 4) {
+            abort(403, 'DGFO no tiene autorización para acceder a proyectos en estado OBSERVADO DGJN.');
+        }
 
         // Modificar esta línea para incluir los nuevos estados 4 y 6
         if ($stageId == 3 || $stageId == 4 || $stageId == 6 || $stageId == 13 || $stageId == 18) {
@@ -1083,6 +1089,11 @@ class ProjectsController extends Controller
         $user = Auth::user()->id;
         $dependencia = optional(Auth::user()->rol_app)->dependency_id;
         $email = Auth::user()->email;
+
+        // DGFO no puede actuar sobre el estado OBSERVADO DGJN
+        if ($dependencia == 1 && $estado == 4) {
+            abort(403, 'DGFO no tiene autorización para actuar sobre proyectos en estado OBSERVADO DGJN.');
+        }
 
         // DGTI (dependencia 7) tiene todas las etapas a su disposición en cualquier momento
         if ($dependencia == 7) {
