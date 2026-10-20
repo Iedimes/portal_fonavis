@@ -37,7 +37,7 @@ class ProjectStatusF extends Model implements HasMedia, AuditableContract
     }
 
     public function getUser() {
-        return $this->hasOne('App\Models\AdminUser','id','user_id');
+        return $this->hasOne('App\Models\AdminUser','id','user_id')->withTrashed();
     }
 
     function registerMediaCollections(): void

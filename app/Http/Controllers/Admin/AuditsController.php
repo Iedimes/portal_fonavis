@@ -77,10 +77,17 @@ class AuditsController extends Controller
         $isMuvh = ($audit->user_type === 'App\Models\AdminUser');
 
         if (!$user && $audit->user_id) {
-            if ($isMuvh) {
+            if ($isMuvh || empty($audit->user_type)) {
                 $user = \App\Models\AdminUser::withTrashed()->find($audit->user_id);
-            } else {
+                if ($user) {
+                    $isMuvh = true;
+                }
+            }
+            if (!$user) {
                 $user = \App\Models\User::withTrashed()->find($audit->user_id);
+                if ($user) {
+                    $isMuvh = false;
+                }
             }
         }
 

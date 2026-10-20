@@ -7,17 +7,6 @@ use App\Models\AdminUser;
 
 trait ResolvesStatusUser
 {
-    /**
-     * Correos de prueba del SAT que llevan dominio @muvh.gov.py pero corresponden a cuentas SAT.
-     * Todos los demás correos del SAT no llevan @muvh.
-     * En el lado admin, todos los correos llevan @muvh.gov.py.
-     */
-    public static $testSatEmails = [
-        'pacosta@muvh.gov.py',
-        'lmtorales@muvh.gov.py',
-        'nmorel@muvh.gov.py',
-        'jdelvalle@muvh.gov.py',
-    ];
 
     /**
      * Resuelve el usuario autor del cambio de estado, diferenciando si es Admin (MUVH) o SAT
