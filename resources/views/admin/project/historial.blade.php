@@ -26,7 +26,14 @@
             <tr>
                 <td>{{ $status->getStage->name ?? 'N/A' }}</td>
                 <td>{{ $status->created_at->format('d/m/Y H:i') }}</td>
-                <td>{{ $status->nombre_usuario }}</td>
+                <td>
+                    <strong>{{ $status->display_name ?? $status->nombre_usuario }}</strong>
+                    @if(isset($status->tipo_usuario) && $status->tipo_usuario === 'MUVH')
+                        <span class="badge badge-primary" style="font-size: 11px; margin-left: 5px; vertical-align: middle;">MUVH</span>
+                    @elseif(isset($status->tipo_usuario) && $status->tipo_usuario === 'SAT')
+                        <span class="badge badge-success" style="font-size: 11px; margin-left: 5px; vertical-align: middle;">SAT</span>
+                    @endif
+                </td>
                 <td>{{ $status->record }}</td>
                 <td>
                     @php

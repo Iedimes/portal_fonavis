@@ -1226,41 +1226,22 @@ class ProjectsController extends Controller
             $previous = $item;
         }
 
-        // Contador específico para estado 1
-        $state1Count = 0;
-        $satNombre = $project->getSat ? trim($project->getSat->NucNomSat) : '';
+        // Preload de usuarios y auditorías para resolución rápida y precisa
+        $userIds = $history->pluck('user_id')->filter()->unique();
+        $adminUsers = \App\Models\AdminUser::withTrashed()->whereIn('id', $userIds)->get()->keyBy('id');
+        $satUsers = \App\Models\User::withTrashed()->whereIn('id', $userIds)->get()->keyBy('id');
 
-        $history = $history->map(function ($item) use (&$state1Count, $satNombre) {
-            if ($item->stage_id == 1) {
-                $state1Count++;
-                if (!empty($satNombre)) {
-                    $item->nombre_usuario = $satNombre . ' (SAT)';
-                } else {
-                    $user = User::find($item->user_id);
-                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
-                }
-            } elseif (in_array($item->stage_id, [5, 8, 11])) {
-                // Primero verifica si fue un usuario SAT
-                $user = User::find($item->user_id);
-                if ($user) {
-                    $item->nombre_usuario = $user->name . ' (SAT)';
-                } else {
-                    // Fallback a AdminUser (si una dependencia técnica o admin operó el estado)
-                    $adminUser = \App\Models\AdminUser::find($item->user_id);
-                    $item->nombre_usuario = $adminUser ? $adminUser->first_name . ' ' . $adminUser->last_name : '';
-                }
-            } else {
-                // Primero verifica si fue un AdminUser
-                $adminUser = \App\Models\AdminUser::find($item->user_id);
-                if ($adminUser) {
-                    $item->nombre_usuario = $adminUser->first_name . ' ' . $adminUser->last_name;
-                } else {
-                    // Fallback a usuario SAT (para registros históricos cargados por el SAT)
-                    $user = User::find($item->user_id);
-                    $item->nombre_usuario = $user ? $user->name . ' (SAT)' : '';
-                }
-            }
+        $statusIds = $history->pluck('id');
+        $audits = \OwenIt\Auditing\Models\Audit::whereIn('auditable_type', ['App\Models\ProjectStatus', 'App\Models\ProjectStatusF'])
+            ->whereIn('auditable_id', $statusIds)
+            ->get()
+            ->keyBy('auditable_id');
 
+        $history = $history->map(function ($item) use ($project, $adminUsers, $satUsers, $audits) {
+            $resolved = ProjectStatusF::resolveStatusUser($item, $project, $adminUsers, $satUsers, $audits);
+            $item->display_name = $resolved['name'];
+            $item->tipo_usuario = $resolved['role'];
+            $item->nombre_usuario = $resolved['display'];
             return $item;
         });
 

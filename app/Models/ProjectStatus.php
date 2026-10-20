@@ -11,6 +11,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Brackets\Media\HasMedia\HasMediaThumbsTrait;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable as AuditableTrait;
+use App\Traits\ResolvesStatusUser;
 
 class ProjectStatus extends Model implements HasMedia, AuditableContract
 {
@@ -19,6 +20,7 @@ class ProjectStatus extends Model implements HasMedia, AuditableContract
     use HasMediaCollectionsTrait;
     use HasMediaThumbsTrait;
     use AuditableTrait;
+    use ResolvesStatusUser;
     //
     protected $table = 'project_status';
 
