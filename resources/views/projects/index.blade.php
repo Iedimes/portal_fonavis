@@ -83,10 +83,10 @@
                                         @else
                                             <a class="dropdown-item" href="{{ url('projects/' . $project->id) }}">Ver</a>
                                         @endif
-                                        <a class="dropdown-item {{ $project->getEstado ? 'disabled' : '' }} "
+                                        <a class="dropdown-item {{ ($project->getEstado && $project->getEstado->stage_id != 22) ? 'disabled' : '' }}"
                                             href="{{ url('projects/' . $project->id . '/edit') }}">Editar</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item {{ $project->getEstado && $project->getEstado->stage_id == 7 ? '' : 'disabled' }}"
+                                        <a class="dropdown-item {{ ($project->getEstado && !in_array($project->getEstado->stage_id, [7, 22])) ? 'disabled' : '' }}"
                                             href="{{ url('projects/' . $project->id . '/postulantes') }}">Grupo Familiar</a>
                                     </div>
                                 </div>

@@ -35,7 +35,7 @@
         <project-status-form
             :action="'{{ url('admin/project-statuses') }}'"
             :project="{{$project->id}}"
-            :estado={{$estado}}
+            :estado="{{ $estado ?? 0 }}"
             :stages="{{ $stages->toJson() }}"
             :user="{{$user}}"
             :dependencia="{{$dependencia}}"

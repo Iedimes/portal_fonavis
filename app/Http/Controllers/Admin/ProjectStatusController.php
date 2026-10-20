@@ -883,11 +883,19 @@ class ProjectStatusController extends Controller
 
 
     public function eliminar(Request $request, $projectId) {
-
-        //return $request;
-        //return $request['project_id'];
+        $project = Project::find($projectId);
+        if ($project && $project->getEstados()->count() > 1) {
+            return response()->json([
+                'error' => 'El proyecto ya tiene más de un registro de estados. No se puede volver a Pendiente; debe utilizar la opción DEVOLUCIÓN SAT.'
+            ], 422);
+        }
 
         $projectStatus = ProjectStatus::where('project_id', $projectId)->first();
+        if (!$projectStatus) {
+            return response()->json([
+                'error' => 'No se encontró registro de estado para este proyecto.'
+            ], 404);
+        }
 
         $userId = auth()->id();
 
@@ -907,15 +915,10 @@ class ProjectStatusController extends Controller
         // Borrar registro original
         $projectStatus->delete();
 
-        //return redirect()->route('projects.show', ['project' => $projectStatus->project_id]);
-        // return view('admin.project/'.$projectId.'/show');
-        //return back();
-
         return response()->json([
             'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
         ]);
-
-      }
+    }
 
     /**
      * Show the form for editing the specified resource.

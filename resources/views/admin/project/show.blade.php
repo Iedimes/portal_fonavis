@@ -88,8 +88,13 @@
 
                @if (empty($project->getEstado))
                     {{-- Si no hay estado definido --}}
+                    @if (optional(Auth::user()->rol_app)->dependency_id == 7)
+                        <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                    @endif
                 @else
-                    @if ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
+                    @if (optional(Auth::user()->rol_app)->dependency_id == 7)
+                        <a href="{{ url('admin/projects/'. $project->id .'/transition') }}" type="button" class="btn btn-primary">CAMBIAR ESTADO</a>
+                    @elseif ($project->getEstado->stage_id == 1 && Auth::user()->rol_app->dependency_id == 1)
                         @if ($project->modalidad_id == 1)
                             {{-- Modalidad 1: requiere ambos documentos --}}
                             @if (collect($uploadedFiles2)->filter()->isEmpty() && collect($uploadedFiles3)->filter()->isEmpty())
@@ -139,7 +144,7 @@
 
 
                 {{-- Mostrar VOLVER AL ESTADO PENDIENTE DE ENVIO solo si hay un único estado --}}
-                @if ($project->getEstados()->count() <= 1)
+                @if ($project->getEstados()->count() == 1)
                     <a href="{{ url('admin/projects/'. $project->id .'/transitionEliminar') }}" type="button" class="btn btn-primary">VOLVER AL ESTADO PENDIENTE DE ENVIO</a>
                 @endif
 
