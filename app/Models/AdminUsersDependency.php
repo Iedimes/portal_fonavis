@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class AdminUsersDependency extends Model
+class AdminUsersDependency extends Model implements AuditableContract
 {
+    use AuditableTrait;
+
     protected $fillable = [
         'admin_user_id',
         'dependency_id',

@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Assignment extends Model
+class Assignment extends Model implements AuditableContract
 {
+    use AuditableTrait;
+
     protected $fillable = [
         'document_id',
         'category_id',

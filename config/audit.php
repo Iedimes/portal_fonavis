@@ -195,5 +195,5 @@ return [
     |
     */
 
-    'console' => false,
+    'console' => env('AUDITING_CONSOLE', false),
 ];

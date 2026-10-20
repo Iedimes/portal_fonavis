@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Brackets\Translatable\Traits\HasTranslations;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Medium extends Model
+class Medium extends Model implements AuditableContract
 {
-use HasTranslations;
+    use HasTranslations;
+    use AuditableTrait;
+
     protected $fillable = [
         'model_type',
         'model_id',
@@ -24,24 +28,21 @@ use HasTranslations;
         'generated_conversions',
         'responsive_images',
         'order_column',
-    
     ];
-    
-    
+
     protected $dates = [
         'created_at',
         'updated_at',
-    
     ];
+
     // these attributes are translatable
     public $translatable = [
         'manipulations',
         'custom_properties',
         'generated_conversions',
         'responsive_images',
-    
     ];
-    
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */

@@ -1079,91 +1079,95 @@ class ProjectsController extends Controller
 
     public function transition(Project $project)
     {
-        $project->getEstado->getStage->id;
-        $estado = $project->getEstado->getStage->id;
+        $estado = $project->getEstado ? $project->getEstado->getStage->id : null;
         $user = Auth::user()->id;
-        $dependencia = Auth::user()->rol_app->dependency_id;
+        $dependencia = optional(Auth::user()->rol_app)->dependency_id;
         $email = Auth::user()->email;
-        // $stages = Stage::where('id','!=',$project->getEstado->getStage->id)->get();
 
-        $countEstado1 = ProjectStatusF::where('project_id', $project->id)
-            ->where('stage_id', 1)
-            ->count();
+        // DGTI (dependencia 7) tiene todas las etapas a su disposición en cualquier momento
+        if ($dependencia == 7) {
+            $stages = Stage::orderBy('id')->get();
+        } else {
+            $countEstado1 = ProjectStatusF::where('project_id', $project->id)
+                ->where('stage_id', 1)
+                ->count();
 
-        $masDeUnEstado1 = $countEstado1 > 1;
+            $masDeUnEstado1 = $countEstado1 > 1;
+            $stages = collect();
 
-        switch ($estado) {
-            case 1:
-                if ($masDeUnEstado1) {
-                    $stages = Stage::whereNotIn('id', [1, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21])->get();
-                } else {
-                    $stages = Stage::whereIn('id', [2])->get();
-                }
-                break;
-            case 2:
-                // Lógica específica para el estado 2
-                $stages = Stage::whereIn('id', [3, 4, 6, 21])->get();
-                break;
-            case 3:
-                // Lógica específica para el estado 3
-                $stages = Stage::whereIn('id', [2, 7, 8])->get();
-                break;
-            case 4:
-                // Lógica específica para el estado 3
-                $stages = Stage::whereIn('id', [3, 21])->get();
-                break;
-            case 5:
-                // Lógica específica para el estado 5
-                $stages = Stage::whereIn('id', [3, 4, 6])->get();
-                break;
-
-            case 6:
-                // Lógica específica para el estado 6
-                $stages = Stage::whereIn('id', [3, 4])->get();
-                break;
-
-            case 8:
-                // Lógica específica para el estado 8
-                $stages = Stage::whereIn('id', [2, 9])->get();
-                break;
-            case 9:
-                // Lógica específica para el estado 9
-                $stages = Stage::whereIn('id', [10])->get();
-                break;
-            case 11:
-                // Lógica específica para el estado 11
-                if ($dependencia == 1) {
-                    $stages = Stage::whereIn('id', [12])->get();
+            switch ($estado) {
+                case 1:
+                    if ($masDeUnEstado1) {
+                        $stages = Stage::whereNotIn('id', [1, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21])->get();
+                    } else {
+                        $stages = Stage::whereIn('id', [2])->get();
+                    }
                     break;
-                }
-
-                if ($dependencia == 5) {
-                    $stages = Stage::whereIn('id', [19])->get();
+                case 2:
+                    // Lógica específica para el estado 2
+                    $stages = Stage::whereIn('id', [3, 4, 6, 21])->get();
                     break;
-                }
+                case 3:
+                    // Lógica específica para el estado 3
+                    $stages = Stage::whereIn('id', [2, 7, 8])->get();
+                    break;
+                case 4:
+                    // Lógica específica para el estado 3
+                    $stages = Stage::whereIn('id', [3, 21])->get();
+                    break;
+                case 5:
+                    // Lógica específica para el estado 5
+                    $stages = Stage::whereIn('id', [3, 4, 6])->get();
+                    break;
 
-                $stages = Stage::whereIn('id', [13])->get();
-                break;
-            case 12:
-                // Lógica específica para el estado 12
-                $stages = Stage::whereIn('id', [13, 14, 15])->get();
-                break;
-            case 13:
-                // Lógica específica para el estado 13
-                $stages = Stage::whereIn('id', [16])->get();
-                break;
-            case 16:
-                // Lógica específica para el estado 16
-                $stages = Stage::whereIn('id', [18, 19, 21])->get();
-                break;
-            case 17:
-                // Lógica específica para el estado 17
-                $stages = Stage::whereIn('id', [18])->get();
-                break;
-            case 21:
-                // Lógica específica para el estado 17
-                $stages = Stage::whereIn('id', [22])->get();
-                break;
+                case 6:
+                    // Lógica específica para el estado 6
+                    $stages = Stage::whereIn('id', [3, 4])->get();
+                    break;
+
+                case 8:
+                    // Lógica específica para el estado 8
+                    $stages = Stage::whereIn('id', [2, 9])->get();
+                    break;
+                case 9:
+                    // Lógica específica para el estado 9
+                    $stages = Stage::whereIn('id', [10])->get();
+                    break;
+                case 11:
+                    // Lógica específica para el estado 11
+                    if ($dependencia == 1) {
+                        $stages = Stage::whereIn('id', [12])->get();
+                        break;
+                    }
+
+                    if ($dependencia == 5) {
+                        $stages = Stage::whereIn('id', [19])->get();
+                        break;
+                    }
+
+                    $stages = Stage::whereIn('id', [13])->get();
+                    break;
+                case 12:
+                    // Lógica específica para el estado 12
+                    $stages = Stage::whereIn('id', [13, 14, 15])->get();
+                    break;
+                case 13:
+                    // Lógica específica para el estado 13
+                    $stages = Stage::whereIn('id', [16])->get();
+                    break;
+                case 16:
+                    // Lógica específica para el estado 16
+                    $stages = Stage::whereIn('id', [18, 19, 21])->get();
+                    break;
+                case 17:
+                    // Lógica específica para el estado 17
+                    $stages = Stage::whereIn('id', [18])->get();
+                    break;
+                case 21:
+                    // Lógica específica para el estado 17
+                    $stages = Stage::whereIn('id', [22])->get();
+                    break;
+            }
         }
 
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
@@ -1173,16 +1177,15 @@ class ProjectsController extends Controller
 
     public function transitionEliminar(Project $project)
     {
-        $project->getEstado->getStage->id;
+        if ($project->getEstados()->count() > 1) {
+            return redirect()->to(url('admin/projects/' . $project->id . '/show'))
+                ->with('error', 'El proyecto ya tiene más de un registro de estados. No se puede volver a Pendiente; debe utilizar la opción DEVOLUCIÓN SAT.');
+        }
+
         $user = Auth::user()->id;
         $email = Auth::user()->email;
-        $stages = Stage::where('id', '!=', $project->getEstado->getStage->id)->get();
+        $stages = $project->getEstado ? Stage::where('id', '!=', $project->getEstado->getStage->id)->get() : collect();
 
-        /*if ($workflowState->id == 26) {
-            $mensaje = 'Esta impresion del documento quedara registrada en el historial!!';
-        }else{
-            $mensaje = 'Este cambio de estado quedara registrado en el historial de la solicitud';
-        }*/
         $mensaje = 'Este cambio de estado quedara registrado en el historial del Proyecto';
 
         return view('admin.project.transitionEliminar', compact('project', 'user', 'mensaje', 'stages', 'email'));

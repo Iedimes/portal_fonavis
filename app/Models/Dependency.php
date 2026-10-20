@@ -3,21 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Dependency extends Model
+class Dependency extends Model implements AuditableContract
 {
+    use AuditableTrait;
+
     protected $fillable = [
         'name',
-    
     ];
-    
-    
+
     protected $dates = [
         'created_at',
         'updated_at',
-    
     ];
-    
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */

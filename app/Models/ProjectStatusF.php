@@ -9,13 +9,16 @@ use Brackets\Media\HasMedia\HasMediaCollectionsTrait;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\HasMedia;
 use Brackets\Media\HasMedia\HasMediaThumbsTrait;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class ProjectStatusF extends Model implements HasMedia
+class ProjectStatusF extends Model implements HasMedia, AuditableContract
 {
     use ProcessMediaTrait;
     use AutoProcessMediaTrait;
     use HasMediaCollectionsTrait;
     use HasMediaThumbsTrait;
+    use AuditableTrait;
 
     protected $table = 'project_status';
 

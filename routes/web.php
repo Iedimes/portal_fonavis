@@ -651,5 +651,14 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
+/* System Audit Viewer */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('App\Http\Controllers\Admin')->group(static function () {
+        Route::get('/audits', 'AuditsController@index')->name('admin.audits.index');
+        Route::get('/audits/{id}', 'AuditsController@show')->name('admin.audits.show');
+    });
+});
+
 // routes/web.php
 Route::get('/dashboard/sessions', [DashboardController::class, 'sessions']);
+

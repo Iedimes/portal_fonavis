@@ -3,23 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Parentesco extends Model
+class Parentesco extends Model implements AuditableContract
 {
+    use AuditableTrait;
+
     protected $table = 'parentesco';
 
     protected $fillable = [
         'name',
-    
     ];
-    
-    
+
     protected $dates = [
         'created_at',
         'updated_at',
-    
     ];
-    
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */

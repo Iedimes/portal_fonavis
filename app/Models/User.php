@@ -9,12 +9,19 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\CustomResetPassword;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-
-class User extends Authenticatable
+class User extends Authenticatable implements AuditableContract
 {
     use HasApiTokens, HasFactory, Notifiable;
     use SoftDeletes;
+    use AuditableTrait;
+
+    protected $auditExclude = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * The attributes that are mass assignable.
