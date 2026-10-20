@@ -104,10 +104,26 @@ class AuditsController extends Controller
     }
 
     /**
+     * Verificar que el usuario tenga acceso a la auditoría (DGTI o Superadmin)
+     */
+    protected function checkAccess()
+    {
+        $user = auth()->user();
+        $dependencyId = optional($user->rol_app)->dependency_id;
+
+        // Solo DGTI (dependencia 7) o Superadmin sin restricción de dependencia pueden acceder
+        if ($dependencyId && $dependencyId != 7) {
+            abort(403, 'No tiene autorización para acceder a la auditoría del sistema.');
+        }
+    }
+
+    /**
      * Listado con filtros y paginación
      */
     public function index(Request $request)
     {
+        $this->checkAccess();
+
         $query = Audit::with('user');
 
         // Filtro por Modelo
@@ -177,6 +193,8 @@ class AuditsController extends Controller
      */
     public function show($id, Request $request)
     {
+        $this->checkAccess();
+
         $audit = Audit::with('user')->findOrFail($id);
         $userData = self::getUserData($audit);
         $modelName = self::getModelName($audit->auditable_type);

@@ -41,8 +41,6 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url('admin/admin-users-dependencies') }}"><i
                             class="fa fa-area-chart" aria-hidden="true"></i>
                         {{ trans('admin.admin-users-dependency.title') }}</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('admin/audits') }}"><i
-                            class="fa fa-history" aria-hidden="true"></i> AUDITORÍA DEL SISTEMA</a></li>
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/projects/legajo-masivo/create') }}"><i
                             class="fa fa-building"></i> {{ trans('LEGAJOS-MASIVO') }}</a></li> --}}
                 {{-- <li class="nav-item"><a class="nav-link" href="{{ url('admin/media') }}"><i class="nav-icon icon-flag"></i> {{ trans('admin.medium.title') }}</a></li>
