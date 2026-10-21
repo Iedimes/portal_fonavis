@@ -29,7 +29,7 @@
                                 <label>SAT</label>
                                 <input type="hidden" name="sat_id" value="{{ $user->sat_ruc }}">
                                 <input type="text" class="form-control"
-                                    value="{{ utf8_encode($user->sat_ruc ? $user->getSat->NucNomSat : '') }}" readonly>
+                                    value="{{ $user->sat_ruc ? $user->getSat->NucNomSat : '' }}" readonly>
                                 {!! $errors->first('sat_id', '<span class="help-block">:message</span>') !!}
                             </div>
 
@@ -176,7 +176,7 @@
                                     @foreach ($departamentos as $key => $dpto)
                                         <option value="{{ $dpto->DptoId }}"
                                             {{ old('state_id', isset($project['state_id']) ? $project['state_id'] : '') == $dpto->DptoId ? 'selected' : '' }}>
-                                            {{ utf8_encode($dpto->DptoNom) }}</option>
+                                            {{ $dpto->DptoNom }}</option>
                                     @endforeach
                                 </select>
                                 {!! $errors->first('state_id', '<span class="help-block">:message</span>') !!}
@@ -190,7 +190,7 @@
                                     @foreach ($localidad as $key => $loc)
                                         <option value="{{ $loc->CiuId }}"
                                             {{ old('state_id', isset($project['city_id']) ? $project['city_id'] : '') == $loc->CiuId ? 'selected' : '' }}>
-                                            {{ utf8_encode($loc->CiuNom) }}</option>
+                                            {{ $loc->CiuNom }}</option>
                                     @endforeach
                                 </select>
                                 {!! $errors->first('city_id', '<span class="help-block">:message</span>') !!}
@@ -201,7 +201,7 @@
                             <div class="form-group {{ $errors->has('localidad') ? 'has-error' : '' }}">
                                 <label>Localidad/Barrio</label>
                                 <input type="text" required class="form-control" name="localidad"
-                                    value="{{ old('localidad', isset($project['localidad']) ? utf8_encode($project['localidad']) : '') }}"
+                                    value="{{ old('localidad', isset($project['localidad']) ? $project['localidad'] : '') }}"
                                     placeholder="Ingrese Localidad">
                                 {!! $errors->first('localidad', '<span class="help-block">:message</span>') !!}
                             </div>

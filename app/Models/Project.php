@@ -7,11 +7,13 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable as AuditableTrait;
+use App\Traits\CleansUtf8Encoding;
 
 class Project extends Model implements AuditableContract
 {
     use SoftDeletes;           // Eliminación suave
     use AuditableTrait;        // Auditoría compatible
+    use CleansUtf8Encoding;
 
     protected $fillable = [
         'name',
@@ -120,10 +122,40 @@ class Project extends Model implements AuditableContract
     }
 
 
-    /* ************************ ACCESSORS ************************* */
+    /* ************************ ACCESSORS & MUTATORS ************************* */
 
     public function getResourceUrlAttribute()
     {
         return url('/admin/projects/' . $this->getKey());
+    }
+
+    public function getLocalidadAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setLocalidadAttribute($value)
+    {
+        $this->attributes['localidad'] = static::fixUtf8($value);
+    }
+
+    public function getNameAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = static::fixUtf8($value);
+    }
+
+    public function getLeaderNameAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setLeaderNameAttribute($value)
+    {
+        $this->attributes['leader_name'] = static::fixUtf8($value);
     }
 }

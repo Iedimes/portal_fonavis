@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable as AuditableTrait;
+use App\Traits\CleansUtf8Encoding;
 
 class Postulante extends Model implements AuditableContract
 {
     use AuditableTrait;
     use SoftDeletes;
+    use CleansUtf8Encoding;
 
     protected static function booted()
     {
@@ -163,5 +165,77 @@ class Postulante extends Model implements AuditableContract
                 $q->select('postulantes.id', 'postulantes.first_name', 'postulantes.last_name', 'postulantes.cedula');
             }
         ]);
+    }
+
+    /* ************************ UTF-8 ACCESSORS & MUTATORS ************************* */
+
+    public function getFirstNameAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setFirstNameAttribute($value)
+    {
+        $this->attributes['first_name'] = static::fixUtf8($value);
+    }
+
+    public function getLastNameAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setLastNameAttribute($value)
+    {
+        $this->attributes['last_name'] = static::fixUtf8($value);
+    }
+
+    public function getLocalidadAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setLocalidadAttribute($value)
+    {
+        $this->attributes['localidad'] = static::fixUtf8($value);
+    }
+
+    public function getAsentamientoAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setAsentamientoAttribute($value)
+    {
+        $this->attributes['asentamiento'] = static::fixUtf8($value);
+    }
+
+    public function getAddressAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setAddressAttribute($value)
+    {
+        $this->attributes['address'] = static::fixUtf8($value);
+    }
+
+    public function getGrupoAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setGrupoAttribute($value)
+    {
+        $this->attributes['grupo'] = static::fixUtf8($value);
+    }
+
+    public function getNacionalidadAttribute($value)
+    {
+        return static::fixUtf8($value);
+    }
+
+    public function setNacionalidadAttribute($value)
+    {
+        $this->attributes['nacionalidad'] = static::fixUtf8($value);
     }
 }

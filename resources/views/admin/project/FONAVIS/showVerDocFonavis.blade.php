@@ -6,33 +6,33 @@
 
 <div class="card">
     <div class="card-header text-center">
-        DATOS {{utf8_encode($project->name)}}
+        DATOS {{ $project->name }}
     </div>
     <div class="card-body">
         <div class="row invoice-info">
             <div class="col-sm-4 invoice-col">
             <address>
             <strong>Lider:</strong> {{($project->leader_name)}}<br>
-            <strong>Departamento: </strong>{{utf8_encode($project->state_id?$project->getState->DptoNom:"")}}<br>
-            <strong>Modalidad:</strong> {{utf8_encode($project->modalidad_id?$project->getModality->name:"")}}<br>
+            <strong>Departamento: </strong>{{ $project->state_id ? $project->getState->DptoNom : "" }}<br>
+            <strong>Modalidad:</strong> {{ $project->modalidad_id ? $project->getModality->name : "" }}<br>
             <strong>Estado:</strong> <span class="badge bg-success " style="font-size:1.1em; color:white">  {{ $project->getEstado ? $project->getEstado->getStage->name : "Pendiente"}}</span><br>
             </address>
             </div>
 
             <div class="col-sm-4 invoice-col">
             <address>
-            <strong>Telefono:</strong> {{utf8_encode($project->phone)}}<br>
-            <strong>Distrito:</strong> {{utf8_encode($project->getcity->CiuNom)}}<br>
-            <strong>Tipo de Terreno:</strong> {{utf8_encode($project->land_id?$project->getLand->name:"")}}<br>
+            <strong>Telefono:</strong> {{ $project->phone }}<br>
+            <strong>Distrito:</strong> {{ $project->city_id ? ($project->getCity ? $project->getCity->CiuNom : $project->city_id) : "" }}<br>
+            <strong>Tipo de Terreno:</strong> {{ $project->land_id ? $project->getLand->name : "" }}<br>
             <strong>Cantidad de Viviendas:</strong> {{ $postulantes->count() }}<br>
             </address>
             </div>
 
             <div class="col-sm-4 invoice-col">
             <address>
-            <strong>SAT:</strong> {{utf8_encode($project->sat_id?$project->getSat->NucNomSat:"")}}<br>
-            <strong>Localidad:</strong> {{utf8_encode($project->localidad)}}<br>
-            <strong>Tipologia:</strong> {{utf8_encode($project->typology_id?$project->getTypology->name:"")}}<br>
+            <strong>SAT:</strong> {{ $project->sat_id ? $project->getSat->NucNomSat : "" }}<br>
+            <strong>Localidad:</strong> {{ $project->localidad }}<br>
+            <strong>Tipologia:</strong> {{ $project->typology_id ? $project->getTypology->name : "" }}<br>
             </address>
             </div>
 

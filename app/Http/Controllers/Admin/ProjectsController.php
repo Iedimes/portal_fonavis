@@ -166,52 +166,7 @@ class ProjectsController extends Controller
      */
     private function fixUtf8($string)
     {
-        if ($string === null || $string === '') {
-            return $string;
-        }
-
-        $string = rtrim($string);
-
-        for ($i = 0; $i < 3; $i++) {
-            if (preg_match('/[\xC2-\xF4][\x80-\xBF]/', $string)) {
-                $converted = @mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8');
-                if ($converted !== false && mb_check_encoding($converted, 'UTF-8') && preg_match('/[\x80-\xFF]/', $converted)) {
-                    $string = $converted;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-
-        $replacements = [
-            'Ã‘' => 'Ñ',
-            'Ã±' => 'ñ',
-            'Ã ' => 'Á',
-            'Ã¡' => 'á',
-            'Ã‰' => 'É',
-            'Ã©' => 'é',
-            'ÃÍ' => 'Í',
-            'Ã­' => 'í',
-            'Ã“' => 'Ó',
-            'Ã³' => 'ó',
-            'ÃŠ' => 'Ú',
-            'Ãº' => 'ú',
-            'Ãœ' => 'Ü',
-            'Ã¼' => 'ü',
-            'Âº' => 'º',
-            'Â°' => '°',
-            'Âª' => 'ª',
-            'Â´' => '´',
-            'Â'  => '',
-            'â€œ' => '“',
-            'â€' => '”',
-            'â€“' => '–',
-            'â€”' => '—',
-        ];
-
-        return strtr($string, $replacements);
+        return \App\Traits\CleansUtf8Encoding::fixUtf8($string);
     }
 
 

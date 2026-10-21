@@ -50,10 +50,10 @@
                             <td>{{ $project->id }}</td>
                             <td>{{ $project->name }}</td>
                             <td>{{ $project->sat_id ? $project->getSat->NucNomSat : '' }}</td>
-                            <td>{{ utf8_encode($project->land_id ? $project->getLand->name : '') }}</td>
-                            <td>{{ utf8_encode($project->state_id ? $project->getState->DptoNom : '') }}</td>
-                            <td>{{ utf8_encode($project->city_id ? $project->getCity->CiuNom : '') }}</td>
-                            <td>{{ utf8_encode($project->modalidad_id ? $project->getModality->name : '') }}</td>
+                            <td>{{ $project->land_id ? $project->getLand->name : '' }}</td>
+                            <td>{{ $project->state_id ? $project->getState->DptoNom : '' }}</td>
+                            <td>{{ $project->city_id ? $project->getCity->CiuNom : '' }}</td>
+                            <td>{{ $project->modalidad_id ? $project->getModality->name : '' }}</td>
                             <td>
                                 @if (isset($project->getEstado->stage_id))
                                     <label for="" class="text-green">
