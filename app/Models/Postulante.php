@@ -144,6 +144,86 @@ class Postulante extends Model implements AuditableContract
     }
 
     /**
+     * Mutador para limpiar y sanitizar el campo ingreso (tipo bigint NOT NULL en PostgreSQL).
+     * En Paraguay (Guaraníes) no existen decimales y el punto '.' es separador de miles.
+     * Elimina separadores de miles (puntos), espacios, monedas o caracteres como '-', '.'
+     * Convierte a entero seguro (o 0 si no contiene dígitos).
+     */
+    public function setIngresoAttribute($value)
+    {
+        if (is_int($value)) {
+            $this->attributes['ingreso'] = $value;
+        } elseif (is_string($value) || is_float($value)) {
+            $digits = preg_replace('/[^\d]/', '', (string) $value);
+            $this->attributes['ingreso'] = ($digits !== '') ? (int) $digits : 0;
+        } else {
+            $this->attributes['ingreso'] = 0;
+        }
+    }
+
+    /**
+     * Mutador para limpiar otros_ingresos (integer nullable en PostgreSQL).
+     */
+    public function setOtrosIngresosAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['otros_ingresos'] = null;
+        } elseif (is_int($value)) {
+            $this->attributes['otros_ingresos'] = $value;
+        } else {
+            $digits = preg_replace('/[^\d]/', '', (string) $value);
+            $this->attributes['otros_ingresos'] = ($digits !== '') ? (int) $digits : null;
+        }
+    }
+
+    /**
+     * Mutador para limpiar ingreso_familiar (integer nullable en PostgreSQL).
+     */
+    public function setIngresoFamiliarAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['ingreso_familiar'] = null;
+        } elseif (is_int($value)) {
+            $this->attributes['ingreso_familiar'] = $value;
+        } else {
+            $digits = preg_replace('/[^\d]/', '', (string) $value);
+            $this->attributes['ingreso_familiar'] = ($digits !== '') ? (int) $digits : null;
+        }
+    }
+
+    /**
+     * Mutador para limpiar cantidad_hijos (integer nullable en PostgreSQL).
+     */
+    public function setCantidadHijosAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['cantidad_hijos'] = null;
+        } elseif (is_int($value)) {
+            $this->attributes['cantidad_hijos'] = $value;
+        } else {
+            $digits = preg_replace('/[^\d]/', '', (string) $value);
+            $this->attributes['cantidad_hijos'] = ($digits !== '') ? (int) $digits : null;
+        }
+    }
+
+    /**
+     * Mutador para limpiar nivel (integer nullable en PostgreSQL).
+     */
+    public function setNivelAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['nivel'] = null;
+        } elseif (is_int($value)) {
+            $this->attributes['nivel'] = $value;
+        } else {
+            $digits = preg_replace('/[^\d]/', '', (string) $value);
+            $this->attributes['nivel'] = ($digits !== '') ? (int) $digits : null;
+        }
+    }
+
+
+
+    /**
      * Scope para eager loading de relaciones necesarias
      */
     public function scopeWithRelationsOptimized($query)

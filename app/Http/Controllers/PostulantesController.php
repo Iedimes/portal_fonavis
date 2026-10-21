@@ -72,7 +72,7 @@ class PostulantesController extends Controller
     public function create(Request $request, $id)
     {
         if (!$request->filled('cedula')) {
-            return redirect()->back()->with('error', 'Ingrese Cédula');
+            return redirect('projects/' . $id . '/postulantes')->with('error', 'Ingrese Cédula');
         }
 
         $cedula = $request->input('cedula');
@@ -468,8 +468,8 @@ class PostulantesController extends Controller
 
     public function show($id,$idpostulante)
     {
-        $postulante=Postulante::find($idpostulante);
-        $project = Project::find($id);
+        $postulante = Postulante::findOrFail($idpostulante);
+        $project = Project::findOrFail($id);
         $title="Resumen Postulante ";
         //dd($project);
         $tipoproy = Land_project::where('land_id',$project->land_id)->first();
@@ -486,13 +486,13 @@ class PostulantesController extends Controller
     public function edit($id,$idpostulante)
     {
         $title="Editar Postulante";
-        $project=Project::find($id);
-        $postulante=Postulante::find($idpostulante);
+        $project = Project::findOrFail($id);
+        $postulante = Postulante::findOrFail($idpostulante);
         $nombre = $postulante->first_name;
         $apellido = $postulante->last_name;
         $cedula = $postulante->cedula;
         $sexo = $postulante->gender;
-        $project_id = Project::find($id);
+        $project_id = $project;
         $nac = $postulante->nacionalidad;
         $est = $postulante->marital_status;
         $fecha = $postulante->birthdate;
@@ -506,13 +506,13 @@ class PostulantesController extends Controller
     public function editarPostulante($id,$idpostulante)
     {
         $title="Editar Postulante";
-        $project=Project::find($id);
-        $postulante=Postulante::find($idpostulante);
+        $project = Project::findOrFail($id);
+        $postulante = Postulante::findOrFail($idpostulante);
         $nombre = $postulante->first_name;
         $apellido = $postulante->last_name;
         $cedula = $postulante->cedula;
         $sexo = $postulante->gender;
-        $project_id = Project::find($id);
+        $project_id = $project;
         $nac = $postulante->nacionalidad;
         $est = $postulante->marital_status;
         $fecha = $postulante->birthdate;
@@ -725,22 +725,25 @@ class PostulantesController extends Controller
 
     public function destroy(Request $request)
     {
-
-
         $postulante = ProjectHasPostulantes::where('postulante_id',$request->delete_id)->first();
 
+        if (!$postulante) {
+            return back()->with('status', 'El postulante no existe o ya fue eliminado.');
+        }
 
-        if ($postulante->getMembers->count() > 0) {
+        if ($postulante->getMembers && $postulante->getMembers->count() > 0) {
             // return back()->with('error', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
             return back()->with('status', 'Debe eliminar todos los miembros antes de eliminar el postulante!');
         }else{
+            ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
+            PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
+            $pos = Postulante::find($request->delete_id);
+            if ($pos) {
+                $pos->delete();
+            }
 
-        ProjectHasPostulantes::where('postulante_id',$request->delete_id)->delete();
-        PostulanteHasDiscapacidad::where('postulante_id',$request->delete_id)->delete();
-        Postulante::find($request->delete_id)->delete();
-
-        // return back()->with('error', 'Se ha eliminado el Postulante!');
-        return back()->with('status', 'Se ha eliminado el Postulante!');
+            // return back()->with('error', 'Se ha eliminado el Postulante!');
+            return back()->with('status', 'Se ha eliminado el Postulante!');
         }
 
     }
@@ -750,7 +753,10 @@ class PostulantesController extends Controller
     {
         PostulanteHasBeneficiary::where('miembro_id',$request->delete_idmiembro)->delete();
         PostulanteHasDiscapacidad::where('postulante_id',$request->delete_idmiembro)->delete();
-        Postulante::find($request->delete_idmiembro)->delete();
+        $miembro = Postulante::find($request->delete_idmiembro);
+        if ($miembro) {
+            $miembro->delete();
+        }
         return back()->with('error', 'Se ha eliminado el Miembro!');
     }
 
@@ -759,12 +765,14 @@ class PostulantesController extends Controller
 
         $file = PostulantesDocuments::find($request->delete_id);
 
-        $file_path = $this->photos_path . '/' . $file->project_id . '/project/general/' . $file->file_path;
-        if (file_exists($file_path)) {
-            unlink($file_path);
+        if ($file) {
+            $file_path = $this->photos_path . '/' . $file->project_id . '/project/general/' . $file->file_path;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            $file->delete();
         }
 
-        PostulantesDocuments::find($request->delete_id)->delete();
         return back()->with('error', 'Se ha eliminado el archivo!');
     }
 

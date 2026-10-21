@@ -415,18 +415,19 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/',                                             'PostulantesController@index')->name('index');
             Route::get('/create',                                       'PostulantesController@create')->name('create');
             Route::post('/',                                            'PostulantesController@store')->name('store');
-            Route::get('/{postulante}/edit',                            'PostulantesController@edit')->name('edit');
+            Route::get('/{postulante}/edit',                            'PostulantesController@edit')->name('edit')->whereNumber('postulante');
             Route::post('/bulk-destroy',                                'PostulantesController@bulkDestroy')->name('bulk-destroy');
-            Route::post('/{postulante}',                                'PostulantesController@update')->name('update');
-            Route::delete('/{postulante}',                              'PostulantesController@destroy')->name('destroy');
-            Route::get('/{id}/comentario',                              'PostulantesController@comentario')->name('comentario');
-            Route::get('/{postulante}/imprimir',                        'PostulantesController@imprimir')->name('imprimir');
-            Route::post('/{id}/actualizar',                             'PostulantesController@actualizar')->name('actualizar');
+            Route::post('/{postulante}',                                'PostulantesController@update')->name('update')->whereNumber('postulante');
+            Route::delete('/{postulante}',                              'PostulantesController@destroy')->name('destroy')->whereNumber('postulante');
+            Route::get('/{id}/comentario',                              'PostulantesController@comentario')->name('comentario')->whereNumber('id');
+            Route::get('/{postulante}/imprimir',                        'PostulantesController@imprimir')->name('imprimir')->whereNumber('postulante');
+            Route::post('/{id}/actualizar',                             'PostulantesController@actualizar')->name('actualizar')->whereNumber('id');
             // Route::get('/exportar',                                     'PostulantesController@export')->name('export');
             // En tu archivo de rutas (routes/web.php o routes/admin.php)
-            Route::get('/exportar/{project_id}',                        'PostulantesController@exportar')->name('exportar');
+            Route::get('/exportar/{project_id}',                        'PostulantesController@exportar')->name('exportar')->whereNumber('project_id');
             Route::post('/miembro/guardar',                             'PostulantesController@guardarmiembro')->name('guardarmiembro');
             Route::post('/miembro/destroy',                             'PostulantesController@destroyMiembro')->name('destroy-miembro');
+
         });
     });
 });
@@ -571,10 +572,10 @@ Route::get('generate-pdf/{id}', [ProjectController::class, 'generatePDF'])->name
 Route::get('projects/ajax/{id}/checkdocuments/{project_id}/{sheets}', [ProjectController::class, 'checkdocuments']);
 
 // Postulantes
-Route::get('projects/{id}/postulantes', [PostulantesController::class, 'index']);
-Route::get('projects/{id}/postulantes/{idpostulante}', [PostulantesController::class, 'show'])->name('projects.postulantes.show');
-Route::get('/postulantes/edit/{id}/{idpostulante}', [PostulantesController::class, 'editarPostulante'])->name('postulantes.edit');
-Route::get('/miembros/edit/{id}/{idpostulante}', [PostulantesController::class, 'editmiembro'])->name('miembros.edit');
+Route::get('projects/{id}/postulantes', [PostulantesController::class, 'index'])->whereNumber('id');
+Route::get('projects/{id}/postulantes/{idpostulante}', [PostulantesController::class, 'show'])->name('projects.postulantes.show')->whereNumber('id')->whereNumber('idpostulante');
+Route::get('/postulantes/edit/{id}/{idpostulante}', [PostulantesController::class, 'editarPostulante'])->name('postulantes.edit')->whereNumber('id')->whereNumber('idpostulante');
+Route::get('/miembros/edit/{id}/{idpostulante}', [PostulantesController::class, 'editmiembro'])->name('miembros.edit')->whereNumber('id')->whereNumber('idpostulante');
 
 // Mostrar documentos
 Route::get('projectsDoc/{id}', [ProjectController::class, 'showDoc']);
@@ -600,13 +601,14 @@ Route::get('documents/eliminardocumento/{project_id}/{document_id}', [ProjectCon
 
 // POST públicas
 Route::get('projects/send/{id}', [ProjectController::class, 'send']);
-Route::post('projects/{id}/postulantes/create', [PostulantesController::class, 'create']);
+Route::match(['get', 'post'], 'projects/{id}/postulantes/create', [PostulantesController::class, 'create'])->whereNumber('id');
 // Route::post('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
-Route::get('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro']);
+Route::get('projects/{id}/postulantes/{x}/createmiembro', [PostulantesController::class, 'createmiembro'])->whereNumber('id');
 Route::post('postulantes/destroy', [PostulantesController::class, 'destroy']);
 Route::post('postulantes/destroymiembro', [PostulantesController::class, 'destroymiembro']);
 Route::post('savepostulante', [PostulantesController::class, 'store']);
 Route::post('savepostulanteEdit', [PostulantesController::class, 'storeEditPostulante']);
+
 Route::post('savemiembro', [PostulantesController::class, 'storemiembro']);
 Route::post('savemiembroeditar', [PostulantesController::class, 'updatemiembro']);
 

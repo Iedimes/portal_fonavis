@@ -74,8 +74,12 @@ class ProjectController extends Controller
         // Filtrar por código o nombre si se proporciona el término de búsqueda
         if ($search) {
             $projects = $projects->where(function($query) use ($search) {
-                $query->where('id', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%");
+                if (is_numeric($search)) {
+                    $query->where('id', $search)
+                        ->orWhere('name', 'ilike', "%{$search}%");
+                } else {
+                    $query->where('name', 'ilike', "%{$search}%");
+                }
             });
         }
 
