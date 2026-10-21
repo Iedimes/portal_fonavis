@@ -18,7 +18,7 @@
                             <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
                                 <label>Nombre del Proyecto</label>
                                 <input type="text" required class="form-control" name="name"
-                                    value="{{ old('name', isset($project['name']) ? utf8_decode($project['name']) : '') }}"
+                                    value="{{ old('name', isset($project['name']) ? $project['name'] : '') }}"
                                     placeholder="Ingrese Nombre del Proyecto">
                                 {!! $errors->first('name', '<span class="help-block">:message</span>') !!}
                             </div>
@@ -81,9 +81,10 @@
                             <!-- Nueva columna para ubicacion -->
                             <div class="form-group {{ $errors->has('ubicacion') ? 'has-error' : '' }}">
                                 <label for="exampleInputPassword1">Ubicación UTM</label>
-                                <input required type="text" class="form-control" name="ubicacion"
-                                    value="{{ old('ubicacion', isset($project['ubicacion']) ? $project['ubicacion'] : '') }}"
-                                    placeholder="Ingrese la ubicación">
+                                <input required type="text" class="form-control" name="ubicacion" maxlength="25"
+                                    value="{{ old('ubicacion', isset($project['ubicacion']) ? trim($project['ubicacion']) : '') }}"
+                                    placeholder="Ingrese ubicación (Ej: 21J, 21K)">
+                                <small class="form-text text-muted">Máx. 25 caracteres (Ej: 21J, 21K)</small>
                                 {!! $errors->first('ubicacion', '<span class="help-block">:message</span>') !!}
                             </div>
                         </div>

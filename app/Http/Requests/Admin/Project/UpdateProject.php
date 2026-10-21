@@ -42,7 +42,7 @@ class UpdateProject extends FormRequest
             'res_nro' => ['required'],
             'coordenadax' => ['nullable', 'string'],
             'coordenaday' => ['nullable', 'string'],
-            'ubicacion' => ['nullable', 'string'],
+            'ubicacion' => ['nullable', 'string', 'max:25'],
         ];
     }
 
@@ -55,7 +55,9 @@ class UpdateProject extends FormRequest
     {
         $sanitized = $this->validated();
 
-        //Add your code for manipulation with request data here
+        if (isset($sanitized['ubicacion'])) {
+            $sanitized['ubicacion'] = mb_substr(trim($sanitized['ubicacion']), 0, 25);
+        }
 
         return $sanitized;
     }

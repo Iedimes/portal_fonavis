@@ -148,7 +148,7 @@
 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('ubicacion'), 'has-success': fields.ubicacion && fields.ubicacion.valid }">
     <label for="ubicacion" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.project.columns.ubicacion') }}</label>
         <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.ubicacion" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('ubicacion'), 'form-control-success': fields.ubicacion && fields.ubicacion.valid}" id="ubicacion" name="ubicacion" placeholder="{{ trans('admin.project.columns.ubicacion') }}">
+        <input type="text" v-model="form.ubicacion" v-validate="'max:25'" maxlength="25" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('ubicacion'), 'form-control-success': fields.ubicacion && fields.ubicacion.valid}" id="ubicacion" name="ubicacion" placeholder="{{ trans('admin.project.columns.ubicacion') }}">
         <div v-if="errors.has('ubicacion')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('ubicacion') }}</div>
     </div>
 </div>

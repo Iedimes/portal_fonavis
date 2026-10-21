@@ -1035,7 +1035,7 @@ public function showTecnico($id)
         $project->coordenadax = $request->input("coordenadax");
         $project->coordenaday = $request->input("coordenaday");
         $project->finca_nro = $request->input("finca_nro");
-        $project->ubicacion = $request->input("ubicacion");
+        $project->ubicacion = mb_substr(trim($request->input("ubicacion")), 0, 25);
 
         $project->save();
 

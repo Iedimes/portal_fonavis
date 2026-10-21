@@ -17,6 +17,20 @@ class StoreProject extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('ubicacion') && is_string($this->ubicacion)) {
+            $this->merge([
+                'ubicacion' => mb_substr(trim($this->ubicacion), 0, 25),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -40,7 +54,7 @@ class StoreProject extends FormRequest
             'fechares' => 'required',
             'coordenadax' => 'required',
             'coordenaday' => 'required',
-            'ubicacion' => 'required',
+            'ubicacion' => ['required', 'string', 'max:25'],
 
 
             //'body' => 'required',
@@ -65,7 +79,8 @@ class StoreProject extends FormRequest
             'fechares.required'  => 'El campo  Fecha Resolucion es Requerido',
             'coordenadax.required'  => 'El campo Coordenada X es Requerido',
             'coordenaday.required'  => 'El campo Coordenada Y es Requerido',
-
+            'ubicacion.required' => 'El campo Ubicación es Requerido',
+            'ubicacion.max' => 'El campo Ubicación no debe superar los 25 caracteres',
         ];
     }
 
@@ -74,7 +89,9 @@ class StoreProject extends FormRequest
     {
         $sanitized = $this->validated();
 
-        //Add your code for manipulation with request data here
+        if (isset($sanitized['ubicacion'])) {
+            $sanitized['ubicacion'] = mb_substr(trim($sanitized['ubicacion']), 0, 25);
+        }
 
         return $sanitized;
     }
