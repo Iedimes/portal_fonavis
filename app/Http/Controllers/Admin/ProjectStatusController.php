@@ -123,6 +123,19 @@ class ProjectStatusController extends Controller
         $mailEnabled = env('MAIL_ENABLED', true);
 
         $projecto = Project::where('id', $request->project_id)->first();
+        if (!$projecto) {
+            return response()->json(['error' => 'No se encontró el proyecto'], 404);
+        }
+
+        // DGSO: en etapa 8, mientras finalizar calificación y migrar a SHD no estén finalizados, no se permite cambiar de estado
+        if ($ultimoEstado && $ultimoEstado->stage_id == 8 && (!$projecto->calificacion_finalizada || !$projecto->shd_migrated)) {
+            return response()->json([
+                'success' => false,
+                'redirect' => url('admin/projects/' . $projecto->id . '/showDGSO'),
+                'message' => 'Debe finalizar la calificación y migrar a SHD antes de cambiar de estado.'
+            ], 422);
+        }
+
         $sat = $projecto->sat_id;
         $satnombre = Sat::where('NucCod', $sat)->select('NucNomSat')->first();
 

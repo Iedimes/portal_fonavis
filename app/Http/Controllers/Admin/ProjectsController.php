@@ -1050,6 +1050,12 @@ class ProjectsController extends Controller
             abort(403, 'DGFO no tiene autorización para actuar sobre proyectos en estado OBSERVADO DGJN.');
         }
 
+        // DGSO: en etapa 8, mientras finalizar calificación y migrar a SHD no estén finalizados, no se puede cambiar de estado
+        if ($estado == 8 && (!$project->calificacion_finalizada || !$project->shd_migrated)) {
+            return redirect('admin/projects/' . $project->id . '/showDGSO')
+                ->with('error', 'Debe finalizar la calificación y migrar a SHD antes de cambiar de estado.');
+        }
+
         // DGTI (dependencia 7) tiene todas las etapas a su disposición en cualquier momento
         if ($dependencia == 7) {
             $stages = Stage::orderBy('id')->get();

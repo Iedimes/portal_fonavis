@@ -101,9 +101,26 @@
                                 </address>
                             </div>
                         </div>
-                        @if (!empty($project->getEstado) && $project->getEstado->stage_id == 8 && Auth::user()->rol_app->dependency_id == 3)
-                            <a href="{{ url('admin/projects/' . $project->id . '/transition') }}" type="button"
-                                class="btn btn-primary">CAMBIAR ESTADO</a>
+                        @if (!empty($project->getEstado) && $project->getEstado->stage_id == 8 && (Auth::user()->rol_app && (Auth::user()->rol_app->dependency_id == 3 || Auth::user()->rol_app->dependency_id == 7)))
+                            @if ($project->calificacion_finalizada && $project->shd_migrated)
+                                <a href="{{ url('admin/projects/' . $project->id . '/transition') }}" type="button"
+                                    class="btn btn-primary">CAMBIAR ESTADO</a>
+                            @else
+                                <button type="button" class="btn btn-secondary" disabled style="cursor: not-allowed;"
+                                    title="Debe finalizar la calificación y migrar a SHD para cambiar de estado">
+                                    <i class="fa fa-lock mr-1"></i> CAMBIAR ESTADO
+                                </button>
+                                <span class="text-danger ml-2 font-weight-bold" style="font-size: 0.9rem;">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    @if (!$project->calificacion_finalizada && !$project->shd_migrated)
+                                        Para habilitar el cambio de estado, debe finalizar la calificación y migrar a SHD.
+                                    @elseif (!$project->calificacion_finalizada)
+                                        Para habilitar el cambio de estado, debe finalizar la calificación.
+                                    @else
+                                        Para habilitar el cambio de estado, debe migrar a SHD.
+                                    @endif
+                                </span>
+                            @endif
                         @endif
                     </div>
 
