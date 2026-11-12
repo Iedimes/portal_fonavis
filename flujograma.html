@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujograma del Circuito de Procesos - FONAVIS (SIPP)</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Mermaid.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- svg-pan-zoom for zoom/pan functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        .header-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .diagram-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            min-height: 800px;
+            position: relative;
+        }
+        #mermaidContainer {
+            overflow: hidden;
+            width: 100%;
+            height: 750px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #fafbfc;
+        }
+        .controls-bar {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .legend-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-right: 8px;
+            margin-bottom: 6px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+<div class="container-fluid max-width-1600">
+    <!-- Header -->
+    <div class="header-card d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="mb-1"><i class="fa fa-sitemap me-2"></i> Flujograma del Circuito de Procesos - FONAVIS (SIPP)</h2>
+            <p class="mb-0 text-white-50">Diagrama interactivo de las 22 etapas con <strong>DGFO como PIVOT central</strong></p>
+        </div>
+        <div>
+            <button class="btn btn-light btn-sm shadow-sm" onclick="exportToSvg()">
+                <i class="fa fa-download me-1 text-primary"></i> Descargar Imagen (SVG)
+            </button>
+            <button class="btn btn-outline-light btn-sm ms-2" onclick="window.print()">
+                <i class="fa fa-print me-1"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Leyenda y Controles -->
+    <div class="card p-3 mb-3 border-0 shadow-sm">
+        <div class="controls-bar">
+            <div>
+                <span class="legend-badge bg-light border text-dark"><span class="legend-dot bg-success"></span>Inicio / Fin (Adjudicado)</span>
+                <span class="legend-badge bg-light border text-primary"><span class="legend-dot bg-primary"></span>DGFO (Pivot Central)</span>
+                <span class="legend-badge bg-light border text-dark"><span class="legend-dot" style="background-color: #6f42c1;"></span>Direcciones Evaluadoras</span>
+                <span class="legend-badge bg-light border text-dark"><span class="legend-dot bg-warning"></span>Observaciones / Subsanación</span>
+                <span class="legend-badge bg-light border text-dark"><span class="legend-dot bg-danger"></span>Rechazo</span>
+            </div>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" onclick="zoomIn()"><i class="fa fa-search-plus"></i></button>
+                <button class="btn btn-outline-secondary" onclick="zoomOut()"><i class="fa fa-search-minus"></i></button>
+                <button class="btn btn-outline-secondary" onclick="resetZoom()"><i class="fa fa-sync-alt"></i> Centrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor del Diagrama -->
+    <div class="diagram-card">
+        <div id="mermaidContainer" class="d-flex justify-content-center align-items-center">
+            <div class="mermaid" id="mermaidDiagram">
+flowchart TD
+    %% FASE 0: PREPARACIÓN Y ALTA POR EL SAT
+    subgraph FASE0 ["FASE 0: Alta y Preparación del Proyecto por el SAT"]
+        SAT_START(["SAT: Ingreso al Portal SIPP"]) --> SAT_ALTA["1. Alta de Proyecto (projects/create)<br>Nombre, Modalidad, Tipología y Terreno"]
+        SAT_ALTA --> SAT_DOCS["2. Carga de Documentación Inicial<br>Títulos de Terreno, Notas, Personería"]
+        SAT_DOCS --> SAT_POST["3. Registro de Postulantes y Familias<br>Titulares, Cónyuges, Miembros e Ingresos"]
+        SAT_POST --> SAT_ENVIO["4. Envío Formal de Proyecto (projects/send)<br>Validación final de requisitos"]
+    end
+
+    SAT_ENVIO --> E1["1. ENVIADO<br>(Entrada Oficial a MUVH - Bloqueo de Edición SAT)"]
+    
+    %% FASE 1: RECEPCION Y JURIDICA
+    subgraph FASE1 ["FASE 1: Entrada y Evaluación Jurídica"]
+        E1 --> P1{"DGFO (Pivot):<br>showVERDOCFONAVIS"}
+        P1 --> E2["2. REVISIÓN PRELIMINAR"]
+        E2 --> DGJN["DGJN: Revisión Legal de Títulos"]
+        DGJN --> E3["3. APROBADO DGJN"]
+        DGJN --> E4["4. OBSERVADO DGJN"]
+        DGJN --> E6["6. RECHAZADO DGJN"]
+        E4 -->|SAT Carga Documentos Subsanatorios| E5["5. CON DOCUMENTACIÓN DGJN"]
+        E5 --> DGJN
+    end
+
+    %% FASE 2: SOCIAL
+    subgraph FASE2 ["FASE 2: Evaluación y Calificación Social"]
+        E3 --> P2{"DGFO (Pivot):<br>showFONAVISSOCIAL"}
+        P2 --> E7["7. EVALUACIÓN SOCIAL / 8. GRUPO FAMILIAR ENVIADO"]
+        E7 --> DGSO["DGSO: Calificación de Ingresos y Familias"]
+        DGSO -->|Cierre y Migración SHD| E9["9. CON DICTAMEN SOCIAL"]
+    end
+
+    %% FASE 3: AMBIENTAL
+    subgraph FASE3 ["FASE 3: Verificación Ambiental y de Suelo"]
+        E9 --> P3{"DGFO (Pivot):<br>showFONAVISTECNICO"}
+        P3 --> E10["10. EVALUACIÓN TÉCNICA"]
+        E10 --> E11["11. DOC. TÉCNICA ENVIADA"]
+        E11 -->|DGFO remite| E12["12. VERIFICACIÓN TÉCNICO AMBIENTAL"]
+        E12 --> DIGH["DIGH (Hábitat): Inspección in situ"]
+        DIGH --> E13["13. CON INFORME VTA"]
+        DIGH --> E14["14. OBSERVACIÓN DIGH"]
+        DIGH --> E15["15. RECHAZADO DIGH"]
+        E14 -->|SAT Subsana Observaciones| E11
+    end
+
+    %% FASE 4: HABITACIONAL
+    subgraph FASE4 ["FASE 4: Evaluación Técnico Habitacional y Obras"]
+        E13 --> P4{"DGFO (Pivot):<br>showFONAVISTECNICODOS"}
+        P4 --> E16["16. EVALUACIÓN TÉCNICO HABITACIONAL"]
+        E16 --> DSGO["DSGO (Grupos Organizados): Planos y Cómputo"]
+        DSGO --> E19["19. CON CALIFICACIÓN TÉCNICA HABITACIONAL"]
+        DSGO --> E17["17. OBSERVACIÓN DSGO"]
+        DSGO --> E18["18. RECHAZADO DSGO"]
+        E17 -->|SAT Subsana Planos| E16
+    end
+
+    %% FASE 5: ADJUDICACION
+    subgraph FASE5 ["FASE 5: Adjudicación Ministerial"]
+        E19 --> P5{"DGFO (Pivot):<br>showFONAVISADJ"}
+        P5 --> E20(["20. ADJUDICADO<br>(Resolución Ministerial y Subsidios)"])
+    end
+
+    %% DEVOLUCIONES
+    subgraph DEVOLUCIONES ["Circuito de Devolución al SAT"]
+        E2 -.->|Inviable| E21["21. DEVOLUCIÓN FONAVIS"]
+        E4 -.->|Insubsanable| E21
+        E16 -.->|No factible| E21
+        E19 -.->|Revisión final| E21
+        E21 --> P_DEV{"DGFO (Pivot):<br>Formaliza Devolución"}
+        P_DEV --> E22["22. DEVOLUCIÓN SAT"]
+        E22 -.->|SAT Rehace o Corrige el Proyecto| SAT_ALTA
+    end
+
+    %% ESTILOS
+    classDef satStyle fill:#e7f5ea,stroke:#28a745,stroke-width:2px,color:#1e7e34;
+    classDef startEnd fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff;
+    classDef pivotStyle fill:#e8f4fd,stroke:#0d6efd,stroke-width:2px,color:#084298;
+    classDef evalStyle fill:#6f42c1,stroke:#59359a,stroke-width:2px,color:#fff;
+    classDef obsStyle fill:#fd7e14,stroke:#c75f08,stroke-width:2px,color:#fff;
+    classDef rejStyle fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff;
+
+    class SAT_START,E20 startEnd;
+    class SAT_ALTA,SAT_DOCS,SAT_POST,SAT_ENVIO satStyle;
+    class P1,P2,P3,P4,P5,P_DEV,E1,E2,E10,E11 pivotStyle;
+    class DGJN,DGSO,DIGH,DSGO,E3,E7,E9,E12,E13,E16,E19 evalStyle;
+    class E4,E5,E14,E17,E21,E22 obsStyle;
+    class E6,E15,E18 rejStyle;
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let panZoomInstance = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        // Esperar a que mermaid dibuje el SVG para inicializar pan-zoom
+        setTimeout(function() {
+            const svgElement = document.querySelector('#mermaidContainer svg');
+            if (svgElement) {
+                svgElement.style.width = '100%';
+                svgElement.style.height = '100%';
+                panZoomInstance = svgPanZoom(svgElement, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: false,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.2,
+                    maxZoom: 5
+                });
+            }
+        }, 1200);
+    });
+
+    function zoomIn() {
+        if (panZoomInstance) panZoomInstance.zoomIn();
+    }
+
+    function zoomOut() {
+        if (panZoomInstance) panZoomInstance.zoomOut();
+    }
+
+    function resetZoom() {
+        if (panZoomInstance) {
+            panZoomInstance.resetZoom();
+            panZoomInstance.center();
+        }
+    }
+
+    function exportToSvg() {
+        const svg = document.querySelector('#mermaidContainer svg');
+        if (!svg) {
+            alert('El diagrama aún se está cargando...');
+            return;
+        }
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svg);
+        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'flujograma_fonavis_sipp.svg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
