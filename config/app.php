@@ -41,6 +41,8 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'dgso_planilla_calificacion_enabled' => (bool) env('DGSO_PLANILLA_CALIFICACION_ENABLED', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

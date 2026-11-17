@@ -548,12 +548,14 @@ class ProjectsController extends Controller
             ->with(['getPostulante', 'getMembers.getPostulante'])
             ->get();
 
-        // Establecer califica='S' por defecto para postulantes sin calificar
-        foreach ($postulantes as $php) {
-            $p = $php->getPostulante;
-            if ($p && $p->califica === null) {
-                $p->califica = 'S';
-                $p->save();
+        if (config('app.dgso_planilla_calificacion_enabled')) {
+            // Establecer califica='S' por defecto para postulantes sin calificar
+            foreach ($postulantes as $php) {
+                $p = $php->getPostulante;
+                if ($p && $p->califica === null) {
+                    $p->califica = 'S';
+                    $p->save();
+                }
             }
         }
 
@@ -579,10 +581,12 @@ class ProjectsController extends Controller
             ->pluck('file_path', 'document_id')
             ->toArray();
 
-        // Obtener número de planilla automático
-        $email = Auth::user()->email ?? '';
-        $username = strstr($email, '@', true) ?: 'PORTAL';
-        $planilla = $migrationService->getOrRegisterPlanillaNumber($project, $username);
+        $planilla = null;
+        if (config('app.dgso_planilla_calificacion_enabled')) {
+            $email = Auth::user()->email ?? '';
+            $username = strstr($email, '@', true) ?: 'PORTAL';
+            $planilla = $migrationService->getOrRegisterPlanillaNumber($project, $username);
+        }
 
         return view('admin.project.DGSO.show', compact(
             'project',
@@ -599,6 +603,8 @@ class ProjectsController extends Controller
 
     public function finalizarCalificacion(Project $project, SHDMigrationService $migrationService)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         if ($project->calificacion_finalizada) {
             return redirect('admin/projects/' . $project->id . '/showDGSO')
                 ->with('status', 'La calificación ya está finalizada.');
@@ -640,6 +646,8 @@ class ProjectsController extends Controller
 
     public function migrarSHD(Request $request, Project $project, SHDMigrationService $migrationService)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         if (!$project->calificacion_finalizada) {
             return redirect('admin/projects/' . $project->id . '/showDGSO')
                 ->with('error', 'Debe finalizar la calificación antes de migrar a SHD.');
@@ -1050,8 +1058,7 @@ class ProjectsController extends Controller
             abort(403, 'DGFO no tiene autorización para actuar sobre proyectos en estado OBSERVADO DGJN.');
         }
 
-        // DGSO: en etapa 8, mientras finalizar calificación y migrar a SHD no estén finalizados, no se puede cambiar de estado
-        if ($estado == 8 && (!$project->calificacion_finalizada || !$project->shd_migrated)) {
+        if (config('app.dgso_planilla_calificacion_enabled') && $estado == 8 && (!$project->calificacion_finalizada || !$project->shd_migrated)) {
             return redirect('admin/projects/' . $project->id . '/showDGSO')
                 ->with('error', 'Debe finalizar la calificación y migrar a SHD antes de cambiar de estado.');
         }
@@ -1448,6 +1455,8 @@ class ProjectsController extends Controller
 
     public function crearmiembro(Request $request, $project, $postulante)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         // return $request;
         // Obtener el estado del proyecto
         $proyectoEstado = ProjectStatus::where('project_id', $project)->latest()->first();
@@ -1513,6 +1522,8 @@ class ProjectsController extends Controller
 
     public function crearmiembroNoCge(Request $request, $project, $postulante)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         // return $request;
         // Obtener el estado del proyecto
         $proyectoEstado = ProjectStatus::where('project_id', $project)->latest()->first();

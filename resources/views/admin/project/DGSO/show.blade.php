@@ -102,7 +102,7 @@
                             </div>
                         </div>
                         @if (!empty($project->getEstado) && $project->getEstado->stage_id == 8 && (Auth::user()->rol_app && (Auth::user()->rol_app->dependency_id == 3 || Auth::user()->rol_app->dependency_id == 7)))
-                            @if ($project->calificacion_finalizada && $project->shd_migrated)
+                            @if (!config('app.dgso_planilla_calificacion_enabled') || ($project->calificacion_finalizada && $project->shd_migrated))
                                 <a href="{{ url('admin/projects/' . $project->id . '/transition') }}" type="button"
                                     class="btn btn-primary">CAMBIAR ESTADO</a>
                             @else
@@ -111,14 +111,7 @@
                                     <i class="fa fa-lock mr-1"></i> CAMBIAR ESTADO
                                 </button>
                                 <span class="text-danger ml-2 font-weight-bold" style="font-size: 0.9rem;">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    @if (!$project->calificacion_finalizada && !$project->shd_migrated)
-                                        Para habilitar el cambio de estado, debe finalizar la calificación y migrar a SHD.
-                                    @elseif (!$project->calificacion_finalizada)
-                                        Para habilitar el cambio de estado, debe finalizar la calificación.
-                                    @else
-                                        Para habilitar el cambio de estado, debe migrar a SHD.
-                                    @endif
+                                    Para habilitar el cambio de estado, debe finalizar la calificación y migrar a SHD.
                                 </span>
                             @endif
                         @endif
@@ -159,6 +152,7 @@
                 </div>
             </div>
 
+            @if (config('app.dgso_planilla_calificacion_enabled'))
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="m-0 text-center flex-grow-1">PLANILLA DE CALIFICACION</h2>
@@ -512,9 +506,11 @@
             </div>
         </div>
     </div>
+    @endif
 
 @endsection
 
+@if (config('app.dgso_planilla_calificacion_enabled'))
 <script type="text/javascript">
     const dgsoFinalizada = {{ $project->calificacion_finalizada ? 'true' : 'false' }};
 
@@ -750,3 +746,4 @@
         }
     });
 </script>
+@endif

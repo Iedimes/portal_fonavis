@@ -177,8 +177,7 @@ class ProjectStatusController extends Controller
             return response()->json(['error' => 'No se encontró el proyecto'], 404);
         }
 
-        // DGSO: en etapa 8, mientras finalizar calificación y migrar a SHD no estén finalizados, no se permite cambiar de estado
-        if ($ultimoEstado && $ultimoEstado->stage_id == 8 && (!$projecto->calificacion_finalizada || !$projecto->shd_migrated)) {
+        if (config('app.dgso_planilla_calificacion_enabled') && $ultimoEstado && $ultimoEstado->stage_id == 8 && (!$projecto->calificacion_finalizada || !$projecto->shd_migrated)) {
             return response()->json([
                 'success' => false,
                 'redirect' => url('admin/projects/' . $projecto->id . '/showDGSO'),

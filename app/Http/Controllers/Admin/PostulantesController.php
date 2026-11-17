@@ -150,6 +150,10 @@ class PostulantesController extends Controller
      */
     public function update(UpdatePostulante $request, Postulante $postulante)
     {
+        if (!config('app.dgso_planilla_calificacion_enabled') && $this->isProjectPlanillaPostulante($postulante->id)) {
+            abort(403, 'La planilla de calificación está deshabilitada.');
+        }
+
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -191,6 +195,10 @@ class PostulantesController extends Controller
 
         if (!$postulante) {
             return back()->with('error', 'Postulante no encontrado');
+        }
+
+        if (!config('app.dgso_planilla_calificacion_enabled') && $this->isProjectPlanillaPostulante($postulante->id)) {
+            abort(403, 'La planilla de calificación está deshabilitada.');
         }
 
         // Verificar si es un TITULAR
@@ -238,6 +246,14 @@ class PostulantesController extends Controller
      */
     public function bulkDestroy(BulkDestroyPostulante $request): Response
     {
+        if (!config('app.dgso_planilla_calificacion_enabled')) {
+            foreach ($request->data['ids'] as $postulanteId) {
+                if ($this->isProjectPlanillaPostulante($postulanteId)) {
+                    abort(403, 'La planilla de calificación está deshabilitada.');
+                }
+            }
+        }
+
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
                 ->chunk(1000)
@@ -321,6 +337,12 @@ class PostulantesController extends Controller
     public function actualizar(Request $request, $id)
     {
         return DB::transaction(function () use ($request, $id) {
+            $postulante = Postulante::findOrFail($id);
+
+            if (!config('app.dgso_planilla_calificacion_enabled') && $this->isProjectPlanillaPostulante($postulante->id)) {
+                return response()->json(['error' => 'La planilla de calificación está deshabilitada.'], 403);
+            }
+
             $user = Auth::user();
             $email = $user->email;
             $username = strtoupper(explode('@', $email)[0]);
@@ -333,9 +355,6 @@ class PostulantesController extends Controller
             $request->validate([
                 'field' => 'required|string',
             ]);
-
-            // Buscar el postulante
-            $postulante = Postulante::findOrFail($id);
 
             // Verificar si la calificación del proyecto ya fue finalizada
             $projectHasPostulante = ProjectHasPostulantes::where('postulante_id', $id)->first();
@@ -451,6 +470,8 @@ class PostulantesController extends Controller
 
     public function exportar($projectId = null)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         if (!$projectId) {
             $projectId = request()->get('project_id');
         }
@@ -484,6 +505,8 @@ class PostulantesController extends Controller
 
     public function guardarmiembro(Request $request)
     {
+        abort_unless(config('app.dgso_planilla_calificacion_enabled'), 403, 'La planilla de calificación está deshabilitada.');
+
         // Validar los campos esenciales que vienen del formulario
         $request->validate([
             'cedula' => 'required|string|max:255',
@@ -581,5 +604,17 @@ class PostulantesController extends Controller
                 'mensaje' => 'Error al validar la fecha de nacimiento. Verifique que la fecha sea válida.'
             ];
         }
+    }
+
+    private function isProjectPlanillaPostulante($postulanteId): bool
+    {
+        if (ProjectHasPostulantes::where('postulante_id', $postulanteId)->exists()) {
+            return true;
+        }
+
+        $beneficiary = PostulanteHasBeneficiary::where('miembro_id', $postulanteId)->first();
+
+        return $beneficiary !== null
+            && ProjectHasPostulantes::where('postulante_id', $beneficiary->postulante_id)->exists();
     }
 }
