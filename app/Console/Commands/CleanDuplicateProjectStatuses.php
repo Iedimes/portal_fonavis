@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\ProjectStatusF;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CleanDuplicateProjectStatuses extends Command
 {
@@ -13,14 +14,14 @@ class CleanDuplicateProjectStatuses extends Command
      *
      * @var string
      */
-    protected $signature = 'project:clean-duplicates {--dry-run : Muestra los duplicados detectados sin realizar cambios} {--force : Elimina los duplicados sin solicitar confirmación}';
+    protected $signature = 'project:clean-duplicates {--date= : Fecha a revisar (AAAA-MM-DD); por defecto, ayer} {--year= : Año calendario completo a revisar (AAAA)} {--dry-run : Muestra los duplicados detectados sin realizar cambios} {--force : Elimina sin solicitar confirmación}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Detecta y elimina registros consecutivos duplicados en el historial de estados de proyectos, conservando los registros con documentos adjuntos.';
+    protected $description = 'Detecta duplicados consecutivos de una fecha o año y elimina solo los que no tienen adjuntos.';
 
     /**
      * Execute the console command.
@@ -31,79 +32,112 @@ class CleanDuplicateProjectStatuses extends Command
     {
         $isDryRun = $this->option('dry-run');
         $force = $this->option('force');
+        $date = $this->option('date');
+        $year = $this->option('year');
 
-        $this->info("Analizando tabla 'project_status' en busca de duplicados...");
+        if ($date && $year) {
+            $this->error('Usa --date o --year, no ambos a la vez.');
+            return 1;
+        }
 
-        $allStatuses = ProjectStatusF::with('imagen')->orderBy('project_id')->orderBy('id')->get();
+        if ($year && (!preg_match('/^\d{4}$/', $year) || (int) $year < 1000)) {
+            $this->error('El año debe tener el formato AAAA.');
+            return 1;
+        }
+
+        if (!$year) {
+            $date = $date ?: Carbon::yesterday()->toDateString();
+            $parsedDate = Carbon::createFromFormat('!Y-m-d', $date);
+            if (!$parsedDate || $parsedDate->format('Y-m-d') !== $date) {
+                $this->error('La fecha debe tener el formato AAAA-MM-DD y ser válida.');
+                return 1;
+            }
+        }
+
+        $period = $year ? "del año {$year}" : "del {$date}";
+        $this->info("Analizando estados duplicados {$period}...");
+
+        $query = ProjectStatusF::with('imagen');
+        if ($year) {
+            $query->whereYear('created_at', $year);
+        } else {
+            $query->whereDate('created_at', $date);
+        }
+
+        $allStatuses = $query
+            ->orderBy('project_id')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
         $byProject = $allStatuses->groupBy('project_id');
 
         $toDeleteIds = [];
         $summary = [];
 
         foreach ($byProject as $projectId => $statuses) {
-            $prev = null;
+            $previous = null;
+            $firstInRun = null;
             foreach ($statuses as $status) {
-                if ($prev !== null) {
-                    if ($prev->stage_id == $status->stage_id) {
-                        $timeDiff = ($prev->created_at && $status->created_at) ? $prev->created_at->diffInSeconds($status->created_at) : 0;
+                $timeDiff = ($previous && $previous->created_at && $status->created_at)
+                    ? $previous->created_at->diffInSeconds($status->created_at)
+                    : null;
 
-                        // Duplicados dentro de los 10 minutos o consecutivos
-                        if ($timeDiff < 600) {
-                            $prevHasFiles = $prev->imagen->count() > 0;
-                            $currHasFiles = $status->imagen->count() > 0;
+                $isDuplicate = $previous
+                    && $previous->stage_id == $status->stage_id
+                    && $timeDiff !== null
+                    && $timeDiff < 600;
 
-                            if ($prevHasFiles && !$currHasFiles) {
-                                $deleteId = $status->id;
-                                $keepId = $prev->id;
-                            } else if ($currHasFiles && !$prevHasFiles) {
-                                $deleteId = $prev->id;
-                                $keepId = $status->id;
-                                $prev = $status; // Conservamos el actual que tiene archivos
-                            } else {
-                                $deleteId = $status->id;
-                                $keepId = $prev->id;
-                            }
-
-                            $toDeleteIds[] = $deleteId;
-
-                            $summary[] = [
-                                'Proyecto' => $projectId,
-                                'Etapa ID' => $status->stage_id,
-                                'Mantener ID' => $keepId,
-                                'Eliminar ID' => $deleteId,
-                                'Archivos Mantener' => $keepId == $prev->id ? $prev->imagen->count() : $status->imagen->count(),
-                                'Archivos Eliminar' => $deleteId == $status->id ? $status->imagen->count() : $prev->imagen->count(),
-                                'Diferencia (seg)' => $timeDiff,
-                            ];
-                            continue;
-                        }
+                if ($isDuplicate) {
+                    if (!$firstInRun) {
+                        $firstInRun = $previous;
                     }
+
+                    $hasFiles = $status->imagen->isNotEmpty();
+                    $action = $hasFiles ? 'Conservar (tiene adjuntos)' : 'Eliminar';
+
+                    if (!$hasFiles) {
+                        $toDeleteIds[] = $status->id;
+                    }
+
+                    $summary[] = [
+                        'Proyecto' => $projectId,
+                        'Etapa ID' => $status->stage_id,
+                        'Estado duplicado' => $status->id,
+                        'Primer estado' => $firstInRun->id,
+                        'Acción' => $action,
+                        'Adjuntos' => $status->imagen->count(),
+                        'Diferencia (seg)' => $timeDiff,
+                    ];
+                } else {
+                    $firstInRun = $status;
                 }
-                $prev = $status;
+
+                $previous = $status;
             }
         }
 
         $uniqueDeleteIds = array_values(array_unique($toDeleteIds));
         $totalDuplicates = count($uniqueDeleteIds);
 
-        if ($totalDuplicates === 0) {
-            $this->info("¡No se encontraron registros duplicados!");
+        if (count($summary) === 0) {
+            $this->info("No se encontraron duplicados consecutivos {$period}.");
             return 0;
         }
 
         $this->table(
-            ['Proyecto', 'Etapa ID', 'Mantener ID', 'Eliminar ID', 'Archivos Mantener', 'Archivos Eliminar', 'Diferencia (seg)'],
-            array_slice($summary, 0, 20)
+            ['Proyecto', 'Etapa ID', 'Estado duplicado', 'Primer estado', 'Acción', 'Adjuntos', 'Diferencia (seg)'],
+            $summary
         );
 
-        if (count($summary) > 20) {
-            $this->comment("...y " . (count($summary) - 20) . " registros duplicados más.");
-        }
-
-        $this->warn("Total de registros duplicados detectados para eliminar: {$totalDuplicates}");
+        $this->warn("Duplicados sin adjuntos candidatos a eliminar: {$totalDuplicates}");
 
         if ($isDryRun) {
             $this->info("[DRY RUN] No se realizaron cambios en la base de datos.");
+            return 0;
+        }
+
+        if ($totalDuplicates === 0) {
+            $this->info('No hay registros sin adjuntos para eliminar.');
             return 0;
         }
 
@@ -112,11 +146,13 @@ class CleanDuplicateProjectStatuses extends Command
             return 0;
         }
 
-        DB::transaction(function () use ($uniqueDeleteIds) {
-            ProjectStatusF::whereIn('id', $uniqueDeleteIds)->delete();
+        $deleted = DB::transaction(function () use ($uniqueDeleteIds) {
+            return ProjectStatusF::whereIn('id', $uniqueDeleteIds)
+                ->whereDoesntHave('imagen')
+                ->delete();
         });
 
-        $this->info("¡Limpieza completada con éxito! Se eliminaron {$totalDuplicates} registros duplicados de la base de datos.");
+        $this->info("Limpieza completada. Se eliminaron {$deleted} registros sin adjuntos.");
 
         return 0;
     }

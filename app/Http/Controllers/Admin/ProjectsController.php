@@ -1196,7 +1196,7 @@ class ProjectsController extends Controller
         $history = collect();
         $previous = null;
         foreach ($rawHistory as $item) {
-            if ($previous && $previous->stage_id == $item->stage_id && $previous->record == $item->record) {
+            if ($previous && $item->imagen->isEmpty() && $previous->stage_id == $item->stage_id && $previous->record == $item->record) {
                 if ($item->created_at && $previous->created_at && $item->created_at->diffInMinutes($previous->created_at) <= 5) {
                     continue;
                 }

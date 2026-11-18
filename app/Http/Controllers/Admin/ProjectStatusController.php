@@ -27,6 +27,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -150,6 +151,7 @@ class ProjectStatusController extends Controller
         // Obtener el último estado del proyecto
         $ultimoEstado = ProjectStatus::where('project_id', $request->project_id)
                             ->orderBy('created_at', 'desc')
+                            ->orderBy('id', 'desc')
                             ->first();
 
         if ($ultimoEstado && $ultimoEstado->stage_id == $sanitized['stage_id']) {
@@ -200,7 +202,7 @@ class ProjectStatusController extends Controller
             $subject = 'PROYECTO ' . $projecto->name . ' PARA REVISION PRELIMINAR';
 
             // Store the ProjectStatus
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled && !empty($userEmails)) {
                 $this->sendViewMailSafely(
@@ -230,8 +232,11 @@ class ProjectStatusController extends Controller
 
             try {
                 $proyecto = Project::findOrFail($request->input('project_id'));
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (\Exception $e) {
                 DB::rollBack();
                 \Log::error('Error guardando etapa 3 (APROBADO DGJN): ' . $e->getMessage());
@@ -302,8 +307,11 @@ class ProjectStatusController extends Controller
 
             try {
                 $proyecto = Project::findOrFail($request->input('project_id'));
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (\Exception $e) {
                 DB::rollBack();
                 \Log::error('Error guardando etapa 4 (ARCHIVADO/OBSERVADO DGJN): ' . $e->getMessage());
@@ -373,8 +381,11 @@ class ProjectStatusController extends Controller
 
             try {
                 $proyecto = Project::findOrFail($request->input('project_id'));
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (\Exception $e) {
                 DB::rollBack();
                 \Log::error('Error guardando etapa 6 (RECHAZADO DGJN): ' . $e->getMessage());
@@ -445,8 +456,11 @@ class ProjectStatusController extends Controller
                     return response()->json(['error' => 'No se encontró el proyecto'], 404);
                 }
 
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (Exception $e) {
                 DB::rollBack();
 
@@ -502,8 +516,11 @@ class ProjectStatusController extends Controller
                     return response()->json(['error' => 'No se encontró el proyecto'], 404);
                 }
 
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (Exception $e) {
                 DB::rollBack();
 
@@ -549,8 +566,11 @@ class ProjectStatusController extends Controller
                     return response()->json(['error' => 'No se encontró el proyecto'], 404);
                 }
 
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (Exception $e) {
                 DB::rollBack();
                 return response()->json([
@@ -600,8 +620,11 @@ class ProjectStatusController extends Controller
                     return response()->json(['error' => 'No se encontró el proyecto'], 404);
                 }
 
-                $projectStatus = ProjectStatus::create($sanitized);
+                $projectStatus = $this->createProjectStatus($sanitized);
                 DB::commit();
+            } catch (HttpResponseException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (Exception $e) {
                 DB::rollBack();
                 return response()->json([
@@ -660,7 +683,7 @@ class ProjectStatusController extends Controller
 
             $subject = 'INFORME VTA ' . $projecto[0]->name;
 
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled) {
                 $this->sendViewMailSafely(
@@ -701,7 +724,7 @@ class ProjectStatusController extends Controller
 
             $subject = 'RECHAZADO POR DIGH ' . $projecto[0]->name;
 
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled) {
                 $this->sendViewMailSafely(
@@ -736,7 +759,7 @@ class ProjectStatusController extends Controller
 
             $subject = 'PARA EVALUACION TECNICO HABITACIONAL ' . $projecto[0]->name;
 
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled) {
                 $this->sendViewMailSafely(
@@ -778,7 +801,7 @@ class ProjectStatusController extends Controller
 
             $subject = 'CALIFICACION TECNICA HABITACIONAL ' . $projecto[0]->name;
 
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled) {
                 $this->sendViewMailSafely(
@@ -823,7 +846,7 @@ class ProjectStatusController extends Controller
 
             $subject = 'ADJUDICACION DE PROYECTO ' . $projecto[0]->name;
 
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             if ($mailEnabled) {
                 $this->sendViewMailSafely(
@@ -848,7 +871,7 @@ class ProjectStatusController extends Controller
                 'redirect' => url('admin/projects/' . $request['project_id'] . '/showFONAVIS')
             ]);
         } else {
-            $projectStatus = ProjectStatus::create($sanitized);
+            $projectStatus = $this->createProjectStatus($sanitized);
 
             return response()->json([
                 'redirect' => url('admin/projects/' . $request['project_id'] . '/show')
@@ -856,6 +879,32 @@ class ProjectStatusController extends Controller
         }
     }
 
+
+    private function createProjectStatus(array $attributes): ProjectStatus
+    {
+        return DB::transaction(function () use ($attributes) {
+            $project = Project::whereKey($attributes['project_id'])->lockForUpdate()->first();
+            if (!$project) {
+                throw new HttpResponseException(response()->json(['error' => 'No se encontró el proyecto'], 404));
+            }
+
+            $ultimoEstado = ProjectStatus::where('project_id', $attributes['project_id'])
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->lockForUpdate()
+                ->first();
+
+            if ($ultimoEstado && (int) $ultimoEstado->stage_id === (int) $attributes['stage_id']) {
+                throw new HttpResponseException(response()->json([
+                    'success' => false,
+                    'redirect' => route('adminprojectsindex'),
+                    'message' => 'No se puede registrar el mismo estado consecutivo.'
+                ]));
+            }
+
+            return ProjectStatus::create($attributes);
+        });
+    }
 
     public function storeNotificacion(Request $request)
     {

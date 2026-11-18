@@ -29,7 +29,8 @@ class ProjectStatusF extends Model implements HasMedia, AuditableContract
 
     public function imagen()
     {
-        return $this->hasMany('App\Models\Medium', 'model_id', 'id');
+        return $this->hasMany(Medium::class, 'model_id', 'id')
+            ->whereIn('model_type', [ProjectStatus::class, self::class]);
     }
 
     public function getStage() {
