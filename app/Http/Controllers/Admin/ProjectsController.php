@@ -24,6 +24,7 @@ use App\Models\ProjectHasExpediente;
 use App\Models\Documents;
 use App\Models\Documentsmissing;
 use App\Services\SHDMigrationService;
+use App\Services\ProjectStatusRecorder;
 use App\Models\Medium;
 use App\Models\Modality;
 use App\Models\Land;
@@ -882,7 +883,7 @@ class ProjectsController extends Controller
             ->exists();
 
         if (!$hasStage14) {
-            ProjectStatus::create([
+            app(ProjectStatusRecorder::class)->createUnlessConsecutive([
                 'project_id' => $project->id,
                 'stage_id' => 14,
                 'user_id' => auth()->id(),
@@ -921,7 +922,7 @@ class ProjectsController extends Controller
             ->exists();
 
         if (!$hasStage17) {
-            ProjectStatus::create([
+            app(ProjectStatusRecorder::class)->createUnlessConsecutive([
                 'project_id' => $project->id,
                 'stage_id' => 17,
                 'user_id' => auth()->id(),

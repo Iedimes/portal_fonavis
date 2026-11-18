@@ -26,6 +26,7 @@ use App\Models\User;
 use App\Models\AdminUser;
 use App\Models\AdminUsersDependency;
 use App\Models\DighObservation;
+use App\Services\ProjectStatusRecorder;
 use Symfony\Component\HttpFoundation\Response;
 use PDF;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -801,16 +802,12 @@ class ProjectController extends Controller
                 return response()->json(['message' => 'Existe al menos un cónyuge menor de 18 años. No se puede enviar el proyecto.'], 400);
             }
 
-            // Guardar estado del proyecto (evitando duplicados por clic múltiple)
-            $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
-            if (!$ultimoEstado || $ultimoEstado->stage_id != '8') {
-                $state = new ProjectStatusF();
-                $state->project_id = $id;
-                $state->stage_id = '8';
-                $state->user_id = Auth::user()->id;
-                $state->record = 'GRUPO FAMILIAR ENVIADO!';
-                $state->save();
-            }
+            app(ProjectStatusRecorder::class)->createUnlessConsecutive([
+                'project_id' => $id,
+                'stage_id' => 8,
+                'user_id' => Auth::user()->id,
+                'record' => 'GRUPO FAMILIAR ENVIADO!',
+            ], ProjectStatusF::class);
 
             // Enviar correo electrónico
             $projecto = Project::where('id', $id)->first();
@@ -849,15 +846,12 @@ public function showTecnico($id)
 {
     //return "Cambiar de estado";
     try {
-        $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
-        if (!$ultimoEstado || $ultimoEstado->stage_id != '11') {
-            $state = new ProjectStatusF();
-            $state->project_id = $id;
-            $state->stage_id = '11';
-            $state->user_id = Auth::user()->id;
-            $state->record = 'DOCUMENTACION TECNICA ENVIADA!';
-            $state->save();
-        }
+        app(ProjectStatusRecorder::class)->createUnlessConsecutive([
+            'project_id' => $id,
+            'stage_id' => 11,
+            'user_id' => Auth::user()->id,
+            'record' => 'DOCUMENTACION TECNICA ENVIADA!',
+        ], ProjectStatusF::class);
 
         //return "controlamos si inserta bien";
 
@@ -1659,12 +1653,12 @@ public function showTecnico($id)
         $id = $request->project_id;
 
         try {
-            $state = new ProjectStatusF();
-            $state->project_id = $id;
-            $state->stage_id = '5';
-            $state->user_id = Auth::user()->id;
-            $state->record = 'CON DOCUMENTACION DGJN!';
-            $state->save();
+            app(ProjectStatusRecorder::class)->createUnlessConsecutive([
+                'project_id' => $id,
+                'stage_id' => 5,
+                'user_id' => Auth::user()->id,
+                'record' => 'CON DOCUMENTACION DGJN!',
+            ], ProjectStatusF::class);
 
             $projecto = Project::where('id', $request->project_id)->first();
             $sat = $projecto->sat_id;
@@ -1719,20 +1713,19 @@ public function showTecnico($id)
     public function send(Request $request, $id)
     {
 
-            // Verificar si el último estado es 1 (Enviado) para evitar duplicados consecutivos
-            $ultimoEstado = ProjectStatusF::where('project_id', $id)->orderBy('created_at', 'desc')->first();
-            if ($ultimoEstado && $ultimoEstado->stage_id == '1') {
+            $state = app(ProjectStatusRecorder::class)->createUnlessConsecutive([
+                'project_id' => $id,
+                'stage_id' => 1,
+                'user_id' => Auth::user()->id,
+                'record' => 'Proyecto Enviado!',
+            ], ProjectStatusF::class);
+
+            if (!$state) {
                 return [
                     'message' => 'success'
                 ];
             }
 
-            $state = new ProjectStatusF();
-            $state->project_id = $id;
-            $state->stage_id = '1';
-            $state->user_id = Auth::user()->id;
-            $state->record = 'Proyecto Enviado!';
-            $state->save();
             try {
             // // Enviar correo electrónico
             $project = Project::find($id);

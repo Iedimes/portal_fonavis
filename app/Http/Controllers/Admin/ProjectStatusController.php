@@ -18,6 +18,7 @@ use App\Models\Distrito;
 use App\Models\Departamento;
 use App\Models\AdminUsersDependency;
 use App\Models\AdminUser;
+use App\Services\ProjectStatusRecorder;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -882,28 +883,20 @@ class ProjectStatusController extends Controller
 
     private function createProjectStatus(array $attributes): ProjectStatus
     {
-        return DB::transaction(function () use ($attributes) {
-            $project = Project::whereKey($attributes['project_id'])->lockForUpdate()->first();
-            if (!$project) {
-                throw new HttpResponseException(response()->json(['error' => 'No se encontró el proyecto'], 404));
-            }
+        $status = app(ProjectStatusRecorder::class)->createUnlessConsecutive($attributes);
+        if (!$status) {
+            throw new HttpResponseException(response()->json([
+                'success' => false,
+                'redirect' => route('adminprojectsindex'),
+                'message' => 'No se puede registrar el mismo estado consecutivo.'
+            ]));
+        }
 
-            $ultimoEstado = ProjectStatus::where('project_id', $attributes['project_id'])
-                ->orderBy('created_at', 'desc')
-                ->orderBy('id', 'desc')
-                ->lockForUpdate()
-                ->first();
+        if (!$status instanceof ProjectStatus) {
+            throw new \LogicException('Unexpected project status model.');
+        }
 
-            if ($ultimoEstado && (int) $ultimoEstado->stage_id === (int) $attributes['stage_id']) {
-                throw new HttpResponseException(response()->json([
-                    'success' => false,
-                    'redirect' => route('adminprojectsindex'),
-                    'message' => 'No se puede registrar el mismo estado consecutivo.'
-                ]));
-            }
-
-            return ProjectStatus::create($attributes);
-        });
+        return $status;
     }
 
     public function storeNotificacion(Request $request)
@@ -917,13 +910,12 @@ class ProjectStatusController extends Controller
         try {
             DB::beginTransaction();
 
-            // Crear y guardar el nuevo registro en ProjectStatus
-            $projectStatus = new ProjectStatus();
-            $projectStatus->project_id = $request->input('project_id');
-            $projectStatus->stage_id = $request->input('stage_id');
-            $projectStatus->record = $request->input('record');
-            $projectStatus->user_id = auth()->id();
-            $projectStatus->save();
+            $projectStatus = app(ProjectStatusRecorder::class)->createUnlessConsecutive([
+                'project_id' => $request->input('project_id'),
+                'stage_id' => $request->input('stage_id'),
+                'record' => $request->input('record'),
+                'user_id' => auth()->id(),
+            ]);
 
             DB::commit();
         } catch (Exception $e) {
@@ -951,7 +943,7 @@ class ProjectStatusController extends Controller
                     $contenidoCorreo = "
                         Proyecto: {$proyecto->name} (ID: {$proyecto->id}) <br>
                         Nombre SAT: {$satnombre} (SAT: {$sat}) <br><br>
-                        {$projectStatus->record}
+                        {$request->input('record')}
                     ";
 
                     // Enviar correo al SAT
@@ -972,7 +964,7 @@ class ProjectStatusController extends Controller
                         $contenidoDGJN = "
                             Proyecto: {$proyecto->name} ({$proyecto->id})<br><br>
                             Notificaste al correo({$correoSat}) registrado por SAT, lo siguiente: <br><br>
-                            {$projectStatus->record}
+                            {$request->input('record')}
                         ";
 
                         $this->sendHtmlMailSafely(
@@ -992,7 +984,9 @@ class ProjectStatusController extends Controller
 
         return response()->json([
             'redirect' => url('admin/projects/' . $request->input('project_id') . '/showDGJN'),
-            'message' => 'Estado del proyecto actualizado correctamente y correo enviado.'
+            'message' => $projectStatus
+                ? 'Estado del proyecto actualizado correctamente y correo enviado.'
+                : 'La notificación se procesó; el estado consecutivo no se duplicó.'
         ]);
     }
 
